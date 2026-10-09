@@ -20,7 +20,7 @@ Créé par **Mathis GILLIG**.
 - **Favoris** et **wishlist**.
 - **Ma collection** : valeur estimée, sets commencés, cartes les plus précieuses, sauvegarde (export / import).
 
-> Pour l'instant, la collection est enregistrée **dans ton navigateur**. Les comptes (email + mot de passe) arrivent à l'étape 2.
+> Sans compte, la collection est enregistrée dans ton navigateur. Avec un compte, elle est sauvegardée en ligne (étape 2).
 
 ---
 
@@ -46,7 +46,7 @@ Va sur [github.com](https://github.com) et crée un compte gratuit si tu n'en as
 
 ### c) Envoyer les fichiers
 1. Sur la page du dépôt, clique sur le lien **uploading an existing file**.
-2. Ouvre le dossier `mgtcg` sur ton ordinateur, sélectionne **tout son contenu** (`index.html`, `README.md`, les dossiers `css` et `js`) et glisse-le dans la page.
+2. Ouvre le dossier `mgtcg` sur ton ordinateur, sélectionne **tous les fichiers** qu'il contient et glisse-le dans la page.
    ⚠️ Glisse le *contenu* du dossier, pas le dossier lui-même : `index.html` doit être à la racine.
 3. En bas, clique sur **Commit changes**.
 
@@ -69,32 +69,82 @@ Quand on modifie des fichiers, refais l'étape **c)** avec les nouveaux fichiers
 
 ```
 mgtcg/
-├── index.html      → la structure de la page (barre du haut, pied de page)
-├── css/style.css   → les couleurs et la mise en page (change :root pour les couleurs)
-└── js/
-    ├── api.js      → récupère les cartes et les prix (TCGdex)
-    ├── rarity.js   → les icônes de rareté
-    ├── store.js    → ta collection, tes favoris, ta wishlist
-    └── app.js      → les pages du site
+├── index.html          → la structure de la page
+├── style.css           → les couleurs et la mise en page (change :root pour les couleurs)
+├── api.js              → récupère les cartes et les prix (TCGdex)
+├── rarity.js           → les icônes de rareté
+├── store.js            → ta collection, tes favoris, ta wishlist
+├── config.js           → les 2 infos de ton projet Supabase (étape 2)
+├── auth.js             → comptes, connexion, compte admin, sauvegarde en ligne
+├── app.js              → les pages du site
+└── supabase-setup.sql  → à coller une fois dans Supabase (tables + sécurité)
 ```
 
 ---
 
-## 4. Sécurité déjà en place
+## 4. Activer les comptes (étape 2) avec Supabase
 
-- Tout texte venant de l'extérieur est « nettoyé » avant d'être affiché (protection XSS).
-- Le site n'accepte que les images et les données de TCGdex (règle CSP dans `index.html`).
-- Les fichiers importés sont vérifiés avant d'être chargés.
-- Les liens externes s'ouvrent sans donner accès à ton site (`noopener`).
-- Aucune donnée personnelle n'est collectée pour l'instant.
+Supabase est un service gratuit qui gère les comptes, les mots de passe (chiffrés) et la base de données.
+Sans cette étape, le site marche quand même : la collection reste dans le navigateur.
 
-La protection anti-DDoS, la limite de tentatives de mot de passe et le compte administrateur arriveront avec les comptes (étape 2).
+### a) Créer le projet
+1. Va sur [supabase.com](https://supabase.com) → **Start your project** → connecte-toi avec GitHub.
+2. **New project** : nom `mgtcg`, choisis un **mot de passe de base de données** (note-le dans un endroit sûr, tu n'en auras pas besoin dans le site) et une **région en Europe** (Paris si proposée).
+3. Attends 1 à 2 minutes que le projet soit prêt.
+
+### b) Créer les tables et la sécurité
+1. Menu de gauche → **SQL Editor** → **New query**.
+2. Ouvre `supabase-setup.sql`, copie **tout**, colle-le, clique sur **Run**. Le message doit être « Success ».
+
+### c) Régler la connexion
+Menu de gauche → **Authentication** :
+1. **URL Configuration** → **Site URL** : `https://mathisven-ui.github.io/mgtcg/`
+   et dans **Redirect URLs**, ajoute la même adresse. Enregistre.
+2. **Sign In / Providers** → **Email** : laisse « Confirm email » activé, et mets la longueur minimale du mot de passe à **10**.
+3. **Rate Limits** : les valeurs par défaut limitent déjà les tentatives. Tu peux baisser les connexions à environ 30 par heure et par adresse IP.
+
+### d) Relier le site
+1. Va dans **Project Settings** (roue dentée) → **API Keys** (ou bouton **Connect** en haut).
+2. Copie l'**URL du projet** et la clé **publishable** (ou **anon public**).
+3. Ouvre `config.js` et colle-les entre les guillemets.
+   ⚠️ Jamais la clé **secret** / **service_role** !
+4. Envoie sur GitHub les fichiers modifiés (même méthode qu'avant : **+** → **Upload files**).
+
+### e) Devenir administrateur
+1. Sur ton site, clique sur **Connexion → Créer un compte** avec ton email, puis confirme via l'email reçu.
+2. Dans Supabase → **SQL Editor** → **New query**, colle (avec TON email) :
+   `update public.profiles set role = 'admin' where email = 'TON-EMAIL';` puis **Run**.
+3. Déconnecte-toi et reconnecte-toi : le bouton **👑 Espace admin** apparaît dans **Mon compte**.
+
+> Bon à savoir : un projet Supabase gratuit se met en pause après une semaine sans aucune visite. Il suffit de le relancer depuis le tableau de bord Supabase.
 
 ---
 
-## 5. La suite (feuille de route)
+## 5. Sécurité en place
 
-- **Étape 2** : comptes (email + mot de passe) avec Supabase, compte administrateur, limite de tentatives, collection synchronisée sur tous tes appareils.
+**Sur le site**
+- Tout texte venant de l'extérieur est « nettoyé » avant d'être affiché (protection XSS).
+- Règle CSP : le site ne peut parler qu'à TCGdex et Supabase.
+- 5 erreurs de mot de passe → blocage 15 minutes ; messages d'erreur vagues (on ne dit pas si l'email existe).
+- Mot de passe solide obligatoire (10 caractères, lettre, chiffre, caractère spécial) + jauge de solidité.
+- Champ piège invisible contre les robots.
+- Déconnexion simple ou de tous les appareils ; la collection est effacée du navigateur à la déconnexion (ordinateur partagé).
+- Fichiers importés vérifiés avant d'être chargés.
+
+**Côté serveur (Supabase)**
+- Mots de passe chiffrés : personne ne peut les lire, même pas l'administrateur.
+- Confirmation de l'email obligatoire.
+- Limitation des tentatives par Supabase.
+- Règles RLS : chaque compte ne peut lire et modifier QUE sa propre collection. Seul l'admin voit la liste des comptes. Personne ne peut se donner le rôle admin depuis le site.
+- Taille maximale d'une collection pour éviter les abus.
+
+**Anti-DDoS** : GitHub Pages et Supabase sont protégés par leurs propres infrastructures. Pour aller plus loin (nom de domaine perso + Cloudflare, CAPTCHA), on le fera quand le site aura du trafic.
+
+---
+
+## 6. La suite (feuille de route)
+
+- ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.
 - **V3** : scan de cartes, assistant IA, échanges entre collectionneurs, communauté, bouclier anti-arnaques, simulateur de boosters, application mobile.
 

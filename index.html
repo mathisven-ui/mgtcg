@@ -10,7 +10,7 @@
   <!-- Sécurité : le site ne peut charger des images et des données
        que depuis les sources autorisées ci-dessous -->
   <meta http-equiv="Content-Security-Policy"
-        content="img-src 'self' https://assets.tcgdex.net data: blob:; connect-src https://api.tcgdex.net; object-src 'none'; base-uri 'none'; form-action 'none'; font-src https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com">
+        content="img-src 'self' https://assets.tcgdex.net data: blob:; connect-src https://api.tcgdex.net https://*.supabase.co wss://*.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'; font-src https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com">
   <meta name="referrer" content="strict-origin-when-cross-origin">
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23ffcb05' stroke='%2312131a' stroke-width='8'/><rect x='4' y='46' width='92' height='8' fill='%2312131a'/><circle cx='50' cy='50' r='14' fill='white' stroke='%2312131a' stroke-width='8'/></svg>">
@@ -41,6 +41,8 @@
       <select id="lang" aria-label="Langue des cartes"></select>
     </label>
 
+    <div id="account" class="account"></div>
+
     <button id="burger" class="burger" aria-label="Menu">☰</button>
   </header>
 
@@ -63,10 +65,13 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <!-- L'ordre compte : api → rarity → store → app -->
+  <!-- L'ordre compte : api → rarity → store → config → supabase → auth → app -->
   <script src="api.js"></script>
   <script src="rarity.js"></script>
   <script src="store.js"></script>
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" crossorigin="anonymous"></script>
+  <script src="auth.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

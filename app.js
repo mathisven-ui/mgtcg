@@ -24,6 +24,7 @@
   const langInfo = (code) => MG.LANGS.find((l) => l.code === code) || MG.LANGS[0];
   const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }); } catch (e) { return d; } };
 
+  MG.routes = MG.routes || {};
   const listeners = {};
   MG.emit = (ev) => (listeners[ev] || []).forEach((fn) => fn());
   MG.on = (ev, fn) => (listeners[ev] = listeners[ev] || []).push(fn);
@@ -470,7 +471,10 @@
         <h2>Hébergement</h2>
         <p>GitHub Pages — GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis.</p>
         <h2>Tes données (RGPD)</h2>
-        <p>Pour l'instant, MGTCG ne crée aucun compte et ne collecte aucune donnée personnelle. Ta collection, tes favoris et ta wishlist sont enregistrés <b>uniquement dans ton navigateur</b> (stockage local). Tu peux les exporter ou les effacer à tout moment depuis la page « Ma collection ».</p>
+        <p><b>Sans compte</b> : ta collection, tes favoris et ta wishlist sont enregistrés uniquement dans ton navigateur (stockage local). Aucune donnée personnelle n'est collectée.</p>
+        <p><b>Avec un compte</b> : MGTCG enregistre ton adresse email, ton mot de passe (chiffré, jamais visible, même par l'administrateur), la date de création du compte et ta collection, pour te permettre de la retrouver sur tous tes appareils. Ces données sont hébergées par Supabase (serveurs dans l'Union européenne si la région choisie est européenne) et ne sont ni vendues, ni partagées, ni utilisées pour de la publicité.</p>
+        <p>Tu peux à tout moment : exporter ta collection (page « Ma collection »), supprimer ta collection en ligne (page « Mon compte »), ou demander la suppression complète de ton compte et l'accès à tes données en écrivant à l'adresse de contact ci-dessus. Tu peux aussi saisir la CNIL (cnil.fr) si tu estimes que tes droits ne sont pas respectés.</p>
+        <p>Cookies : le site n'utilise ni cookies publicitaires ni traceurs. Seul le stockage local du navigateur est utilisé, pour faire fonctionner le site (collection, connexion).</p>
         <h2>Sources des données</h2>
         <p>Informations et images des cartes : <a href="https://tcgdex.dev" target="_blank" rel="noopener noreferrer">TCGdex</a>. Prix : moyennes Cardmarket fournies par TCGdex, à titre indicatif.</p>
         <h2>Avertissements</h2>
@@ -620,9 +624,16 @@
       case "favoris": return pageLists("fav");
       case "wishlist": return pageLists("wish");
       case "mentions": return pageLegal();
-      default: return pageHome();
+      default:
+        // Pages ajoutées par d'autres fichiers (ex : auth.js → connexion, compte, admin)
+        if (MG.routes[page]) return MG.routes[page](arg);
+        return pageHome();
     }
   }
+  MG.route = route;
+
+  // Outils partagés avec les autres fichiers (auth.js…)
+  MG.ui = { $, $$, esc, enc, toast, loading, view, fmtDate, eur, openCard };
 
   function init() {
     // Menu des langues

@@ -165,5 +165,25 @@ window.MG = window.MG || {};
       save();
     },
     reset() { data = Object.assign(empty(), { lang: data.lang }); save(); },
+
+    /* ---- Pour la synchronisation avec le compte (auth.js) ---- */
+    // Copie propre des données à envoyer en ligne
+    snapshot() { return JSON.parse(JSON.stringify(data)); },
+    // Fusionne une collection en ligne avec celle du navigateur :
+    // on garde tout ce qui est coché d'un côté OU de l'autre
+    mergeFrom(remote) {
+      const r = sanitize(remote);
+      for (const [key, flags] of Object.entries(r.owned)) {
+        data.owned[key] = Object.assign({}, data.owned[key] || {}, flags);
+      }
+      for (const list of ["fav", "wish"]) Object.assign(data[list], r[list]);
+      for (const [key, m] of Object.entries(r.meta)) {
+        data.meta[key] = Object.assign({}, m, data.meta[key] || {});
+      }
+      save();
+    },
+    // Vide la collection du navigateur à la déconnexion (ordinateur partagé)
+    clearLocal() { data = Object.assign(empty(), { lang: data.lang }); save(); },
+    get isEmpty() { return !Object.keys(data.owned).length && !Object.keys(data.fav).length && !Object.keys(data.wish).length; },
   };
 })(window.MG);

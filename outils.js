@@ -63,6 +63,9 @@ window.MG = window.MG || {};
         <a class="chip ${t === "grading" ? "active" : ""}" href="#/outils/grading">🏅 Faire grader ?</a>
         <a class="chip ${t === "import" ? "active" : ""}" href="#/outils/import">🗾 France ou Japon ?</a>
         <a class="chip ${t === "ventes" ? "active" : ""}" href="#/outils/ventes">💶 Mes ventes</a>
+        <a class="chip" href="#/bouclier">🛡️ Anti-arnaque</a>
+        <a class="chip" href="#/completer">🎯 Compléter mes sets</a>
+        <a class="chip" href="#/importer">📥 Importer</a>
       </div>
       <div id="tool"></div>`;
     const el = document.getElementById("tool");

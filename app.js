@@ -611,7 +611,7 @@
               <a target="_blank" rel="noopener noreferrer" href="https://www.vinted.fr/catalog?search_text=${qShort}">Vinted</a>
               <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/search?q=${enc("site:pokecardex.com " + card.name + " " + (card.set ? card.set.name : ""))}">Voir sur PokéCardex</a>
             </div>
-            <p class="warn">🛡 Avant d'acheter à un particulier : demande des photos recto/verso avec ton pseudo écrit à côté, méfie-toi des prix bien plus bas que la cote, et ne paie jamais « entre amis » (aucune protection en cas d'arnaque).</p>
+            <p class="warn">🛡 Avant d'acheter à un particulier : demande des photos recto/verso avec ton pseudo écrit à côté, méfie-toi des prix bien plus bas que la cote, et ne paie jamais « entre amis » (aucune protection en cas d'arnaque). <a class="accent-link" href="#/bouclier/${enc(MG.store.key(lang, card.id))}" data-close>🛡 Vérifier une annonce</a></p>
 
             <h3>Vidéos</h3>
             <div class="links">

@@ -793,3 +793,33 @@ h1 .flag .flag-img { width: 30px; height: 20px; vertical-align: 2px; }
 .cp-out td { opacity: .45; }
 .btn.small { padding: 5px 10px; font-size: .8rem; }
 @media (max-width: 600px) { .cp-table th:nth-child(5), .cp-table td:nth-child(5) { display: none; } .cp-table .link-btn b { white-space: nowrap; } }
+
+/* ---------- Bouclier anti-arnaques (V3) ---------- */
+.sh-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px 16px; }
+.sh-grid label { display: flex; flex-direction: column; gap: 6px; font-size: .85rem; font-weight: 600; }
+.sh-grid input, .sh-grid select { background: var(--bg-2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: inherit; font-weight: 400; }
+.sh-grid input:focus, .sh-grid select:focus { outline: none; border-color: var(--accent); }
+.sh-checks { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin: 10px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px 16px; }
+.sh-checks legend { font-weight: 600; font-size: .85rem; padding: 0 6px; }
+.sh-check { display: flex; gap: 8px; align-items: flex-start; font-size: .9rem; cursor: pointer; }
+.sh-check input { margin-top: 3px; accent-color: var(--accent); flex: none; }
+#sh-result { margin-top: 16px; }
+#sh-result h3 { font-size: 1rem; margin: 16px 0 6px; }
+.sh-level { display: flex; gap: 16px; align-items: center; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg-2); }
+.sh-level p { margin: 4px 0 0; }
+.sh-level b { font-size: 1.15rem; }
+.sh-meter { display: flex; gap: 4px; flex: none; }
+.sh-meter span { width: 14px; height: 34px; border-radius: 4px; background: var(--line); }
+.lvl-1 { border-color: var(--green); } .lvl-1 .sh-meter .on { background: var(--green); } .lvl-1 b { color: var(--green); }
+.lvl-2 { border-color: #f5a524; } .lvl-2 .sh-meter .on { background: #f5a524; } .lvl-2 b { color: #f5a524; }
+.lvl-3 { border-color: #ff7a6e; } .lvl-3 .sh-meter .on { background: #ff7a6e; } .lvl-3 b { color: #ff7a6e; }
+.lvl-4 { border-color: #ff4d4d; background: rgba(255, 77, 77, .08); } .lvl-4 .sh-meter .on { background: #ff4d4d; } .lvl-4 b { color: #ff4d4d; }
+.sh-list { margin: 0; padding-left: 20px; display: grid; gap: 5px; }
+.sh-list.bad li::marker { color: #ff7a6e; }
+.sh-list.good li::marker { color: var(--green); }
+.sh-guide { display: grid; gap: 10px; }
+.sh-guide details { padding: 14px 18px; }
+.sh-guide summary { cursor: pointer; }
+.sh-guide ul { margin: 10px 0 0; padding-left: 20px; display: grid; gap: 6px; }
+#sh-filter { margin: 8px 0 12px; flex-wrap: wrap; }
+.sh-steps { margin: 0; padding-left: 22px; display: grid; gap: 8px; }

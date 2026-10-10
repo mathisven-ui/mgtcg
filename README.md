@@ -255,7 +255,18 @@ Page **Compléter mes sets** (bouton dans **Ma collection**, et « 🎯 Complét
 
 ---
 
-## 15. La suite (feuille de route)
+## 15. Bouclier anti-arnaques (V3)
+
+Page **Bouclier** (onglet « 🛡️ Anti-arnaque » dans **Outils**, et lien « 🛡 Vérifier une annonce » dans la fiche de chaque carte) :
+- **Vérifier une annonce** : cote de la carte (pré-remplie depuis la fiche), prix demandé, plateforme, moyen de paiement et signaux d'alerte à cocher → niveau de risque (faible, moyen, élevé, très élevé) avec l'explication de chaque point.
+- **Les arnaques les plus courantes** : fausses cartes, boosters rescellés, faux boîtiers gradés, paiements sans protection, faux liens, colis vide, arnaques aux vendeurs.
+- **Alertes de la communauté** : les membres décrivent des façons d'arnaquer (sans pseudo ni nom), l'admin valide avant publication (3 signalements en attente max par membre).
+- **Où signaler** : plateforme, banque, Perceval, plainte en ligne, Pharos, Cybermalveillance, Info Escroqueries.
+- Base de données : lancer une fois `supabase-bouclier.sql` dans Supabase.
+
+---
+
+## 16. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

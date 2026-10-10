@@ -620,3 +620,21 @@ code { background: var(--surface-2); padding: 1px 6px; border-radius: 6px; font-
 }
 .buy-links a:hover { border-color: var(--accent); color: var(--accent); }
 .product-detail .buy-links, .set-sealed > .buy-links { padding: 0; max-width: 520px; }
+
+/* Scellés : items d'une extension */
+.item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.item-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); display: flex; flex-direction: column; gap: 10px; padding-top: 14px; }
+.item-card .buy-links { margin-top: auto; }
+.ic-head { display: flex; gap: 12px; align-items: flex-start; padding: 0 14px; }
+.ic-head div { display: flex; flex-direction: column; gap: 2px; }
+.ic-head small { font-size: .8rem; }
+.ic-icon { font-size: 1.8rem; line-height: 1; }
+.ic-price {
+  margin: 0 14px; display: flex; flex-direction: column; text-align: left; cursor: pointer; font: inherit; color: var(--text);
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px;
+}
+.ic-price:hover { border-color: var(--accent); }
+.ic-price span { font-size: .72rem; color: var(--muted); }
+.ic-price strong { color: var(--accent); font-size: 1.2rem; }
+.set-sealed-link { margin: 14px 0 4px; }
+.item-card .buy-links, .sealed-card .buy-links { display: grid; grid-template-columns: 1fr 1fr; }

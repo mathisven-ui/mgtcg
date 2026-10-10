@@ -260,7 +260,7 @@
 
     const grid = $("#grid");
     bindGrid(grid, getCard);
-    if (MG.scelle && MG.scelle.mountSet) MG.scelle.mountSet($("#set-sealed"), set.name, lang);
+    if (MG.scelle && MG.scelle.mountSet) MG.scelle.mountSet($("#set-sealed"), set.name, lang, set.id);
 
     function computeStats() {
       let ownedCards = 0, ownedValue = 0, missingValue = 0, variantsTotal = 0, variantsOwned = 0;

@@ -403,6 +403,7 @@
         <p class="disclaimer">Prix Cardmarket actualisés automatiquement toutes les 12 h. Données indicatives, pas un conseil d'investissement.</p>
       </section>`}
 
+      <div id="sealed-block"></div>
       <section class="backup"><h2>Sauvegarde</h2>
         <p class="muted">Télécharge ta collection dans un fichier, pour la garder en sécurité ou la mettre sur un autre appareil.</p>
         <div class="row">
@@ -414,6 +415,7 @@
 
     $$("main > section tr.clickable").forEach((tr) => tr.addEventListener("click", () => openCard(tr.dataset.lang, tr.dataset.id)));
     if (MG.valeur) MG.valeur.mount($("#valeur"));
+    if (MG.scelle && MG.scelle.mountCollection) MG.scelle.mountCollection($("#sealed-block"));
     $("#exp").addEventListener("click", () => {
       const blob = new Blob([MG.store.exportJSON()], { type: "application/json" });
       const a = document.createElement("a");

@@ -20,7 +20,7 @@ window.MG = window.MG || {};
   };
 
   function empty() {
-    return { version: 1, lang: "fr", owned: {}, fav: {}, wish: {}, meta: {}, paid: {}, alerts: {}, history: {}, lastRefresh: 0 };
+    return { version: 1, lang: "fr", owned: {}, fav: {}, wish: {}, meta: {}, paid: {}, alerts: {}, history: {}, lastRefresh: 0, sealed: {} };
   }
 
   let data = load();
@@ -76,6 +76,13 @@ window.MG = window.MG || {};
     const days = Object.keys(obj.history || {}).filter(isDate).sort().slice(-1100);
     for (const d of days) { const v = money(obj.history[d]); if (v != null) out.history[d] = v; }
     out.lastRefresh = Number(obj.lastRefresh) || 0;
+    // Produits scellés possédés (clé = identifiant du produit)
+    for (const [id, v] of Object.entries(obj.sealed || {})) {
+      if (!/^[0-9a-f-]{36}$/i.test(id) || !v || typeof v !== "object") continue;
+      const qty = Math.min(999, Math.max(0, parseInt(v.qty, 10) || 0));
+      if (!qty) continue;
+      out.sealed[id] = { qty, paid: money(v.paid), date: isDate(v.date) ? v.date : "", name: str(v.name, 120), type: str(v.type, 30) };
+    }
     return out;
   }
 
@@ -222,6 +229,19 @@ window.MG = window.MG || {};
       while (days.length > 1100) delete data.history[days.shift()];
       save();
     },
+    /* ---- Produits scellés ---- */
+    sealed: (id) => data.sealed[id] || null,
+    sealedList: () => Object.entries(data.sealed).map(([id, v]) => Object.assign({ id }, v)),
+    setSealed(product, qty, paid, date) {
+      if (!product || !/^[0-9a-f-]{36}$/i.test(product.id)) return;
+      qty = Math.min(999, Math.max(0, parseInt(qty, 10) || 0));
+      if (!qty) delete data.sealed[product.id];
+      else data.sealed[product.id] = {
+        qty, paid: paid == null || paid === "" || isNaN(paid) ? null : Math.round(Number(paid) * 100) / 100,
+        date: date || "", name: String(product.name || "").slice(0, 120), type: String(product.type || "").slice(0, 30),
+      };
+      save();
+    },
     history: () => Object.entries(data.history).sort((a, b) => (a[0] < b[0] ? -1 : 1)),
     get lastRefresh() { return data.lastRefresh || 0; },
     markRefreshed() { data.lastRefresh = Date.now(); save(); },
@@ -244,10 +264,11 @@ window.MG = window.MG || {};
       for (const [key, v] of Object.entries(r.alerts)) if (!data.alerts[key]) data.alerts[key] = v;
       for (const [day, v] of Object.entries(r.history)) if (data.history[day] == null) data.history[day] = v;
       data.lastRefresh = Math.max(data.lastRefresh || 0, r.lastRefresh || 0);
+      for (const [id, v] of Object.entries(r.sealed)) if (!data.sealed[id]) data.sealed[id] = v;
       save();
     },
     // Vide la collection du navigateur à la déconnexion (ordinateur partagé)
     clearLocal() { data = Object.assign(empty(), { lang: data.lang }); save(); },
-    get isEmpty() { return !Object.keys(data.owned).length && !Object.keys(data.fav).length && !Object.keys(data.wish).length; },
+    get isEmpty() { return !Object.keys(data.sealed).length && !Object.keys(data.owned).length && !Object.keys(data.fav).length && !Object.keys(data.wish).length; },
   };
 })(window.MG);

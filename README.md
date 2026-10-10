@@ -78,9 +78,11 @@ mgtcg/
 ├── auth.js             → comptes, connexion, compte admin, sauvegarde en ligne
 ├── boutiques.js        → carte 3D des boutiques, trajets, tournée, restocks (V2)
 ├── valeur.js           → graphique de valeur, plus-values, alertes de prix (V2)
+├── scelle.js           → produits scellés : catalogue, cote, mes produits (V2)
 ├── app.js              → les pages du site
 ├── supabase-setup.sql  → à coller une fois dans Supabase (comptes + sécurité)
-└── supabase-boutiques.sql → à coller une fois dans Supabase (boutiques + restocks)
+├── supabase-boutiques.sql → à coller une fois dans Supabase (boutiques + restocks)
+└── supabase-scelle.sql → à coller une fois dans Supabase (produits scellés + prix)
 ```
 
 ---
@@ -171,7 +173,20 @@ Tout est sauvegardé avec ton compte (synchronisé entre tes appareils).
 
 ---
 
-## 8. La suite (feuille de route)
+## 8. Produits scellés (V2)
+
+Page **Scellés** :
+- Catalogue des ETB, displays, UPC, coffrets, tripacks… par langue, avec recherche et filtres.
+- **Prix de sortie** + **cote membres** (médiane des prix signalés par la communauté sur 30 jours) + évolution en %.
+- Fiche produit : graphique des prix signalés, « J'ai vu ce produit à… » pour signaler un prix, liens Cardmarket / eBay / Vinted / Leboncoin, conseils anti-reseal.
+- **Mes produits** : quantité, prix payé, plus-value → aussi affichés dans **Ma collection**.
+- Admin : « ⚙ Ajouter les produits d'un set » crée d'un coup Booster / Tripack / ETB / Display d'une extension ; validation des produits proposés par les membres.
+
+**Activation** : Supabase → SQL Editor → New query → colle `supabase-scelle.sql` → **Run**.
+
+---
+
+## 9. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

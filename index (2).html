@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MGTCG — Ton classeur Pokémon en ligne</title>
+  <meta name="description" content="MGTCG : toutes les cartes Pokémon par série et par langue, suivi de master set, cotes Cardmarket et collection.">
+  <meta name="author" content="Mathis GILLIG">
+
+  <!-- Sécurité : le site ne peut charger des images et des données
+       que depuis les sources autorisées ci-dessous -->
+  <meta http-equiv="Content-Security-Policy"
+        content="img-src 'self' https://assets.tcgdex.net data: blob:; connect-src https://api.tcgdex.net https://*.supabase.co wss://*.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'; font-src https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23ffcb05' stroke='%2312131a' stroke-width='8'/><rect x='4' y='46' width='92' height='8' fill='%2312131a'/><circle cx='50' cy='50' r='14' fill='white' stroke='%2312131a' stroke-width='8'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+  <header class="topbar">
+    <a href="#/" class="brand" aria-label="Accueil MGTCG">
+      <span class="ball" aria-hidden="true"></span>
+      <span>MG<span class="accent">TCG</span></span>
+    </a>
+
+    <form id="search" class="search" role="search">
+      <input id="q" type="search" placeholder="Rechercher une carte (ex : Dracaufeu)…" aria-label="Rechercher une carte" maxlength="60" autocomplete="off">
+      <button type="submit" aria-label="Rechercher">🔍</button>
+    </form>
+
+    <nav class="nav">
+      <a href="#/">Séries</a>
+      <a href="#/collection">Ma collection</a>
+      <a href="#/favoris">Mes listes</a>
+    </nav>
+
+    <label class="lang" title="Langue des cartes">
+      <select id="lang" aria-label="Langue des cartes"></select>
+    </label>
+
+    <div id="account" class="account"></div>
+
+    <button id="burger" class="burger" aria-label="Menu">☰</button>
+  </header>
+
+  <main id="view" class="container"></main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div><strong>MG<span class="accent">TCG</span></strong> — créé par <strong>Mathis GILLIG</strong> · © <span id="year"></span></div>
+      <div class="muted small">Données : TCGdex · Prix : Cardmarket (indicatifs) · Site non affilié à Nintendo / The Pokémon Company · <a href="#/mentions">Mentions légales</a></div>
+    </div>
+  </footer>
+
+  <!-- Fenêtre « fiche carte » -->
+  <div id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box">
+      <button id="modal-close" class="modal-close" aria-label="Fermer">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- L'ordre compte : api → rarity → store → config → supabase → auth → app -->
+  <script src="api.js?v=3"></script>
+  <script src="rarity.js?v=3"></script>
+  <script src="store.js?v=3"></script>
+  <script src="config.js?v=3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" crossorigin="anonymous"></script>
+  <script src="auth.js?v=3"></script>
+  <script src="app.js?v=3"></script>
+</body>
+</html>

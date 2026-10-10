@@ -117,28 +117,39 @@ window.MG = window.MG || {};
 
   /* ---------------- Données : OpenStreetMap ---------------- */
   const osmCache = new Map();
-  async function fetchOSM(center) {
-    const key = center.lat.toFixed(2) + "," + center.lon.toFixed(2);
-    if (osmCache.has(key)) return osmCache.get(key);
-    const a = `(around:${RADIUS_M},${center.lat.toFixed(5)},${center.lon.toFixed(5)})`;
-    const q = `[out:json][timeout:25];(
-      nwr["shop"~"^(games|collector|comics|anime|trade)$"]${a};
-      nwr["shop"]["name"~"pok[eé]mon|tcg|trading card|cartes? (à|a) collectionner|card ?shop|carte ?shop|manga|geek",i]${a};
-      nwr["shop"]["brand"~"^(Fnac|Micromania|Micromania-Zing|Cultura|King Jouet|JouéClub|La Grande Récré|Smyths Toys|Carrefour|E\\.Leclerc|Auchan|Cora|Géant Casino|Hyper U)$"]${a};
-      nwr["shop"]["name"~"^(Fnac.*|Micromania.*|Cultura|King Jouet|JouéClub|La Grande Récré|Carrefour|E\\.Leclerc|Leclerc|Auchan|Cora|Hyper U)$"]${a};
-    );out center tags 500;`;
+  async function overpass(q) {
     let lastErr;
     for (const url of OVERPASS) {
       try {
         const res = await fetch(url, { method: "POST", body: "data=" + encodeURIComponent(q), headers: { "Content-Type": "application/x-www-form-urlencoded" } });
         if (!res.ok) throw new Error("HTTP " + res.status);
         const json = await res.json();
-        const shops = (json.elements || []).map(osmToShop).filter(Boolean);
-        osmCache.set(key, shops);
-        return shops;
+        return (json.elements || []).map(osmToShop).filter(Boolean);
       } catch (e) { lastErr = e; }
     }
     throw lastErr;
+  }
+
+  // Deux recherches séparées : les boutiques spécialisées ne sont jamais
+  // « coupées » par la limite de résultats à cause des grandes enseignes.
+  async function fetchOSM(center) {
+    const key = center.lat.toFixed(2) + "," + center.lon.toFixed(2);
+    if (osmCache.has(key)) return osmCache.get(key);
+    const a = `(around:${RADIUS_M},${center.lat.toFixed(5)},${center.lon.toFixed(5)})`;
+    const qSpec = `[out:json][timeout:25];(
+      nwr["shop"~"^(games|collector|comics|anime|trade)$"]${a};
+      nwr["shop"]["name"~"pok[eé]mon|tcg|trading card|cartes? (à|a) collectionner|card ?shop|carte ?shop|manga|geek",i]${a};
+    );out center tags;`;
+    const qChain = `[out:json][timeout:25];(
+      nwr["shop"]["brand"~"^(Fnac|Micromania|Micromania-Zing|Cultura|King Jouet|JouéClub|La Grande Récré|Smyths Toys|Carrefour|E\\.Leclerc|Auchan|Cora|Géant Casino|Hyper U)$"]${a};
+      nwr["shop"]["name"~"^(Fnac.*|Micromania.*|Cultura|King Jouet|JouéClub|La Grande Récré|Carrefour|E\\.Leclerc|Leclerc|Auchan|Cora|Hyper U)$"]${a};
+    );out center tags 400;`;
+    const [spec, chain] = await Promise.allSettled([overpass(qSpec), overpass(qChain)]);
+    if (spec.status === "rejected" && chain.status === "rejected") throw spec.reason;
+    const seen = new Set();
+    const shops = [...(spec.value || []), ...(chain.value || [])].filter((s) => !seen.has(s.key) && seen.add(s.key));
+    if (spec.status === "fulfilled") osmCache.set(key, shops); // on ne garde en mémoire que si la recherche principale a réussi
+    return shops;
   }
 
   function osmToShop(el) {

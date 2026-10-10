@@ -644,3 +644,41 @@ code { background: var(--surface-2); padding: 1px 6px; border-radius: 6px; font-
 .visuel svg { width: 100%; height: 100%; padding: 10px 0; filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .45)); }
 .visuel-real { position: absolute; inset: 8px; width: calc(100% - 16px); height: calc(100% - 16px); object-fit: contain; filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .45)); }
 .item-card .ic-head { padding-top: 2px; }
+
+/* ==========================================================
+   Agenda (V2)
+   ========================================================== */
+.agenda-layout { display: grid; grid-template-columns: 1fr 420px; gap: 16px; align-items: start; }
+.ag-side { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 12px; }
+.ag-map { height: 340px; }
+.ag-detail { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.ag-list { display: flex; flex-direction: column; gap: 10px; }
+.ag-month { font-size: 1.1rem; margin: 14px 0 2px; color: var(--accent); }
+.ag-item { display: flex; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
+.ag-item.sel { border-color: var(--accent); }
+.ag-date { flex: none; width: 56px; height: 60px; border-radius: 10px; background: var(--bg-2); border: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ag-date b { font-size: 1.4rem; line-height: 1; }
+.ag-date span { font-size: .75rem; color: var(--muted); text-transform: uppercase; }
+.ag-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.ag-title { font-size: 1.02rem; }
+.ag-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.ag-kind { font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--line); }
+.k-sortie { border-color: #4c8dff; }
+.k-jp { border-color: #ff6b81; }
+.k-ap { border-color: var(--accent); }
+.k-conv { border-color: var(--green); }
+.k-tournoi { border-color: #b48cff; }
+.ag-rumeur { font-size: .72rem; padding: 2px 8px; border-radius: 999px; background: rgba(255, 140, 0, .15); color: #ffb366; border: 1px solid rgba(255, 140, 0, .4); }
+.ag-soon { font-size: .72rem; font-weight: 700; color: var(--accent-ink); background: var(--accent); padding: 2px 8px; border-radius: 999px; }
+.ag-dist { font-size: .78rem; color: var(--accent); font-weight: 600; }
+.ag-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 2px; }
+.tiny { font-size: .72rem; }
+.mk.ev { width: 30px; height: 30px; font-size: 14px; background: var(--surface); border-color: var(--green); }
+.mk.ev.k-ap { border-color: var(--accent); }
+.mk.ev.k-tournoi { border-color: #b48cff; }
+@media (max-width: 960px) {
+  .agenda-layout { grid-template-columns: 1fr; }
+  .ag-side { position: static; order: -1; }
+  .ag-map { height: 300px; }
+}
+.ag-actions .link-btn, .ag-actions a { font-size: .85rem; }

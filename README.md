@@ -78,11 +78,14 @@ mgtcg/
 ├── auth.js             → comptes, connexion, compte admin, sauvegarde en ligne
 ├── boutiques.js        → carte 3D des boutiques, trajets, tournée, restocks (V2)
 ├── valeur.js           → graphique de valeur, plus-values, alertes de prix (V2)
-├── scelle.js           → produits scellés : catalogue, cote, mes produits (V2)
+├── scelle.js           → produits scellés : séries → extensions → produits + liens d'achat (V2)
+├── visuels.js          → illustrations des produits avec le logo de l'extension
+├── agenda.js           → agenda des sorties et conventions, carte, trajet (V2)
 ├── app.js              → les pages du site
 ├── supabase-setup.sql  → à coller une fois dans Supabase (comptes + sécurité)
 ├── supabase-boutiques.sql → à coller une fois dans Supabase (boutiques + restocks)
-└── supabase-scelle.sql → à coller une fois dans Supabase (produits scellés + prix)
+├── supabase-scelle.sql → à coller une fois dans Supabase (produits scellés + prix)
+└── supabase-agenda.sql → à coller une fois dans Supabase (agenda + premiers événements)
 ```
 
 ---
@@ -186,7 +189,19 @@ Page **Scellés** :
 
 ---
 
-## 9. La suite (feuille de route)
+## 9. Agenda (V2)
+
+Page **Agenda** :
+- Sorties en France (extensions, coffrets, decks…), avant-premières, sorties japonaises (y compris les rumeurs, signalées comme telles) et extensions récentes détectées automatiquement dans la base de cartes.
+- Conventions et salons en France, sur une carte, avec **trajet et coût** (voiture, transports, vélo, à pied) depuis ta position.
+- Tri par distance, bouton **« 📅 Ajouter à mon agenda »** (fichier .ics pour Google Agenda, Outlook, iPhone).
+- Les membres proposent des événements (tournois en boutique…), l'admin valide.
+
+**Activation** : Supabase → SQL Editor → New query → colle `supabase-agenda.sql` → **Run** (crée la table et ajoute les premiers événements).
+
+---
+
+## 10. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

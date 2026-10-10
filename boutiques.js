@@ -843,6 +843,13 @@ window.MG = window.MG || {};
     }));
   });
 
+  // Outils partagés avec d'autres pages (agenda…)
+  MG.trajet = {
+    loadMapLibre, computeTrip, gmapsLink, haversine, MAP_STYLE, MODES,
+    dur, km, euro, tripSettingsHTML, bindTripSettings,
+    get settings() { return settings; },
+  };
+
   // Libère la carte quand on quitte la page
   window.addEventListener("hashchange", () => {
     if (!location.hash.startsWith("#/boutiques") && S.map) {

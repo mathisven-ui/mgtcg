@@ -37,6 +37,21 @@ window.MG = window.MG || {};
     games: "Jeux & cartes", collector: "Objets de collection", comics: "BD & manga",
     anime: "Manga & anime", hobby: "Loisirs", trade: "Achat / revente", toys: "Jouets",
   };
+  // Grandes enseignes qui vendent souvent des cartes Pokémon (points rouges)
+  const CHAINS = [
+    ["Fnac", /^fnac\b/i], ["Micromania", /^micromania/i], ["Cultura", /^cultura\b/i],
+    ["King Jouet", /^king ?jouet/i], ["JouéClub", /^jou[eé] ?club/i], ["La Grande Récré", /^la grande r[eé]cr[eé]/i],
+    ["Smyths Toys", /^smyths/i], ["Carrefour", /^carrefour$/i], ["E.Leclerc", /^(e\.? ?)?leclerc$/i],
+    ["Auchan", /^auchan$/i], ["Cora", /^cora$/i], ["Géant Casino", /^g[eé]ant( casino)?$/i], ["Hyper U", /^hyper u$/i],
+  ];
+  const chainOf = (t) => {
+    for (const v of [t.brand, t.name]) {
+      if (!v) continue;
+      const hit = CHAINS.find(([, re]) => re.test(String(v).trim()));
+      if (hit) return hit[0];
+    }
+    return null;
+  };
   const SELLS = { boosters: "Boosters", gradees: "Cartes gradées", scelle: "Produits scellés (ETB, displays…)", occasion: "Cartes à l'unité / occasion", tournois: "Tournois" };
   const PRODUCTS = ["Boosters", "ETB", "Display", "UPC", "Coffret", "Cartes gradées", "Autre"];
   const MODES = {
@@ -109,7 +124,9 @@ window.MG = window.MG || {};
     const q = `[out:json][timeout:25];(
       nwr["shop"~"^(games|collector|comics|anime|trade)$"]${a};
       nwr["shop"]["name"~"pok[eé]mon|tcg|trading card|cartes? (à|a) collectionner|card ?shop|carte ?shop|manga|geek",i]${a};
-    );out center tags 300;`;
+      nwr["shop"]["brand"~"^(Fnac|Micromania|Micromania-Zing|Cultura|King Jouet|JouéClub|La Grande Récré|Smyths Toys|Carrefour|E\\.Leclerc|Auchan|Cora|Géant Casino|Hyper U)$"]${a};
+      nwr["shop"]["name"~"^(Fnac.*|Micromania.*|Cultura|King Jouet|JouéClub|La Grande Récré|Carrefour|E\\.Leclerc|Leclerc|Auchan|Cora|Hyper U)$"]${a};
+    );out center tags 500;`;
     let lastErr;
     for (const url of OVERPASS) {
       try {
@@ -134,10 +151,11 @@ window.MG = window.MG || {};
     return {
       key: `osm:${el.type}/${el.id}`,
       source: "osm",
+      type: chainOf(t) ? "chain" : "spec",
       name: String(t.name).slice(0, 80),
       lat, lon,
       address: [street, city].filter(Boolean).join(", "),
-      category: CATEGORIES[t.shop] || "Boutique",
+      category: chainOf(t) ? "Grande enseigne · " + chainOf(t) : CATEGORIES[t.shop] || "Boutique",
       hours: t.opening_hours || "",
       website: safeUrl(t.website || t["contact:website"] || ""),
       phone: String(t.phone || t["contact:phone"] || "").slice(0, 30),
@@ -154,7 +172,8 @@ window.MG = window.MG || {};
     return data.map((s) => ({
       key: "mg:" + s.id, source: "mg", id: s.id,
       name: s.name, lat: s.lat, lon: s.lon, address: s.address,
-      category: s.kind === "enseigne" ? "Enseigne" : "Boutique indépendante",
+      type: s.kind === "enseigne" ? "chain" : "spec",
+      category: s.kind === "enseigne" ? "Grande enseigne" : "Boutique spécialisée",
       sells: Array.isArray(s.sells) ? s.sells : [], website: safeUrl(s.website), note: s.note || "",
     }));
   }
@@ -240,9 +259,10 @@ window.MG = window.MG || {};
           <div id="map" class="map"></div>
           <button class="map-3d" id="toggle3d" title="Vue 3D / vue du dessus">2D</button>
           <div class="map-legend">
-            <span><i class="lg osm"></i>OpenStreetMap</span>
-            <span><i class="lg mg"></i>Ajoutée par la communauté</span>
-            <span><i class="lg hot"></i>Restock récent</span>
+            <span><i class="lg spec"></i>Boutique spécialisée</span>
+            <span><i class="lg chain"></i>Grande enseigne</span>
+            <span><i class="lg mg"></i>Ajoutée par un membre</span>
+            <span>🔥 Restock récent</span>
           </div>
           <div id="map-msg" class="map-msg" hidden></div>
         </div>
@@ -402,7 +422,7 @@ window.MG = window.MG || {};
     S.markers.clear();
     for (const s of S.shops.values()) {
       const el = document.createElement("button");
-      el.className = "mk " + s.source + (S.hot.has(s.key) ? " hot" : "") + (S.selected === s.key ? " sel" : "") + (tour.includes(s.key) ? " in-tour" : "");
+      el.className = "mk " + (s.type || "spec") + " " + s.source + (S.hot.has(s.key) ? " hot" : "") + (S.selected === s.key ? " sel" : "") + (tour.includes(s.key) ? " in-tour" : "");
       el.setAttribute("aria-label", s.name);
       el.title = s.name;
       el.textContent = S.hot.has(s.key) ? "🔥" : "";
@@ -436,6 +456,8 @@ window.MG = window.MG || {};
     let list = [...S.shops.values()].map((x) => ({ s: x, d: haversine(ref, x) }));
     if (S.filter === "hot") list = list.filter((x) => S.hot.has(x.s.key));
     if (S.filter === "mg") list = list.filter((x) => x.s.source === "mg");
+    if (S.filter === "spec") list = list.filter((x) => x.s.type !== "chain");
+    if (S.filter === "chain") list = list.filter((x) => x.s.type === "chain");
     list.sort((a, b) => a.d - b.d);
 
     panel.innerHTML = `
@@ -443,14 +465,16 @@ window.MG = window.MG || {};
         <strong>${S.shops.size} boutique${S.shops.size > 1 ? "s" : ""}</strong>
         <div class="chips small-chips">
           <button class="chip ${S.filter === "all" ? "active" : ""}" data-f="all">Toutes</button>
+          <button class="chip ${S.filter === "spec" ? "active" : ""}" data-f="spec">Spécialisées</button>
+          <button class="chip ${S.filter === "chain" ? "active" : ""}" data-f="chain">Grandes enseignes</button>
           <button class="chip ${S.filter === "hot" ? "active" : ""}" data-f="hot">🔥 Restocks</button>
           <button class="chip ${S.filter === "mg" ? "active" : ""}" data-f="mg">Communauté</button>
         </div>
       </div>
       ${list.length ? `<ul class="shop-list">${list.slice(0, 80).map(({ s: x, d }) => `
         <li><button class="shop-item" data-k="${esc(x.key)}">
-          <span class="dot ${x.source}${S.hot.has(x.key) ? " hot" : ""}"></span>
-          <span class="si-main"><b>${esc(x.name)}</b><small>${esc(x.category)}${x.address ? " · " + esc(x.address) : ""}</small></span>
+          <span class="dot ${x.type || "spec"} ${x.source}"></span>
+          <span class="si-main"><b>${S.hot.has(x.key) ? "🔥 " : ""}${esc(x.name)}</b><small>${esc(x.category)}${x.address ? " · " + esc(x.address) : ""}</small></span>
           <span class="si-dist">${km(d)}</span>
         </button></li>`).join("")}</ul>`
       : `<p class="muted small panel-empty">Aucune boutique à afficher ici.</p>`}`;
@@ -466,7 +490,7 @@ window.MG = window.MG || {};
     panel.innerHTML = `
       <button class="link-btn" id="back">← Toutes les boutiques</button>
       <div class="shop-card">
-        <p class="eyebrow">${s.source === "mg" ? "Ajoutée par la communauté" : "OpenStreetMap"}${S.hot.has(s.key) ? ' · <span class="hot-tag">🔥 restock récent</span>' : ""}</p>
+        <p class="eyebrow">${s.type === "chain" ? "Grande enseigne" : "Boutique spécialisée"} · ${s.source === "mg" ? "ajoutée par un membre" : "OpenStreetMap"}${S.hot.has(s.key) ? ' · <span class="hot-tag">🔥 restock récent</span>' : ""}</p>
         <h2>${esc(s.name)}</h2>
         <p class="muted small">${esc(s.category)}${d != null ? " · à " + km(d) + " à vol d'oiseau" : ""}</p>
         ${s.address ? `<p>📍 ${esc(s.address)}</p>` : ""}
@@ -474,6 +498,7 @@ window.MG = window.MG || {};
         ${s.phone ? `<p>📞 <a href="tel:${esc(s.phone.replace(/[^\d+]/g, ""))}">${esc(s.phone)}</a></p>` : ""}
         ${s.sells && s.sells.length ? `<div class="badges">${s.sells.filter((x) => SELLS[x]).map((x) => `<span class="badge">${esc(SELLS[x])}</span>`).join("")}</div>` : ""}
         ${s.note ? `<p class="small">${esc(s.note)}</p>` : ""}
+        ${s.type === "chain" ? `<p class="small muted">Les grandes enseignes ont souvent un rayon cartes Pokémon, mais le stock varie beaucoup d'un magasin à l'autre.</p>` : ""}
         <div class="links">
           ${s.website ? `<a target="_blank" rel="noopener noreferrer nofollow" href="${esc(s.website)}">🌐 Site web</a>` : ""}
           ${s.osmUrl ? `<a target="_blank" rel="noopener noreferrer" href="${esc(s.osmUrl)}">Fiche OpenStreetMap</a>` : ""}
@@ -759,7 +784,8 @@ window.MG = window.MG || {};
       a.client.from("restocks").select("id,shop_name,product,set_name,note,created_at").order("created_at", { ascending: false }).limit(30),
     ]);
     el.innerHTML = `
-      <section><h2>🏪 Boutiques à valider (${(pending || []).length})</h2>
+      <section><div class="section-head"><h2>🏪 Boutiques à valider (${(pending || []).length})</h2>
+        ${(pending || []).length > 1 ? `<button class="btn ghost" id="approve-all">✓ Tout valider</button>` : ""}</div>
         ${(pending || []).length ? `<div class="mod-list">${pending.map((s) => `
           <div class="mod-item" data-id="${esc(s.id)}">
             <div><b>${esc(s.name)}</b> · ${s.kind === "enseigne" ? "Enseigne" : "Indépendante"}<br>
@@ -782,6 +808,13 @@ window.MG = window.MG || {};
       ui().toast(error ? "Erreur" : b.dataset.act === "approved" ? "Boutique validée ✓" : "Boutique refusée");
       if (!error) b.closest(".mod-item").remove();
     }));
+    const all = el.querySelector("#approve-all");
+    if (all) all.addEventListener("click", async () => {
+      if (!confirm("Valider les " + pending.length + " boutiques en attente ?")) return;
+      const { error } = await a.client.from("shops").update({ status: "approved" }).in("id", pending.map((p) => p.id));
+      ui().toast(error ? "Erreur" : "Boutiques validées ✓");
+      if (!error) el.querySelectorAll(".mod-item").forEach((x) => x.remove());
+    });
     el.querySelectorAll("[data-rdel]").forEach((b) => b.addEventListener("click", async () => {
       if (!confirm("Supprimer ce restock ?")) return;
       const { error } = await a.client.from("restocks").delete().eq("id", b.dataset.rdel);

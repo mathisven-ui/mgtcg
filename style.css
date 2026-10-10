@@ -394,9 +394,10 @@ code { background: var(--surface-2); padding: 1px 6px; border-radius: 6px; font-
 }
 .map-legend span { display: flex; align-items: center; gap: 6px; }
 .lg { width: 12px; height: 12px; border-radius: 50%; display: inline-block; border: 2px solid #fff; }
-.lg.osm, .dot.osm { background: #3d8bff; }
-.lg.mg, .dot.mg { background: var(--accent); }
-.lg.hot { background: var(--red); }
+.lg.spec, .dot.spec { background: #3d8bff; }
+.lg.chain, .dot.chain { background: #ff3b5c; }
+.lg.mg { background: transparent; border-color: var(--accent); }
+.dot.mg { box-shadow: 0 0 0 2px var(--accent); }
 .map-msg {
   position: absolute; left: 50%; top: 14px; transform: translateX(-50%); z-index: 3; max-width: 80%;
   background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; font-size: .88rem; text-align: center;
@@ -408,8 +409,9 @@ code { background: var(--surface-2); padding: 1px 6px; border-radius: 6px; font-
   box-shadow: 0 2px 8px rgba(0, 0, 0, .5); background: #3d8bff; font-size: 11px; line-height: 1;
   display: grid; place-items: center; transition: transform .15s;
 }
-.mk.mg { background: var(--accent); }
-.mk.hot { background: var(--red); width: 28px; height: 28px; }
+.mk.chain { background: #ff3b5c; }
+.mk.mg { border-color: var(--accent); }
+.mk.hot { width: 30px; height: 30px; font-size: 14px; box-shadow: 0 0 0 4px rgba(255, 140, 0, .55), 0 2px 8px rgba(0, 0, 0, .5); }
 .mk.in-tour { outline: 3px solid var(--green); outline-offset: 1px; }
 .mk:hover, .mk.sel { transform: scale(1.35); z-index: 5; }
 .mk.sel { border-color: var(--accent); }
@@ -429,7 +431,6 @@ code { background: var(--surface-2); padding: 1px 6px; border-radius: 6px; font-
 }
 .shop-item:hover { border-color: var(--accent); }
 .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
-.dot.hot { background: var(--red); }
 .si-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .si-main b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .si-main small { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

@@ -300,7 +300,18 @@ Bouton **« 🛂 Passeport de la carte »** dans la fiche de chaque carte possé
 
 ---
 
-## 19. La suite (feuille de route)
+## 19. Portefeuille (V3)
+
+Page **Portefeuille** (lien en haut de **Ma collection**, et onglet dans **Outils**) — des calculs, pas des conseils :
+- **Résumé** : valeur estimée, montant investi, plus-value latente, part de la valeur dans les 10 meilleures cartes.
+- **Répartition** de la valeur par extension, langue, rareté ou version, et meilleures / moins bonnes plus-values.
+- **Simuler une vente** : cartes au choix, plateforme (frais vendeur particulier 2026 : Cardmarket 5 % + 0,01 €/carte, eBay particulier 0 % depuis le 1er septembre 2026, Vinted / Leboncoin 0 %), prix en % de la cote, envoi → ce que tu récupères et ta plus-value nette.
+- **Simuler un achat** (cartes de la wishlist) : prix proposé vs cote, impact sur la collection, prix de revente minimum pour ne rien perdre.
+- **Et si le marché bougeait ?** : hausse ou baisse sur toute la collection, une extension ou une rareté.
+
+---
+
+## 20. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

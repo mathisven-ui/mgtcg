@@ -390,6 +390,7 @@
         <a href="#/profil">🏅 Badges & objectifs</a>
         <a href="#/completer">🎯 Compléter mes sets</a>
         <a href="#/echanges">🔄 Échanger mes doubles</a>
+        <a href="#/portefeuille">💼 Portefeuille</a>
         <a href="#/passeport">🛂 Passeports</a>
         <a href="#/importer">📥 Importer</a>
       </div>

@@ -46,7 +46,9 @@ window.MG = window.MG || {};
     "PSA Express": { label: "PSA – USA (Express, ≤ 2 500 $)", cur: "USD", ship: 60, fee: () => 149 },
     Autre: { label: "Autre société (je saisis le prix)", cur: "EUR", ship: 15, fee: () => 0 },
   };
-  const SELL_FEES = { "Cardmarket (≈ 5 %)": 5, "eBay (≈ 13 %)": 13, "Vinted / Leboncoin (0 % vendeur)": 0, "Autre": 0 };
+  // Frais vendeur particulier en France (sources : margeoapp.com MAJ 23/09/2026, justgeek.fr 01/09/2026)
+  const SELL_FEES = { "Cardmarket (5 %)": 5, "eBay particulier (0 % depuis le 1er sept. 2026)": 0, "Vinted / Leboncoin (0 % vendeur)": 0, "eBay professionnel (≈ 13 %)": 13, "Autre": 0 };
+  MG.SELL_FEES = SELL_FEES;
 
   /* ---------------- Page ---------------- */
   const R = (MG.routes = MG.routes || {});
@@ -63,6 +65,7 @@ window.MG = window.MG || {};
         <a class="chip ${t === "grading" ? "active" : ""}" href="#/outils/grading">🏅 Faire grader ?</a>
         <a class="chip ${t === "import" ? "active" : ""}" href="#/outils/import">🗾 France ou Japon ?</a>
         <a class="chip ${t === "ventes" ? "active" : ""}" href="#/outils/ventes">💶 Mes ventes</a>
+        <a class="chip" href="#/portefeuille/vente">💼 Simuler une vente</a>
         <a class="chip" href="#/bouclier">🛡️ Anti-arnaque</a>
         <a class="chip" href="#/completer">🎯 Compléter mes sets</a>
         <a class="chip" href="#/importer">📥 Importer</a>

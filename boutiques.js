@@ -140,15 +140,23 @@ window.MG = window.MG || {};
       nwr["shop"~"^(games|collector|comics|anime|trade)$"]${a};
       nwr["shop"]["name"~"pok[eé]mon|tcg|trading card|cartes? (à|a) collectionner|card ?shop|carte ?shop|manga|geek",i]${a};
     );out center tags;`;
-    const qChain = `[out:json][timeout:25];(
+    const qChain = `[out:json][timeout:40];(
       nwr["shop"]["brand"~"^(Fnac|Micromania|Micromania-Zing|Cultura|King Jouet|JouéClub|La Grande Récré|Smyths Toys|Carrefour|E\\.Leclerc|Auchan|Cora|Géant Casino|Hyper U)$"]${a};
       nwr["shop"]["name"~"^(Fnac.*|Micromania.*|Cultura|King Jouet|JouéClub|La Grande Récré|Carrefour|E\\.Leclerc|Leclerc|Auchan|Cora|Hyper U)$"]${a};
     );out center tags 400;`;
-    const [spec, chain] = await Promise.allSettled([overpass(qSpec), overpass(qChain)]);
-    if (spec.status === "rejected" && chain.status === "rejected") throw spec.reason;
+    // L'une APRÈS l'autre : le service gratuit refuse souvent 2 recherches simultanées
+    let spec = null, chain = null;
+    try { spec = await overpass(qSpec); } catch (e) { /* on tente quand même les enseignes */ }
+    for (let i = 0; i < 3 && !chain; i++) {
+      try { chain = await overpass(qChain); }
+      catch (e) { await new Promise((r) => setTimeout(r, 2500 * (i + 1))); } // petite pause puis on réessaie
+    }
+    if (!spec && !chain) throw new Error("overpass");
+    S.chainFailed = !chain;
+    S.specFailed = !spec;
     const seen = new Set();
-    const shops = [...(spec.value || []), ...(chain.value || [])].filter((s) => !seen.has(s.key) && seen.add(s.key));
-    if (spec.status === "fulfilled") osmCache.set(key, shops); // on ne garde en mémoire que si la recherche principale a réussi
+    const shops = [...(spec || []), ...(chain || [])].filter((s) => !seen.has(s.key) && seen.add(s.key));
+    if (spec && chain) osmCache.set(key, shops); // en mémoire seulement si TOUT a marché
     return shops;
   }
 
@@ -423,6 +431,8 @@ window.MG = window.MG || {};
     renderMarkers();
     renderPanel();
     if (failed && !osm.length) mapMsg("⚠️ Le service OpenStreetMap ne répond pas. Réessaie dans un instant avec « Chercher dans cette zone ».");
+    else if (S.chainFailed) mapMsg("⚠️ Les grandes enseignes n'ont pas pu être chargées (service gratuit très occupé). Clique sur « 🔄 Chercher dans cette zone » pour réessayer.");
+    else if (S.specFailed) mapMsg("⚠️ Les boutiques spécialisées n'ont pas pu être chargées. Clique sur « 🔄 Chercher dans cette zone » pour réessayer.");
     else if (!S.shops.size) mapMsg("Aucune boutique trouvée dans un rayon de 15 km. Déplace la carte ou propose une boutique !");
     else mapMsg("");
   }

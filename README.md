@@ -288,7 +288,19 @@ Page **Mon profil & mes badges** (lien en haut de **Ma collection**) :
 
 ---
 
-## 18. La suite (feuille de route)
+## 18. Passeport des cartes (V3)
+
+Bouton **« 🛂 Passeport de la carte »** dans la fiche de chaque carte possédée, et page **Passeports** (lien en haut de **Ma collection**) :
+- **État** (échelle Cardmarket, de Mint à Poor) et défauts (coins, bords, surface, centrage, pli…).
+- **Carte gradée** : société, note, n° de certificat (lien direct de vérification pour PSA).
+- **Provenance** (booster, boutique, Cardmarket, échange…), **rangement** et emplacement, **notes privées**.
+- **Jusqu'à 4 photos personnelles** par carte (compte nécessaire) : réduites automatiquement, infos GPS retirées, stockées dans un espace privé Supabase.
+- Liste des passeports avec filtres (gradées, avec défauts, avec photos) et suggestions (tes cartes les plus chères sans passeport).
+- Base de données : lancer une fois `supabase-passeport.sql` dans Supabase (crée l'espace photos privé).
+
+---
+
+## 19. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

@@ -20,7 +20,31 @@ window.MG = window.MG || {};
   };
 
   function empty() {
-    return { version: 1, lang: "fr", owned: {}, fav: {}, wish: {}, meta: {}, paid: {}, alerts: {}, history: {}, lastRefresh: 0, sealed: {}, sales: [], goals: [] };
+    return { version: 1, lang: "fr", owned: {}, fav: {}, wish: {}, meta: {}, paid: {}, alerts: {}, history: {}, lastRefresh: 0, sealed: {}, sales: [], goals: [], passport: {} };
+  }
+
+  const PP = {
+    cond: ["Mint", "Near Mint", "Excellent", "Good", "Light Played", "Played", "Poor"],
+    defects: ["coins", "bords", "surface", "centrage", "pli", "tache", "dos", "impression"],
+    grader: ["", "PSA", "PCA", "CCC", "CGC", "Beckett", "Autre"],
+    source: ["", "Booster ouvert", "Boutique", "Cardmarket", "eBay", "Vinted", "Leboncoin", "Échange", "Cadeau", "Autre"],
+    storage: ["", "Classeur", "Toploader", "Sleeve", "Boîte", "Présentoir", "Autre"],
+  };
+  MG.PASSPORT = PP;
+  function cleanPassport(v) {
+    if (!v || typeof v !== "object") return null;
+    const s = (x, n) => (typeof x === "string" ? x.slice(0, n) : "");
+    const pick = (x, list) => (list.includes(x) ? x : "");
+    const out = {
+      cond: pick(v.cond, PP.cond), defects: Array.isArray(v.defects) ? [...new Set(v.defects.filter((d) => PP.defects.includes(d)))] : [],
+      grader: pick(v.grader, PP.grader), grade: /^(10|[1-9](\.5)?)$/.test(String(v.grade || "")) ? String(v.grade) : "",
+      cert: /^[A-Za-z0-9-]{1,20}$/.test(String(v.cert || "")) ? String(v.cert) : "",
+      source: pick(v.source, PP.source), storage: pick(v.storage, PP.storage), place: s(v.place, 80), note: s(v.note, 500),
+      photos: Array.isArray(v.photos) ? v.photos.filter((p) => typeof p === "string" && /^[0-9a-f-]{36}\/[A-Za-z0-9._-]{1,120}\.jpg$/.test(p)).slice(0, 4) : [],
+      updated: typeof v.updated === "string" && /^\d{4}-\d{2}-\d{2}/.test(v.updated) ? v.updated.slice(0, 10) : "",
+    };
+    const empty = !out.cond && !out.defects.length && !out.grader && !out.cert && !out.source && !out.storage && !out.place && !out.note && !out.photos.length;
+    return empty ? null : out;
   }
 
   let data = load();
@@ -99,6 +123,11 @@ window.MG = window.MG || {};
       if (g.type === "set" && !(typeof g.setKey === "string" && /^[a-z-]+\|[\w.\-]+$/i.test(g.setKey))) continue;
       out.goals.push({ id: str(g.id, 40) || Math.random().toString(36).slice(2, 12), type: g.type, target: g.type === "set" ? 0 : Math.round(target),
         setKey: g.type === "set" ? g.setKey.slice(0, 60) : "", label: str(g.label, 80), deadline: isDate(g.deadline) ? g.deadline : "", created: isDate(g.created) ? g.created : "" });
+    }
+    // Passeports des cartes (état, défauts, certificat, photos…)
+    for (const [k, v] of Object.entries(obj.passport || {}).slice(0, 5000)) {
+      const pp = cleanPassport(v);
+      if (isKey(k) && pp) out.passport[k] = pp;
     }
     return out;
   }
@@ -285,6 +314,14 @@ window.MG = window.MG || {};
       const clean = sanitize({ sales: [Object.assign({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6) }, v)] }).sales[0];
       if (clean) { data.sales.push(clean); save(); }
     },
+    passport: (key) => data.passport[key] || null,
+    passportKeys: () => Object.keys(data.passport),
+    setPassport(key, v) {
+      const pp = cleanPassport(Object.assign({}, v, { updated: new Date().toISOString().slice(0, 10) }));
+      if (pp) data.passport[key] = pp; else delete data.passport[key];
+      save();
+      return pp;
+    },
     goals: () => data.goals.slice(),
     addGoal(g) { if (data.goals.length >= 30) return false; const t = sanitize({ goals: [g] }).goals[0]; if (!t) return false; data.goals.push(t); save(); return true; },
     removeGoal(id) { data.goals = data.goals.filter((x) => x.id !== id); save(); },
@@ -314,6 +351,7 @@ window.MG = window.MG || {};
       for (const [id, v] of Object.entries(r.sealed)) if (!data.sealed[id]) data.sealed[id] = v;
       const known = new Set(data.sales.map((x) => x.id));
       for (const v of r.sales) if (!known.has(v.id)) data.sales.push(v);
+      for (const [k, v] of Object.entries(r.passport)) if (!data.passport[k]) data.passport[k] = v;
       const knownGoals = new Set(data.goals.map((x) => x.id));
       for (const g of r.goals) if (!knownGoals.has(g.id) && data.goals.length < 30) data.goals.push(g);
       save();

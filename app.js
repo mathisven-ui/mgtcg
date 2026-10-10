@@ -390,6 +390,7 @@
         <a href="#/profil">🏅 Badges & objectifs</a>
         <a href="#/completer">🎯 Compléter mes sets</a>
         <a href="#/echanges">🔄 Échanger mes doubles</a>
+        <a href="#/passeport">🛂 Passeports</a>
         <a href="#/importer">📥 Importer</a>
       </div>
 
@@ -492,6 +493,7 @@
         <h2>Tes données (RGPD)</h2>
         <p><b>Sans compte</b> : ta collection, tes favoris et ta wishlist sont enregistrés uniquement dans ton navigateur (stockage local). Aucune donnée personnelle n'est collectée.</p>
         <p><b>Avec un compte</b> : MGTCG enregistre ton adresse email, ton mot de passe (chiffré, jamais visible, même par l'administrateur), la date de création du compte et ta collection, pour te permettre de la retrouver sur tous tes appareils. Ces données sont hébergées par Supabase (serveurs dans l'Union européenne si la région choisie est européenne) et ne sont ni vendues, ni partagées, ni utilisées pour de la publicité.</p>
+        <p><b>Fonctions facultatives pour les membres</b> : si tu les utilises, MGTCG enregistre aussi ta liste d'échange (pseudo, département, cartes à échanger et recherchées) et tes propositions d'échange (visibles par toi et l'autre membre), ton profil public (pseudo, badges, chiffres et vitrine, visibles par tous), tes contributions (boutiques, événements, actus, alertes, prix, ouvertures) et tes signalements (visibles seulement par l'administrateur). Les photos du passeport de tes cartes sont stockées dans un espace <b>privé</b> que toi seul peux voir ; elles sont réduites et débarrassées de leurs informations cachées (lieu GPS, appareil) avant l'envoi. Tu peux supprimer chacun de ces éléments depuis la page correspondante.</p>
         <p>Tu peux à tout moment : exporter ta collection (page « Ma collection »), supprimer ta collection en ligne (page « Mon compte »), ou demander la suppression complète de ton compte et l'accès à tes données en écrivant à l'adresse de contact ci-dessus. Tu peux aussi saisir la CNIL (cnil.fr) si tu estimes que tes droits ne sont pas respectés.</p>
         <p>Cookies : le site n'utilise ni cookies publicitaires ni traceurs. Seul le stockage local du navigateur est utilisé, pour faire fonctionner le site (collection, connexion).</p>
         <h2>Sources des données</h2>
@@ -603,6 +605,7 @@
 
             <h3>🧮 Outils</h3>
             <div class="links">
+              ${Object.keys(owned).length ? `<a href="#/passeport/${enc(MG.store.key(lang, card.id))}" data-close>🛂 Passeport de la carte${MG.store.passport(MG.store.key(lang, card.id)) ? " ✓" : ""}</a>` : ""}
               <a href="#/outils/grading/${enc(MG.store.key(lang, card.id))}" data-close>🏅 La faire grader : rentable ?</a>
               <a href="#/outils/import/${enc(MG.store.key(lang, card.id))}" data-close>🗾 France ou Japon ?</a>
               ${Object.keys(owned).length ? `<a href="#/outils/ventes/${enc(MG.store.key(lang, card.id))}" data-close>💶 J'ai vendu cette carte</a>` : ""}

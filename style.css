@@ -898,3 +898,24 @@ h1 .flag .flag-img { width: 30px; height: 20px; vertical-align: 2px; }
 .pf-board td { padding: 10px 14px; }
 .pf-col { font-weight: 700; color: var(--accent); }
 .pf-me td { background: rgba(255, 203, 5, .08); }
+
+/* ---------- Passeport des cartes (V3) ---------- */
+.pp-head { display: grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: start; margin-bottom: 18px; }
+.pp-img img { width: 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, .4); }
+.pp-head h1 { margin-top: 0; }
+.pp-stats { margin: 12px 0; }
+.pp-stats b { font-size: 1rem !important; }
+.pp-form .tool-card { margin-bottom: 14px; }
+.pp-note { display: flex; flex-direction: column; gap: 6px; font-size: .85rem; font-weight: 600; margin-top: 12px; }
+.pp-note textarea { background: var(--bg-2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: inherit; font-weight: 400; resize: vertical; }
+.pp-photos { margin-top: 16px; }
+.pp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.pp-grid figure { margin: 0; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.pp-grid img, .pp-ph { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); background: var(--bg-2); cursor: zoom-in; }
+.pp-ph { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: .85rem; }
+.pp-add { aspect-ratio: 3 / 4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; border: 2px dashed var(--line); border-radius: 10px; cursor: pointer; font-size: 2rem; color: var(--muted); }
+.pp-add span { font-size: .85rem; }
+.pp-add:hover { border-color: var(--accent); color: var(--accent); }
+.pp-add.busy { opacity: .6; pointer-events: none; }
+.pp-table tr.clickable { cursor: pointer; }
+@media (max-width: 700px) { .pp-head { grid-template-columns: 1fr; } .pp-img { max-width: 220px; } }

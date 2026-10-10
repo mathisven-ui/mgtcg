@@ -266,7 +266,18 @@ Page **Bouclier** (onglet « 🛡️ Anti-arnaque » dans **Outils**, et lien «
 
 ---
 
-## 16. La suite (feuille de route)
+## 16. Échanges entre membres (V3)
+
+Page **Échanges** (menu, et bouton dans **Ma collection**) — réservée aux membres connectés :
+- **Ma liste d'échange** : un pseudo (sans vrai nom), un département optionnel, les cartes à échanger (tes doubles, cochés dans ta collection). Les cartes recherchées = ta wishlist.
+- **Correspondances** : les membres qui ont des cartes de ta wishlist, en premier ceux qui cherchent aussi tes cartes, puis ceux de ton département.
+- **Propositions encadrées** : « mes cartes contre tes cartes » + un lieu public (boutique validée ou convention / tournoi de l'agenda) + une date et un moment. L'autre accepte, refuse ou fait une contre-proposition. Après l'échange, un bouton met la collection à jour.
+- **Sécurité** : aucune messagerie et aucune coordonnée échangée ; le lieu est recopié depuis la base (impossible d'y glisser un message) ; blocage d'un membre ; signalements traités dans l'espace admin (bouton « Bloquer sa liste ») ; limites anti-spam (10 propositions en attente, 20 par jour).
+- Base de données : lancer une fois `supabase-echanges.sql` dans Supabase.
+
+---
+
+## 17. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

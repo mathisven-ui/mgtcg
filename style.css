@@ -823,3 +823,45 @@ h1 .flag .flag-img { width: 30px; height: 20px; vertical-align: 2px; }
 .sh-guide ul { margin: 10px 0 0; padding-left: 20px; display: grid; gap: 6px; }
 #sh-filter { margin: 8px 0 12px; flex-wrap: wrap; }
 .sh-steps { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+
+/* ---------- Échanges entre membres (V3) ---------- */
+.tr-safe { display: flex; gap: 12px; align-items: flex-start; background: rgba(76, 141, 255, .08); border: 1px solid rgba(76, 141, 255, .45); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; font-size: .9rem; }
+.tr-safe > div { flex: 1; }
+.tr-badge { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--accent); color: #12131a; font-size: .75rem; font-weight: 700; text-align: center; }
+.tr-warn { background: rgba(245, 165, 36, .1); border: 1px solid rgba(245, 165, 36, .5); border-radius: 10px; padding: 10px 14px; font-size: .9rem; }
+.tr-form h3 { margin: 18px 0 6px; }
+.tr-form .check, .form .check { display: flex; gap: 8px; align-items: flex-start; }
+#tr-q { width: 100%; max-width: 420px; margin-bottom: 8px; background: var(--bg-2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: inherit; }
+.tr-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px; max-height: 420px; overflow: auto; padding: 4px; border: 1px solid var(--line); border-radius: 12px; }
+.tr-pick.small-pick { grid-template-columns: 1fr; max-height: 240px; }
+.tr-opt { display: flex; gap: 8px; align-items: center; padding: 6px 8px; border-radius: 8px; background: var(--bg-2); cursor: pointer; font-size: .88rem; }
+.tr-opt[hidden] { display: none; }
+.tr-opt input { accent-color: var(--accent); flex: none; }
+.tr-card { display: inline-flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.tr-chips .tr-card { background: var(--bg-2); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: .82rem; }
+.tr-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.tr-price { color: var(--accent); font-weight: 600; }
+.tr-matches { display: grid; gap: 12px; }
+.tr-match h3 { margin: 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tr-perfect { border-color: var(--green) !important; color: var(--green); }
+.tr-two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.tr-two h3 { font-size: .95rem; margin: 6px 0; }
+.tr-two details summary { cursor: pointer; margin: 6px 0; }
+.tr-balance { background: var(--bg-2); border-radius: 10px; padding: 10px 12px; font-size: .9rem; }
+.tr-offer { margin-bottom: 12px; }
+.tr-place { background: var(--bg-2); border-radius: 10px; padding: 10px 12px; font-size: .9rem; }
+.tr-actions { flex-wrap: wrap; gap: 8px; align-items: center; }
+.tr-hist summary { cursor: pointer; font-weight: 600; margin: 10px 0; }
+@media (max-width: 700px) { .tr-two { grid-template-columns: 1fr; } }
+
+/* Barre du haut sur écran moyen : le menu passe sur une 2e ligne */
+@media (min-width: 861px) and (max-width: 1499px) {
+  .topbar { flex-wrap: wrap; row-gap: 6px; }
+  .topbar .search { flex: 1 1 260px; max-width: none; }
+  .topbar .nav { order: 10; flex-basis: 100%; overflow-x: auto; scrollbar-width: none; margin: 0 -4px; }
+  .topbar .nav a { padding: 6px 10px; font-size: .92rem; }
+  .toolbar { top: 110px; }
+  .ag-side { top: 124px; }
+}
+.form .tr-opt { flex-direction: row; justify-content: flex-start; text-align: left; font-weight: 400; color: var(--text); }
+.form .tr-pick { border-color: var(--line); }

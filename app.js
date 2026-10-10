@@ -419,6 +419,7 @@
           <label class="btn ghost">⬆ Importer un fichier<input type="file" id="imp" accept=".json,application/json" hidden></label>
           <a class="btn ghost" href="#/importer">📥 Importer depuis une autre appli (CSV, Excel)</a>
           <a class="btn ghost" href="#/completer">🎯 Compléter mes sets</a>
+          <a class="btn ghost" href="#/echanges">🔄 Échanger mes doubles</a>
           <button class="btn danger" id="reset">Tout effacer</button>
         </div>
       </section>`;

@@ -225,7 +225,16 @@ Page **Outils** (aussi accessible depuis la fiche de chaque carte) :
 
 ---
 
-## 12. La suite (feuille de route)
+## 12. Actus & marché (V2)
+
+Page **Actus** :
+- **Tendances de la semaine** — pour chacune des dernières extensions, MGTCG compare le prix moyen Cardmarket des 7 derniers jours à celui des 30 derniers jours : plus fortes hausses, plus fortes baisses, cartes les plus chères et tendance générale. Calculé automatiquement, rien à mettre à jour.
+- **Dernières actus** — publiées par l'admin, ou proposées par les membres puis validées dans l'espace admin (5 propositions en attente maximum par membre). Toujours avec un résumé écrit avec nos mots et un lien vers la source.
+- Base de données : lancer une fois `supabase-actus.sql` dans Supabase.
+
+---
+
+## 13. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

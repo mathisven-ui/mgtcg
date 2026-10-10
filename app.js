@@ -239,6 +239,8 @@
         </div>
       </section>
 
+      <div id="set-sealed"></div>
+
       <div class="toolbar">
         <div class="chips" role="tablist">
           <button class="chip active" data-f="all">Toutes</button>
@@ -258,6 +260,7 @@
 
     const grid = $("#grid");
     bindGrid(grid, getCard);
+    if (MG.scelle && MG.scelle.mountSet) MG.scelle.mountSet($("#set-sealed"), set.name, lang);
 
     function computeStats() {
       let ownedCards = 0, ownedValue = 0, missingValue = 0, variantsTotal = 0, variantsOwned = 0;

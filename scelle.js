@@ -78,23 +78,22 @@ window.MG = window.MG || {};
     view().innerHTML = `
       <header class="page-head"><div>
         <h1>📦 Produits scellés</h1>
-        <p class="muted">ETB, displays, UPC, coffrets… Leur prix de sortie, leur cote actuelle et ce que tu possèdes.</p>
+        <p class="muted">Tous les produits sortis pour chaque série : boosters, tripacks, ETB, displays, coffrets… avec un prix estimé et des liens pour les trouver sur eBay, Leboncoin, Vinted ou Cardmarket.</p>
       </div></header>
 
       <div class="toolbar static">
         <div class="chips" id="types">
           <button class="chip active" data-t="all">Tous</button>
           ${["ETB", "Display", "UPC", "Coffret", "Tripack", "Booster"].map((t) => `<button class="chip" data-t="${t}">${t}</button>`).join("")}
-          <button class="chip" data-t="mine">⭐ Les miens</button>
         </div>
         <input id="sq" type="search" placeholder="Rechercher (ex : 151, Dracaufeu…)" maxlength="60" aria-label="Rechercher un produit">
         <select id="slang" aria-label="Langue">${Object.entries(LANGS).map(([k, v]) => `<option value="${k}" ${k === S.lang ? "selected" : ""}>${v}</option>`).join("")}<option value="all">Toutes langues</option></select>
-        <button class="btn" id="propose">＋ Proposer un produit</button>
-        ${isAdmin ? `<button class="btn ghost" id="gen">⚙ Ajouter les produits d'un set</button>` : ""}
+        <button class="btn ghost" id="propose">＋ Proposer un produit manquant</button>
+        ${isAdmin ? `<button class="btn" id="gen">⚙ Ajouter les produits d'une série</button>` : ""}
       </div>
 
-      <div id="sealed-grid" class="sealed-grid"></div>
-      <p class="disclaimer">La « cote » est la médiane des prix signalés par les membres sur 30 jours (ou 90 jours s'il y en a peu). Ce sont des prix constatés, pas des conseils d'achat ou d'investissement. Vérifie toujours le prix sur Cardmarket avant d'acheter ou de vendre.</p>`;
+      <div id="sealed-grid"></div>
+      <p class="disclaimer">Prix estimé : prix constatés par les membres (médiane sur 30 jours) ou, à défaut, prix de vente conseillé à la sortie. C'est une estimation : compare toujours les annonces avant d'acheter. MGTCG ne vend rien et ne touche aucune commission.</p>`;
 
     const grid = document.getElementById("sealed-grid");
     const render = () => renderGrid(grid);
@@ -110,35 +109,121 @@ window.MG = window.MG || {};
     render();
   };
 
+  // Prix estimé : prix constatés par les membres, sinon prix de sortie
+  function estimate(p) {
+    const c = cote(p.id);
+    if (c) return { value: c.value, label: "Prix estimé", hint: c.n + " prix constaté" + (c.n > 1 ? "s" : "") };
+    if (p.msrp) return { value: p.msrp, label: "Prix de sortie", hint: "prix conseillé à la sortie" };
+    return null;
+  }
+
+  // Liens de recherche pré-remplis vers les sites d'achat
+  function buyLinks(p) {
+    const words = { fr: "", en: "anglais", ja: "japonais", zh: "chinois", ko: "coréen" };
+    const q = encodeURIComponent(("pokemon " + p.name + " " + (words[p.lang] || "")).trim());
+    const cm = encodeURIComponent(p.name);
+    return `<div class="buy-links">
+      <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.ebay.fr/sch/i.html?_nkw=${q}">eBay</a>
+      <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.leboncoin.fr/recherche?text=${q}">Leboncoin</a>
+      <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.vinted.fr/catalog?search_text=${q}">Vinted</a>
+      <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=${cm}">Cardmarket</a>
+    </div>`;
+  }
+
+  function cardHTML(p) {
+    const { esc } = ui();
+    const e = estimate(p);
+    const c = cote(p.id);
+    const evo = c && p.msrp ? ((c.value - p.msrp) / p.msrp) * 100 : null;
+    return `<div class="sealed-card" data-id="${esc(p.id)}">
+      <button class="sc-open" data-open="${esc(p.id)}" aria-label="Voir ${esc(p.name)}">
+        <div class="sc-top"><span class="sc-type">${esc(p.type)}</span><span class="muted small">${LANGS[p.lang] || ""}</span></div>
+        <b class="sc-name">${esc(p.name)}</b>
+        ${p.content ? `<span class="muted small">${esc(p.content)}</span>` : ""}
+        <div class="sc-est">
+          <span>${e ? esc(e.label) : "Prix estimé"}</span>
+          <strong>${e ? eur(e.value) : "—"}</strong>
+          <small class="muted">${e ? esc(e.hint) : "pas encore de prix : regarde les annonces"}${evo != null ? ` · <span class="${evo >= 0 ? "up" : "down"}">${evo >= 0 ? "▲ +" : "▼ "}${evo.toFixed(0)} % depuis la sortie</span>` : ""}</small>
+        </div>
+      </button>
+      ${buyLinks(p)}
+    </div>`;
+  }
+
+  function bindCards(root) {
+    root.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => openProduct(b.dataset.open)));
+  }
+
+  const TYPE_ORDER = ["Booster", "Blister", "Tripack", "ETB", "Display", "Coffret", "Pokébox", "Mini-tin", "UPC", "Collection premium", "Autre"];
+  const byType = (a, b) => TYPE_ORDER.indexOf(a.type) - TYPE_ORDER.indexOf(b.type) || a.name.localeCompare(b.name);
+
   function renderGrid(grid) {
     const { esc } = ui();
     let list = S.products.filter((p) => p.status === "approved");
     if (S.lang !== "all") list = list.filter((p) => p.lang === S.lang);
-    if (S.filter === "mine") list = list.filter((p) => MG.store.sealed(p.id));
-    else if (S.filter !== "all") list = list.filter((p) => p.type === S.filter);
+    if (S.filter !== "all") list = list.filter((p) => p.type === S.filter);
     if (S.q) list = list.filter((p) => (p.name + " " + (p.set_name || "") + " " + (p.serie || "")).toLowerCase().includes(S.q));
 
     if (!list.length) {
       grid.innerHTML = `<div class="state"><p>${S.products.length ? "Aucun produit ne correspond à ta recherche." : "Le catalogue est encore vide."}</p>
-        <p class="muted small">Tu ne trouves pas un produit ? Propose-le avec « ＋ Proposer un produit ».</p></div>`;
-    } else {
-      grid.innerHTML = list.slice(0, 300).map((p) => {
-        const c = cote(p.id);
-        const own = MG.store.sealed(p.id);
-        const evo = c && p.msrp ? ((c.value - p.msrp) / p.msrp) * 100 : null;
-        return `<button class="sealed-card" data-id="${esc(p.id)}">
-          <div class="sc-top"><span class="sc-type">${esc(p.type)}</span><span class="muted small">${LANGS[p.lang] || ""}</span>${own ? `<span class="sc-own">⭐ ×${own.qty}</span>` : ""}</div>
-          <b class="sc-name">${esc(p.name)}</b>
-          <span class="muted small">${esc(p.set_name || p.serie || "")}${p.release_date ? " · " + esc(fmtDay(p.release_date)) : ""}</span>
-          <div class="sc-prices">
-            <div><span>Prix de sortie</span><strong>${p.msrp ? eur(p.msrp) : "—"}</strong></div>
-            <div><span>Cote membres</span><strong>${c ? eur(c.value) : "—"}</strong></div>
-          </div>
-          ${evo != null ? `<span class="sc-evo ${evo >= 0 ? "up" : "down"}">${evo >= 0 ? "▲ +" : "▼ "}${evo.toFixed(0)} % depuis la sortie</span>` : `<span class="muted small">${c ? c.n + " prix signalé" + (c.n > 1 ? "s" : "") : "Aucun prix signalé"}</span>`}
-        </button>`;
-      }).join("");
+        <p class="muted small">Il manque un produit ? Propose-le avec « ＋ Proposer un produit manquant ».</p></div>`;
+      return;
     }
-    grid.querySelectorAll(".sealed-card").forEach((b) => b.addEventListener("click", () => openProduct(b.dataset.id)));
+    // Regroupe : série → extension (de la plus récente à la plus ancienne)
+    const series = new Map();
+    for (const p of list) {
+      const sk = p.serie || "Autres produits";
+      const ek = p.set_name || "Hors extension";
+      if (!series.has(sk)) series.set(sk, new Map());
+      const sets = series.get(sk);
+      if (!sets.has(ek)) sets.set(ek, []);
+      sets.get(ek).push(p);
+    }
+    const newest = (arr) => arr.reduce((m, p) => (p.release_date && p.release_date > m ? p.release_date : m), "");
+    const serieList = [...series.entries()].sort((a, b) => (newest([...b[1].values()].flat()) > newest([...a[1].values()].flat()) ? 1 : -1));
+    const open = S.q || S.filter !== "all" || serieList.length <= 2;
+    grid.innerHTML = serieList.map(([serie, sets], i) => {
+      const setList = [...sets.entries()].sort((a, b) => (newest(b[1]) > newest(a[1]) ? 1 : -1));
+      const count = setList.reduce((t, [, l]) => t + l.length, 0);
+      return `<details class="serie-block" ${open || i === 0 ? "open" : ""}>
+        <summary><span class="sb-title">${esc(serie)}</span><span class="muted small">${setList.length} extension${setList.length > 1 ? "s" : ""} · ${count} produit${count > 1 ? "s" : ""}</span></summary>
+        ${setList.map(([setName, prods]) => {
+          const d = newest(prods);
+          return `<div class="set-block">
+            <h3>${esc(setName)}${d ? `<span class="muted small"> · sortie le ${esc(fmtDay(d))}</span>` : ""}</h3>
+            <div class="sealed-grid">${prods.sort(byType).map(cardHTML).join("")}</div>
+          </div>`;
+        }).join("")}
+      </details>`;
+    }).join("");
+    bindCards(grid);
+  }
+
+  /* ---------------- Bloc « produits de cette extension » (page d'un set) ---------------- */
+  const LANG_OF = { fr: "fr", en: "en", ja: "ja", "zh-tw": "zh", "zh-cn": "zh", ko: "ko" };
+  async function mountSet(el, setName, cardLang) {
+    if (!el) return;
+    const { esc } = ui();
+    const a = auth();
+    const pLang = LANG_OF[cardLang] || "autre";
+    let prods = [];
+    if (a && a.enabled && await load()) {
+      const norm = (x) => String(x || "").toLowerCase().trim();
+      prods = S.products.filter((p) => p.status === "approved" && p.lang === pLang && norm(p.set_name) === norm(setName)).sort(byType);
+    }
+    const q = encodeURIComponent("pokemon " + setName);
+    el.innerHTML = `<details class="serie-block set-sealed" ${prods.length ? "open" : ""}>
+      <summary><span class="sb-title">📦 Produits scellés de cette extension</span><span class="muted small">${prods.length ? prods.length + " produit" + (prods.length > 1 ? "s" : "") : "à compléter"}</span></summary>
+      ${prods.length ? `<div class="sealed-grid">${prods.map(cardHTML).join("")}</div>`
+        : `<p class="muted small">Les produits de cette extension n'ont pas encore été ajoutés au catalogue. En attendant, cherche-les directement :</p>
+          <div class="buy-links">
+            <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.ebay.fr/sch/i.html?_nkw=${q}+scellé">eBay</a>
+            <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.leboncoin.fr/recherche?text=${q}">Leboncoin</a>
+            <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.vinted.fr/catalog?search_text=${q}">Vinted</a>
+            <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=${encodeURIComponent(setName)}">Cardmarket</a>
+          </div>`}
+    </details>`;
+    bindCards(el);
   }
 
   /* ---------------- Fiche produit ---------------- */
@@ -173,16 +258,19 @@ window.MG = window.MG || {};
 
         <div class="prices" style="margin-top:14px">
           <div><span>Prix de sortie</span><strong>${p.msrp ? eur(p.msrp) : "—"}</strong></div>
-          <div><span>Cote membres (${c ? c.days : WINDOW_DAYS} j)</span><strong>${c ? eur(c.value) : "—"}</strong></div>
+          <div><span>Prix estimé (${c ? c.days : WINDOW_DAYS} j)</span><strong>${c ? eur(c.value) : "—"}</strong></div>
           <div><span>Évolution</span><strong class="${evo == null ? "" : evo >= 0 ? "up" : "down"}">${evo == null ? "—" : (evo >= 0 ? "▲ +" : "▼ ") + evo.toFixed(0) + " %"}</strong></div>
-          <div><span>Prix signalés</span><strong>${prices.length}</strong></div>
+          <div><span>Prix constatés</span><strong>${prices.length}</strong></div>
         </div>
 
-        <h3>Évolution des prix signalés</h3>
+        <h3>🛒 Trouver ce produit</h3>
+        ${buyLinks(p)}
+
+        <h3>Évolution des prix constatés</h3>
         <div id="p-chart"></div>
 
         ${a.user ? `
-        <h3>Mes ${esc(p.type)}</h3>
+        <h3>J'en ai (optionnel)</h3>
         <form class="mini-form" id="f-own">
           <label>Quantité<input type="number" name="qty" min="0" max="999" step="1" value="${own ? own.qty : ""}" placeholder="0"></label>
           <label>Prix payé / unité (€)<input type="number" name="paid" min="0" max="100000" step="0.01" value="${own && own.paid != null ? own.paid : ""}" placeholder="${p.msrp || ""}"></label>
@@ -191,27 +279,20 @@ window.MG = window.MG || {};
         </form>
         ${plUnit != null ? `<p class="pl ${plUnit >= 0 ? "up" : "down"}">${plUnit >= 0 ? "▲ +" : "▼ "}${eur(plUnit * own.qty)} de plus-value latente sur tes ${own.qty} exemplaire${own.qty > 1 ? "s" : ""} <span class="muted small">(selon la cote membres)</span></p>` : ""}
 
-        <h3>J'ai vu ce produit à…</h3>
+        <h3>Aider à estimer le prix : j'ai vu ce produit à…</h3>
         <form class="mini-form" id="f-price">
           <label>Prix (€)<input type="number" name="price" min="0.01" max="100000" step="0.01" required></label>
           <label>Où ?<select name="source">${SOURCES.map((s) => `<option>${s}</option>`).join("")}</select></label>
           <button class="btn" type="submit">Signaler ce prix</button>
           <p class="form-msg" id="pr-msg" role="alert"></p>
         </form>
-        <p class="muted small">Indique un prix réellement vu (annonce, boutique, vente). Ça aide toute la communauté à connaître la vraie cote.</p>`
-        : `<p class="small" style="margin-top:14px"><a href="#/connexion">Connecte-toi</a> pour suivre tes produits et signaler des prix.</p>`}
+        <p class="muted small">Indique un prix réellement vu (annonce, boutique, vente terminée). Plus il y a de prix, plus l'estimation est juste pour tout le monde.</p>`
+        : `<p class="small" style="margin-top:14px"><a href="#/connexion">Connecte-toi</a> pour aider à estimer les prix (signaler un prix vu).</p>`}
 
         ${prices.length ? `<h3>Derniers prix signalés</h3>
         <ul class="restock-list price-list">${prices.slice(-10).reverse().map((r) => `<li><div><span><b>${eur(r.price)}</b> · ${esc(r.source)}</span><small>${esc(fmtDay(r.created_at))}</small></div>
           ${(a.user && (r.user_id === a.user.id || (a.isAdmin && a.isAdmin()))) ? `<button class="link-btn small" data-pdel="${esc(r.id)}">Supprimer</button>` : ""}</li>`).join("")}</ul>` : ""}
 
-        <h3>Comparer les prix</h3>
-        <div class="links">
-          <a target="_blank" rel="noopener noreferrer" href="https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=${q}">Cardmarket</a>
-          <a target="_blank" rel="noopener noreferrer" href="https://www.ebay.fr/sch/i.html?_nkw=${q}">eBay</a>
-          <a target="_blank" rel="noopener noreferrer" href="https://www.vinted.fr/catalog?search_text=${q}">Vinted</a>
-          <a target="_blank" rel="noopener noreferrer" href="https://www.leboncoin.fr/recherche?text=${q}">Leboncoin</a>
-        </div>
         <p class="warn">🛡 Produits scellés : méfie-toi des films plastiques refaits (« reseal »). Achète de préférence en boutique ou à des vendeurs bien notés, et vérifie le film, les logos et le poids.</p>
         ${a.isAdmin && a.isAdmin() ? `<p style="margin-top:14px"><button class="btn danger" id="p-del">Supprimer ce produit (admin)</button></p>` : ""}
       </div>`);
@@ -360,7 +441,7 @@ window.MG = window.MG || {};
   async function openGenerator() {
     const { esc } = ui();
     const lang = MG.store.lang;
-    openModal(`<h2 id="modal-title">Ajouter les produits d'un set</h2>
+    openModal(`<h2 id="modal-title">Ajouter les produits d'une série</h2>
       <p class="muted small">Crée en un clic les produits classiques d'une extension (langue des cartes actuelle : ${esc(lang)}). Tu pourras ensuite ajouter les prix de sortie avec « Proposer un produit » ou les laisser vides.</p>
       <div id="gen-body">${ui().loading("Chargement des séries…")}</div>`);
     let series;
@@ -381,7 +462,8 @@ window.MG = window.MG || {};
       setSel.innerHTML = `<option>Chargement…</option>`;
       try {
         const s = await MG.api.serie(lang, form.serie.value);
-        setSel.innerHTML = (s.sets || []).slice().reverse().map((x) => `<option value="${esc(x.id)}">${esc(x.name)}</option>`).join("");
+        setSel.innerHTML = `<option value="__all">⭐ Toutes les extensions de la série (${(s.sets || []).length})</option>` +
+          (s.sets || []).slice().reverse().map((x) => `<option value="${esc(x.id)}">${esc(x.name)}</option>`).join("");
       } catch (e) { setSel.innerHTML = `<option>Erreur</option>`; }
     };
     form.serie.addEventListener("change", loadSets);
@@ -391,20 +473,30 @@ window.MG = window.MG || {};
       const msg = document.getElementById("gen-msg");
       const types = new FormData(form).getAll("types");
       if (!types.length) { msg.textContent = "Coche au moins un produit."; msg.className = "form-msg err"; return; }
-      let set;
-      try { set = await MG.api.set(lang, setSel.value); } catch (err) { msg.textContent = "Extension introuvable."; msg.className = "form-msg err"; return; }
+      const ids = setSel.value === "__all" ? [...setSel.options].map((o) => o.value).filter((v) => v !== "__all") : [setSel.value];
       const serieName = form.serie.options[form.serie.selectedIndex].text;
       const pLang = LANG_MAP[lang] || "autre";
       const existing = new Set(S.products.map((p) => p.name.toLowerCase()));
-      const rows = types.map((t) => ({
-        name: `${t} ${set.name}`.slice(0, 120), type: t, lang: pLang, serie: serieName.slice(0, 80), set_name: String(set.name).slice(0, 80),
-        release_date: /^\d{4}-\d{2}-\d{2}/.test(set.releaseDate || "") ? set.releaseDate.slice(0, 10) : null,
-        status: "approved", created_by: auth().user.id,
-      })).filter((r) => !existing.has(r.name.toLowerCase()));
+      const rows = [];
+      msg.textContent = "Préparation…"; msg.className = "form-msg ok";
+      for (const sid of ids) {
+        let set;
+        try { set = await MG.api.set(lang, sid); } catch (err) { continue; }
+        for (const t of types) {
+          const name = `${t} ${set.name}`.slice(0, 120);
+          if (existing.has(name.toLowerCase())) continue;
+          existing.add(name.toLowerCase());
+          rows.push({
+            name, type: t, lang: pLang, serie: serieName.slice(0, 80), set_name: String(set.name).slice(0, 80),
+            release_date: /^\d{4}-\d{2}-\d{2}/.test(set.releaseDate || "") ? set.releaseDate.slice(0, 10) : null,
+            status: "approved", created_by: auth().user.id,
+          });
+        }
+      }
       if (!rows.length) { msg.textContent = "Ces produits existent déjà."; msg.className = "form-msg err"; return; }
       const { error } = await auth().client.from("products").insert(rows);
       if (error) { msg.textContent = "Erreur : " + (error.message || "réessaie"); msg.className = "form-msg err"; return; }
-      msg.textContent = `✅ ${rows.length} produit${rows.length > 1 ? "s" : ""} ajouté${rows.length > 1 ? "s" : ""} : ${rows.map((r) => r.name).join(", ")}`;
+      msg.textContent = `✅ ${rows.length} produit${rows.length > 1 ? "s" : ""} ajouté${rows.length > 1 ? "s" : ""}${rows.length <= 6 ? " : " + rows.map((r) => r.name).join(", ") : ""}. Pense à supprimer ceux qui n'existent pas pour une extension (ex : pas de display pour certaines extensions spéciales).`;
       msg.className = "form-msg ok";
       await load(true);
       const g = document.getElementById("sealed-grid"); if (g) renderGrid(g);
@@ -451,6 +543,7 @@ window.MG = window.MG || {};
     el.querySelectorAll("[data-pid]").forEach((tr) => tr.addEventListener("click", () => openProduct(tr.dataset.pid)));
   }
   MG.scelle.mountCollection = mountCollection;
+  MG.scelle.mountSet = mountSet;
 
   /* ---------------- Espace admin : produits à valider ---------------- */
   MG.adminSections = MG.adminSections || [];

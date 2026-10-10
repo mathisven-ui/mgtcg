@@ -590,3 +590,33 @@ code { background: var(--surface-2); padding: 1px 6px; border-radius: 6px; font-
   background: var(--bg-2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px; font: inherit; color-scheme: dark;
 }
 .mini-form select { background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font: inherit; }
+
+/* Scellés : catalogue par série / extension */
+.serie-block { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 4px 16px; margin-bottom: 12px; }
+.serie-block > summary { cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 0; list-style: none; }
+.serie-block > summary::-webkit-details-marker { display: none; }
+.serie-block > summary::before { content: "▸"; color: var(--accent); margin-right: 4px; transition: transform .15s; }
+.serie-block[open] > summary::before { transform: rotate(90deg); }
+.sb-title { font-weight: 700; font-size: 1.1rem; flex: 1; }
+.set-block { padding: 4px 0 16px; border-top: 1px solid var(--line); }
+.set-block h3 { margin: 14px 0 10px; }
+.set-sealed { margin-top: 16px; }
+.set-sealed .sealed-grid, .set-sealed .buy-links { margin-bottom: 14px; }
+.sealed-card { cursor: default; padding: 0; overflow: hidden; }
+.sealed-card:hover { transform: none; }
+.sc-open {
+  display: flex; flex-direction: column; gap: 6px; text-align: left; width: 100%; padding: 14px 14px 10px;
+  background: none; border: 0; color: var(--text); font: inherit; cursor: pointer;
+}
+.sc-open:hover .sc-name { color: var(--accent); }
+.sc-est { margin-top: 4px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; }
+.sc-est > span { font-size: .72rem; color: var(--muted); }
+.sc-est strong { color: var(--accent); font-size: 1.25rem; }
+.sc-est small { font-size: .75rem; }
+.buy-links { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 14px; }
+.buy-links a {
+  flex: 1 1 auto; text-align: center; text-decoration: none; font-size: .8rem; font-weight: 600; padding: 7px 8px; border-radius: 8px;
+  background: var(--bg-2); border: 1px solid var(--line); color: var(--text);
+}
+.buy-links a:hover { border-color: var(--accent); color: var(--accent); }
+.product-detail .buy-links, .set-sealed > .buy-links { padding: 0; max-width: 520px; }

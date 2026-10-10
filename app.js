@@ -469,7 +469,7 @@
       <article class="prose">
         <h1>Mentions légales & confidentialité</h1>
         <h2>Éditeur</h2>
-        <p>MGTCG est un site personnel et gratuit créé par <b>Mathis GILLIG</b>.<br>Contact : <i>[à compléter : ton email de contact]</i></p>
+        <p>MGTCG est un site personnel et gratuit créé par <b>Mathis GILLIG</b>.<br>Contact : <a href="mailto:mathisven@gmail.com">mathisven@gmail.com</a></p>
         <h2>Hébergement</h2>
         <p>GitHub Pages — GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis.</p>
         <h2>Tes données (RGPD)</h2>

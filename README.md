@@ -277,7 +277,18 @@ Page **Échanges** (menu, et bouton dans **Ma collection**) — réservée aux m
 
 ---
 
-## 17. La suite (feuille de route)
+## 17. Profil, badges, objectifs et classements (V3)
+
+Page **Mon profil & mes badges** (lien en haut de **Ma collection**) :
+- **23 badges** qui se débloquent tout seuls (nombre de cartes, sets complétés, cartes rares, langues, valeur, échanges, ventes, scellés, alertes…), avec la progression vers les suivants.
+- **Objectifs** : compléter un set, atteindre un nombre de cartes ou une valeur, avec une date limite si on veut. Enregistrés avec la collection (synchronisés avec le compte).
+- **Profil public facultatif** : pseudo, badges, nombre de cartes / sets complétés / langues et une vitrine de 6 cartes. Jamais l'email, la valeur ou le reste de la collection, et aucun texte libre. Signalement possible, l'admin peut masquer un profil.
+- **Classements** (`#/classements`) : plus de cartes, plus de sets complétés, plus de badges (chiffres déclarés par chaque membre).
+- Base de données : lancer une fois `supabase-profils.sql` dans Supabase.
+
+---
+
+## 18. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

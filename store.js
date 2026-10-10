@@ -20,7 +20,7 @@ window.MG = window.MG || {};
   };
 
   function empty() {
-    return { version: 1, lang: "fr", owned: {}, fav: {}, wish: {}, meta: {}, paid: {}, alerts: {}, history: {}, lastRefresh: 0, sealed: {}, sales: [] };
+    return { version: 1, lang: "fr", owned: {}, fav: {}, wish: {}, meta: {}, paid: {}, alerts: {}, history: {}, lastRefresh: 0, sealed: {}, sales: [], goals: [] };
   }
 
   let data = load();
@@ -90,6 +90,15 @@ window.MG = window.MG || {};
         id: str(v.id, 40) || Math.random().toString(36).slice(2, 12), name: str(v.name, 100), date: v.date, where: str(v.where, 30),
         price: money(v.price), fees: money(v.fees) || 0, ship: money(v.ship) || 0, cost: v.cost == null ? null : money(v.cost), key: str(v.key, 80),
       });
+    }
+    // Objectifs personnels
+    for (const g of Array.isArray(obj.goals) ? obj.goals.slice(0, 30) : []) {
+      if (!g || typeof g !== "object" || !["set", "cartes", "valeur"].includes(g.type)) continue;
+      const target = Number(g.target);
+      if (g.type !== "set" && !(isFinite(target) && target > 0 && target < 1e7)) continue;
+      if (g.type === "set" && !(typeof g.setKey === "string" && /^[a-z-]+\|[\w.\-]+$/i.test(g.setKey))) continue;
+      out.goals.push({ id: str(g.id, 40) || Math.random().toString(36).slice(2, 12), type: g.type, target: g.type === "set" ? 0 : Math.round(target),
+        setKey: g.type === "set" ? g.setKey.slice(0, 60) : "", label: str(g.label, 80), deadline: isDate(g.deadline) ? g.deadline : "", created: isDate(g.created) ? g.created : "" });
     }
     return out;
   }
@@ -276,6 +285,9 @@ window.MG = window.MG || {};
       const clean = sanitize({ sales: [Object.assign({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6) }, v)] }).sales[0];
       if (clean) { data.sales.push(clean); save(); }
     },
+    goals: () => data.goals.slice(),
+    addGoal(g) { if (data.goals.length >= 30) return false; const t = sanitize({ goals: [g] }).goals[0]; if (!t) return false; data.goals.push(t); save(); return true; },
+    removeGoal(id) { data.goals = data.goals.filter((x) => x.id !== id); save(); },
     removeSale(id) { data.sales = data.sales.filter((x) => x.id !== id); save(); },
     history: () => Object.entries(data.history).sort((a, b) => (a[0] < b[0] ? -1 : 1)),
     get lastRefresh() { return data.lastRefresh || 0; },
@@ -302,6 +314,8 @@ window.MG = window.MG || {};
       for (const [id, v] of Object.entries(r.sealed)) if (!data.sealed[id]) data.sealed[id] = v;
       const known = new Set(data.sales.map((x) => x.id));
       for (const v of r.sales) if (!known.has(v.id)) data.sales.push(v);
+      const knownGoals = new Set(data.goals.map((x) => x.id));
+      for (const g of r.goals) if (!knownGoals.has(g.id) && data.goals.length < 30) data.goals.push(g);
       save();
     },
     // Vide la collection du navigateur à la déconnexion (ordinateur partagé)

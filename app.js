@@ -386,6 +386,12 @@
     view().innerHTML = `
       <header class="page-head"><div><h1>Ma collection</h1>
       <p class="muted">Enregistrée dans ce navigateur. Pense à faire une sauvegarde de temps en temps !</p></div></header>
+      <div class="links coll-links">
+        <a href="#/profil">🏅 Badges & objectifs</a>
+        <a href="#/completer">🎯 Compléter mes sets</a>
+        <a href="#/echanges">🔄 Échanger mes doubles</a>
+        <a href="#/importer">📥 Importer</a>
+      </div>
 
       <div id="valeur"></div>
       <div class="stat-row">
@@ -418,8 +424,6 @@
           <button class="btn" id="exp">⬇ Exporter ma collection</button>
           <label class="btn ghost">⬆ Importer un fichier<input type="file" id="imp" accept=".json,application/json" hidden></label>
           <a class="btn ghost" href="#/importer">📥 Importer depuis une autre appli (CSV, Excel)</a>
-          <a class="btn ghost" href="#/completer">🎯 Compléter mes sets</a>
-          <a class="btn ghost" href="#/echanges">🔄 Échanger mes doubles</a>
           <button class="btn danger" id="reset">Tout effacer</button>
         </div>
       </section>`;

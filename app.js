@@ -255,6 +255,7 @@
         <select id="rar" aria-label="Rareté"><option value="">Toutes les raretés</option></select>
         <button class="btn ghost" id="copy">📋 Copier les manquantes</button>
         <button class="btn ghost" id="print">🖨 Checklist</button>
+        <a class="btn ghost" href="#/completer/${enc(set.id)}/${enc(lang)}">🎯 Compléter au meilleur prix</a>
       </div>
 
       <div id="grid" class="grid">${briefs.map((c) => tileHTML(c, lang, { priceWait: true })).join("")}</div>
@@ -417,6 +418,7 @@
           <button class="btn" id="exp">⬇ Exporter ma collection</button>
           <label class="btn ghost">⬆ Importer un fichier<input type="file" id="imp" accept=".json,application/json" hidden></label>
           <a class="btn ghost" href="#/importer">📥 Importer depuis une autre appli (CSV, Excel)</a>
+          <a class="btn ghost" href="#/completer">🎯 Compléter mes sets</a>
           <button class="btn danger" id="reset">Tout effacer</button>
         </div>
       </section>`;

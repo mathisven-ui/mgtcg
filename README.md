@@ -244,7 +244,18 @@ Page **Importer** (bouton dans **Ma collection**) :
 
 ---
 
-## 14. La suite (feuille de route)
+## 14. Compléter mes sets au meilleur prix (V3)
+
+Page **Compléter mes sets** (bouton dans **Ma collection**, et « 🎯 Compléter au meilleur prix » sur chaque extension) :
+- Liste des extensions commencées avec leur progression.
+- Pour une extension : liste d'achat des cartes manquantes, de la moins chère à la plus chère, avec le cumul et le coût total estimé.
+- Objectif au choix : set complet, set complet + secrètes, ou master set (toutes les versions). Pour un set complet, MGTCG choisit la version la moins chère de chaque carte.
+- Prix de tendance ou prix le plus bas Cardmarket, budget (« avec 50 € je peux avoir X cartes »), plafond pour ignorer les cartes trop chères.
+- Astuces pour payer moins (lots pour les cartes à moins de 1 €, regrouper chez un vendeur, état et langue), liens Cardmarket / eBay / Vinted / Leboncoin, bouton « Je l'ai », ajout à la wishlist, export CSV.
+
+---
+
+## 15. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

@@ -771,3 +771,25 @@ h1 .flag .flag-img { width: 30px; height: 20px; vertical-align: 2px; }
 .imp-det summary { cursor: pointer; font-weight: 600; margin-bottom: 8px; }
 .imp-det .btn { margin-top: 10px; }
 @media (max-width: 600px) { .imp-stats { grid-template-columns: 1fr; } }
+
+/* ---------- Compléter mes sets (V3) ---------- */
+.cp-sets { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.cp-set { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); text-decoration: none; color: var(--text); }
+.cp-set:hover { border-color: var(--accent); }
+.cp-set .bar { display: block; height: 8px; border-radius: 999px; background: var(--bg-2); overflow: hidden; }
+.cp-opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px 16px; }
+.cp-opts label { display: flex; flex-direction: column; gap: 6px; font-size: .85rem; font-weight: 600; }
+.cp-opts select, .cp-opts input { background: var(--bg-2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: inherit; font-weight: 400; }
+.cp-opts select:focus, .cp-opts input:focus { outline: none; border-color: var(--accent); }
+.cp-stats { margin-top: 16px; }
+.cp-tips { margin: 14px 0; }
+.cp-tips ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.cp-actions { flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.cp-table td, .cp-table th { padding: 8px 10px; }
+.cp-table .link-btn b { color: var(--text); }
+.cp-table .link-btn:hover b { color: var(--accent); }
+.cp-links { white-space: nowrap; }
+.cp-links a { color: var(--accent); margin-right: 6px; }
+.cp-out td { opacity: .45; }
+.btn.small { padding: 5px 10px; font-size: .8rem; }
+@media (max-width: 600px) { .cp-table th:nth-child(5), .cp-table td:nth-child(5) { display: none; } .cp-table .link-btn b { white-space: nowrap; } }

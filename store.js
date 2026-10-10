@@ -20,7 +20,7 @@ window.MG = window.MG || {};
   };
 
   function empty() {
-    return { version: 1, lang: "fr", owned: {}, fav: {}, wish: {}, meta: {} };
+    return { version: 1, lang: "fr", owned: {}, fav: {}, wish: {}, meta: {}, paid: {}, alerts: {}, history: {}, lastRefresh: 0 };
   }
 
   let data = load();
@@ -60,6 +60,22 @@ window.MG = window.MG || {};
         rarity: str(m.rarity, 60),
       };
     }
+    const money = (v) => { const n = Number(v); return isFinite(n) && n >= 0 && n < 1e7 ? Math.round(n * 100) / 100 : null; };
+    const isDate = (d) => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d);
+    // Prix d'achat
+    for (const [k, v] of Object.entries(obj.paid || {})) {
+      if (!isKey(k) || !v || typeof v !== "object" || money(v.price) == null) continue;
+      out.paid[k] = { price: money(v.price), date: isDate(v.date) ? v.date : "" };
+    }
+    // Alertes de prix
+    for (const [k, v] of Object.entries(obj.alerts || {})) {
+      if (!isKey(k) || !v || typeof v !== "object" || !money(v.below)) continue;
+      out.alerts[k] = { below: money(v.below) };
+    }
+    // Historique de valeur (1 point par jour, 3 ans max)
+    const days = Object.keys(obj.history || {}).filter(isDate).sort().slice(-1100);
+    for (const d of days) { const v = money(obj.history[d]); if (v != null) out.history[d] = v; }
+    out.lastRefresh = Number(obj.lastRefresh) || 0;
     return out;
   }
 
@@ -166,6 +182,50 @@ window.MG = window.MG || {};
     },
     reset() { data = Object.assign(empty(), { lang: data.lang }); save(); },
 
+    /* ---- Prix d'achat, alertes, historique ---- */
+    paid: (key) => data.paid[key] || null,
+    paidKeys: () => Object.keys(data.paid),
+    setPaid(lang, card, price, date) {
+      const key = k(lang, card.id);
+      if (price == null || price === "" || isNaN(price)) delete data.paid[key];
+      else data.paid[key] = { price: Math.round(Number(price) * 100) / 100, date: date || "" };
+      this.remember(lang, card);
+      save();
+    },
+    alert: (key) => data.alerts[key] || null,
+    alertKeys: () => Object.keys(data.alerts),
+    setAlert(lang, card, below) {
+      const key = k(lang, card.id);
+      if (!below || isNaN(below) || below <= 0) delete data.alerts[key];
+      else data.alerts[key] = { below: Math.round(Number(below) * 100) / 100 };
+      this.remember(lang, card);
+      save();
+    },
+    // Prix actuel d'une carte (tendance Cardmarket)
+    priceOf(key) { const m = data.meta[key]; return m ? (m.price || m.priceHolo || 0) : 0; },
+    // Alertes déclenchées : la cote est passée sous le prix voulu
+    triggeredAlerts() {
+      return Object.entries(data.alerts)
+        .map(([key, a]) => ({ key, below: a.below, now: this.priceOf(key), meta: data.meta[key] || {} }))
+        .filter((x) => x.now > 0 && x.now <= x.below);
+    },
+    totalValue() { return Object.keys(data.owned).reduce((s, key) => s + this.valueOf(key), 0); },
+    // Enregistre la valeur du jour (un point par jour)
+    recordHistory() {
+      if (!Object.keys(data.owned).length) return;
+      const d = new Date();
+      const day = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+      const v = Math.round(this.totalValue() * 100) / 100;
+      if (data.history[day] === v) return;
+      data.history[day] = v;
+      const days = Object.keys(data.history).sort();
+      while (days.length > 1100) delete data.history[days.shift()];
+      save();
+    },
+    history: () => Object.entries(data.history).sort((a, b) => (a[0] < b[0] ? -1 : 1)),
+    get lastRefresh() { return data.lastRefresh || 0; },
+    markRefreshed() { data.lastRefresh = Date.now(); save(); },
+
     /* ---- Pour la synchronisation avec le compte (auth.js) ---- */
     // Copie propre des données à envoyer en ligne
     snapshot() { return JSON.parse(JSON.stringify(data)); },
@@ -180,6 +240,10 @@ window.MG = window.MG || {};
       for (const [key, m] of Object.entries(r.meta)) {
         data.meta[key] = Object.assign({}, m, data.meta[key] || {});
       }
+      for (const [key, v] of Object.entries(r.paid)) if (!data.paid[key]) data.paid[key] = v;
+      for (const [key, v] of Object.entries(r.alerts)) if (!data.alerts[key]) data.alerts[key] = v;
+      for (const [day, v] of Object.entries(r.history)) if (data.history[day] == null) data.history[day] = v;
+      data.lastRefresh = Math.max(data.lastRefresh || 0, r.lastRefresh || 0);
       save();
     },
     // Vide la collection du navigateur à la déconnexion (ordinateur partagé)

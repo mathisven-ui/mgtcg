@@ -77,6 +77,7 @@ mgtcg/
 ├── config.js           → les 2 infos de ton projet Supabase (étape 2)
 ├── auth.js             → comptes, connexion, compte admin, sauvegarde en ligne
 ├── boutiques.js        → carte 3D des boutiques, trajets, tournée, restocks (V2)
+├── valeur.js           → graphique de valeur, plus-values, alertes de prix (V2)
 ├── app.js              → les pages du site
 ├── supabase-setup.sql  → à coller une fois dans Supabase (comptes + sécurité)
 └── supabase-boutiques.sql → à coller une fois dans Supabase (boutiques + restocks)
@@ -158,7 +159,19 @@ Les propositions de boutiques et les restocks se modèrent dans **👑 Espace ad
 
 ---
 
-## 7. La suite (feuille de route)
+## 7. Valeur de la collection (V2)
+
+Page **Ma collection** :
+- Prix Cardmarket **actualisés automatiquement** toutes les 12 h (ou bouton « Actualiser maintenant »).
+- **Graphique** de la valeur, un point par jour (30 j, 3 mois, 1 an, tout), avec le **montant investi** si tu as indiqué tes prix d'achat. Survole la courbe pour voir le détail d'un jour.
+- **Prix d'achat** à indiquer dans la fiche d'une carte → tableau des **plus-values / moins-values**.
+- **Alertes de prix** : dans la fiche de n'importe quelle carte, « préviens-moi si la cote passe sous X € ». Bandeau sur l'accueil quand une alerte se déclenche.
+
+Tout est sauvegardé avec ton compte (synchronisé entre tes appareils).
+
+---
+
+## 8. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

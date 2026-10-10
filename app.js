@@ -137,6 +137,7 @@
           <div class="stat"><strong>${MG.store.listKeys("wish").length}</strong><span>dans ma wishlist</span></div>
         </div>
       </section>
+      ${(() => { const hits = MG.store.triggeredAlerts(); return hits.length ? `<a class="alert-banner" href="#/collection">🔔 <b>${hits.length} alerte${hits.length > 1 ? "s" : ""} de prix</b> : ${hits.slice(0, 3).map((h) => esc(h.meta.name || "")).join(", ")}${hits.length > 3 ? "…" : ""} — voir</a>` : ""; })()}
       ${progress.length ? `<section><h2>Mes sets en cours</h2><div class="set-grid">${progress.map(setProgressCard).join("")}</div></section>` : ""}
       <section>
         <div class="section-head"><h2>Toutes les séries</h2><span class="muted">Clique sur une série pour voir ses sets</span></div>
@@ -378,11 +379,11 @@
       <header class="page-head"><div><h1>Ma collection</h1>
       <p class="muted">Enregistrée dans ce navigateur. Pense à faire une sauvegarde de temps en temps !</p></div></header>
 
+      <div id="valeur"></div>
       <div class="stat-row">
-        <div class="stat"><strong>${keys.length}</strong><span>cartes différentes</span></div>
-        <div class="stat"><strong>${eur(total)}</strong><span>valeur estimée (Cardmarket)</span></div>
-        <div class="stat"><strong>${sets.length}</strong><span>sets commencés</span></div>
-        <div class="stat"><strong>${total ? pct(top3, total) + "%" : "—"}</strong><span>de la valeur dans tes 3 meilleures cartes</span></div>
+        <div class="stat small"><strong>${keys.length}</strong><span>cartes différentes</span></div>
+        <div class="stat small"><strong>${sets.length}</strong><span>sets commencés</span></div>
+        <div class="stat small"><strong>${total ? pct(top3, total) + "%" : "—"}</strong><span>de la valeur dans tes 3 meilleures cartes</span></div>
       </div>
 
       ${keys.length === 0 ? `<div class="state"><p>Ta collection est vide pour l'instant. Va dans un set et clique sur le <b>+</b> des cartes que tu possèdes.</p><a class="btn" href="#/">Parcourir les séries</a></div>` : `
@@ -399,7 +400,7 @@
               <td><span class="rar ${r.cls}">${esc(r.icon)}</span></td>
               <td class="right">${i.v ? eur(i.v) : "<span class='muted'>ouvre la carte</span>"}</td></tr>`;
           }).join("")}</tbody></table></div>
-        <p class="disclaimer">La valeur se met à jour quand tu ouvres un set ou une carte. Données indicatives, pas un conseil d'investissement.</p>
+        <p class="disclaimer">Prix Cardmarket actualisés automatiquement toutes les 12 h. Données indicatives, pas un conseil d'investissement.</p>
       </section>`}
 
       <section class="backup"><h2>Sauvegarde</h2>
@@ -411,7 +412,8 @@
         </div>
       </section>`;
 
-    $$("tr.clickable").forEach((tr) => tr.addEventListener("click", () => openCard(tr.dataset.lang, tr.dataset.id)));
+    $$("main > section tr.clickable").forEach((tr) => tr.addEventListener("click", () => openCard(tr.dataset.lang, tr.dataset.id)));
+    if (MG.valeur) MG.valeur.mount($("#valeur"));
     $("#exp").addEventListener("click", () => {
       const blob = new Blob([MG.store.exportJSON()], { type: "application/json" });
       const a = document.createElement("a");
@@ -557,6 +559,31 @@
               <p class="disclaimer">Source : Cardmarket (via TCGdex)${cm.updated ? ", mis à jour le " + esc(fmtDate(cm.updated)) : ""}. Données indicatives, pas un conseil d'investissement.</p>`
             : `<p class="muted">Pas de prix Cardmarket disponible pour cette carte (fréquent pour les cartes asiatiques ou très récentes).</p>`}
 
+            ${(() => {
+              const key = MG.store.key(lang, card.id);
+              const paid = MG.store.paid(key);
+              const al = MG.store.alert(key);
+              const now = MG.store.priceOf(key);
+              const isOwned = Object.keys(owned).length > 0;
+              const pl = paid && now ? MG.store.valueOf(key) - paid.price : null;
+              return `
+            ${isOwned ? `<h3>Mon achat</h3>
+            <form class="mini-form" id="f-paid">
+              <label>Prix payé (€)<input type="number" name="price" min="0" max="1000000" step="0.01" inputmode="decimal" value="${paid ? paid.price : ""}" placeholder="ex : 12,50"></label>
+              <label>Date<input type="date" name="date" value="${paid ? esc(paid.date) : ""}"></label>
+              <button class="btn ghost" type="submit">Enregistrer</button>
+            </form>
+            ${pl != null ? `<p class="pl ${pl >= 0 ? "up" : "down"}">${pl >= 0 ? "▲" : "▼"} ${pl >= 0 ? "+" : ""}${eur(pl)} de plus-value latente <span class="muted small">(valeur actuelle de tes exemplaires − prix payé)</span></p>` : ""}` : ""}
+
+            <h3>🔔 Alerte de prix</h3>
+            <form class="mini-form" id="f-alert">
+              <label>Me prévenir si la cote passe sous (€)<input type="number" name="below" min="0.01" max="1000000" step="0.01" inputmode="decimal" value="${al ? al.below : ""}" placeholder="ex : ${now ? Math.max(0.01, Math.floor(now * 0.85 * 100) / 100) : "10"}"></label>
+              <button class="btn ghost" type="submit">${al ? "Modifier" : "Créer l'alerte"}</button>
+              ${al ? `<button class="btn ghost" type="button" id="al-del">Supprimer</button>` : ""}
+            </form>
+            ${al ? `<p class="small ${now && now <= al.below ? "pl up" : "muted"}">${now && now <= al.below ? "✅ Alerte déclenchée : la cote (" + eur(now) + ") est sous ton prix !" : "Alerte active : tu seras prévenu sur MGTCG quand la cote passera sous " + eur(al.below) + "."}</p>` : ""}`;
+            })()}
+
             <h3>Trouver cette carte</h3>
             <div class="links">
               <a target="_blank" rel="noopener noreferrer" href="https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=${enc(card.name)}">Cardmarket</a>
@@ -590,6 +617,28 @@
       $("#b-fav").addEventListener("click", () => { MG.store.toggleList("fav", lang, card); render(); syncTile(); });
       $("#b-wish").addEventListener("click", () => { MG.store.toggleList("wish", lang, card); render(); });
       $$("[data-close]", box).forEach((a) => a.addEventListener("click", closeModal));
+      const fPaid = $("#f-paid", box);
+      if (fPaid) fPaid.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const f = new FormData(fPaid);
+        const raw = String(f.get("price") || "").replace(",", ".").trim();
+        const price = raw === "" ? null : parseFloat(raw);
+        if (price != null && (isNaN(price) || price < 0 || price > 1e6)) { toast("Prix invalide"); return; }
+        MG.store.setPaid(lang, card, price, String(f.get("date") || "").slice(0, 10));
+        toast(price == null ? "Prix d'achat retiré" : "Prix d'achat enregistré ✓");
+        render();
+      });
+      const fAlert = $("#f-alert", box);
+      fAlert.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const below = parseFloat(String(new FormData(fAlert).get("below") || "").replace(",", "."));
+        if (!(below > 0 && below <= 1e6)) { toast("Indique un prix valide"); return; }
+        MG.store.setAlert(lang, card, below);
+        toast("🔔 Alerte enregistrée");
+        render();
+      });
+      const alDel = $("#al-del", box);
+      if (alDel) alDel.addEventListener("click", () => { MG.store.setAlert(lang, card, null); toast("Alerte supprimée"); render(); });
     };
 
     // Met à jour la tuile derrière la fenêtre

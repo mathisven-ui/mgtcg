@@ -10,14 +10,14 @@
   <!-- Sécurité : le site ne peut charger des images et des données
        que depuis les sources autorisées ci-dessous -->
   <meta http-equiv="Content-Security-Policy"
-        content="img-src 'self' https://assets.tcgdex.net data: blob:; connect-src https://api.tcgdex.net https://*.supabase.co wss://*.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'; font-src https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com">
+        content="img-src 'self' https://assets.tcgdex.net https://tiles.openfreemap.org data: blob:; connect-src https://api.tcgdex.net https://*.supabase.co wss://*.supabase.co https://tiles.openfreemap.org https://overpass-api.de https://overpass.kumi.systems https://routing.openstreetmap.de https://nominatim.openstreetmap.org; worker-src blob:; child-src blob:; object-src 'none'; base-uri 'none'; form-action 'none'; font-src https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com">
   <meta name="referrer" content="strict-origin-when-cross-origin">
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23ffcb05' stroke='%2312131a' stroke-width='8'/><rect x='4' y='46' width='92' height='8' fill='%2312131a'/><circle cx='50' cy='50' r='14' fill='white' stroke='%2312131a' stroke-width='8'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
   <header class="topbar">
@@ -33,6 +33,7 @@
 
     <nav class="nav">
       <a href="#/">Séries</a>
+      <a href="#/boutiques">Boutiques</a>
       <a href="#/collection">Ma collection</a>
       <a href="#/favoris">Mes listes</a>
     </nav>
@@ -66,12 +67,13 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- L'ordre compte : api → rarity → store → config → supabase → auth → app -->
-  <script src="api.js?v=3"></script>
-  <script src="rarity.js?v=3"></script>
-  <script src="store.js?v=3"></script>
-  <script src="config.js?v=3"></script>
+  <script src="api.js?v=4"></script>
+  <script src="rarity.js?v=4"></script>
+  <script src="store.js?v=4"></script>
+  <script src="config.js?v=4"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" crossorigin="anonymous"></script>
-  <script src="auth.js?v=3"></script>
-  <script src="app.js?v=3"></script>
+  <script src="auth.js?v=4"></script>
+  <script src="boutiques.js?v=4"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

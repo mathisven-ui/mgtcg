@@ -76,8 +76,10 @@ mgtcg/
 ├── store.js            → ta collection, tes favoris, ta wishlist
 ├── config.js           → les 2 infos de ton projet Supabase (étape 2)
 ├── auth.js             → comptes, connexion, compte admin, sauvegarde en ligne
+├── boutiques.js        → carte 3D des boutiques, trajets, tournée, restocks (V2)
 ├── app.js              → les pages du site
-└── supabase-setup.sql  → à coller une fois dans Supabase (tables + sécurité)
+├── supabase-setup.sql  → à coller une fois dans Supabase (comptes + sécurité)
+└── supabase-boutiques.sql → à coller une fois dans Supabase (boutiques + restocks)
 ```
 
 ---
@@ -142,7 +144,21 @@ Menu de gauche → **Authentication** :
 
 ---
 
-## 6. La suite (feuille de route)
+## 6. Carte des boutiques (V2)
+
+Page **Boutiques** :
+- Carte **3D** (bouton 2D/3D, rotation et inclinaison avec la souris ou deux doigts).
+- Boutiques trouvées automatiquement dans **OpenStreetMap** (points bleus) + boutiques **proposées par les membres** et validées par l'admin (points jaunes).
+- **Trajet** en voiture, transports, vélo ou à pied : durée, distance, **coût** (carburant selon la consommation et le prix du litre réglables, tickets estimés), aller-retour, bouton **GPS Google Maps**.
+- **Tournée « Chasse aux cartes »** : jusqu'à 10 boutiques, ordre de passage optimisé, durée et coût total.
+- **Restocks** signalés par les membres (🔥 sur la carte pendant 7 jours).
+
+**Activation** : dans Supabase → SQL Editor → New query, colle tout le fichier `supabase-boutiques.sql` → **Run**.
+Les propositions de boutiques et les restocks se modèrent dans **👑 Espace admin**.
+
+---
+
+## 7. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

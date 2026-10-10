@@ -477,6 +477,9 @@
         <p>Cookies : le site n'utilise ni cookies publicitaires ni traceurs. Seul le stockage local du navigateur est utilisé, pour faire fonctionner le site (collection, connexion).</p>
         <h2>Sources des données</h2>
         <p>Informations et images des cartes : <a href="https://tcgdex.dev" target="_blank" rel="noopener noreferrer">TCGdex</a>. Prix : moyennes Cardmarket fournies par TCGdex, à titre indicatif.</p>
+        <p>Carte des boutiques : fond de carte © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">contributeurs OpenStreetMap</a>, via OpenFreeMap et MapLibre. Boutiques : OpenStreetMap (API Overpass) et propositions des membres. Itinéraires : OSRM. Recherche d'adresse : Nominatim.</p>
+        <p>Localisation : ta position n'est utilisée que dans ton navigateur pour centrer la carte et calculer les trajets. Elle n'est jamais enregistrée par MGTCG. Les recherches de boutiques et d'itinéraires envoient les coordonnées concernées aux services OpenStreetMap ci-dessus.</p>
+        <p>Restocks et boutiques proposées : ils sont visibles par tous, sans afficher ton email. Tu peux supprimer tes signalements à tout moment.</p>
         <h2>Avertissements</h2>
         <p>Les prix affichés sont des données indicatives et ne constituent en aucun cas un conseil en investissement.</p>
         <p>MGTCG n'est pas affilié à, ni approuvé par, Nintendo, Creatures, GAME FREAK ou The Pokémon Company. Pokémon et les noms associés sont des marques de leurs propriétaires respectifs.</p>

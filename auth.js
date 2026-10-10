@@ -465,6 +465,13 @@ window.MG = window.MG || {};
           </tr>`).join("")}</tbody></table></div>
         <p class="disclaimer">Les emails des utilisateurs sont des données personnelles : ne les partage pas et ne les utilise pas pour autre chose que le fonctionnement du site (RGPD).</p>
       </section>`;
+    // Sections ajoutées par d'autres fichiers (ex : boutiques.js → modération)
+    for (const section of MG.adminSections || []) {
+      const box = document.createElement("div");
+      box.innerHTML = loading("Chargement…");
+      view().appendChild(box);
+      try { await section(box); } catch (e) { box.innerHTML = "<p class='muted'>Section indisponible (as-tu lancé supabase-boutiques.sql ?).</p>"; }
+    }
   };
 
   document.addEventListener("DOMContentLoaded", () => {

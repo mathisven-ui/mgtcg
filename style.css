@@ -638,3 +638,9 @@ code { background: var(--surface-2); padding: 1px 6px; border-radius: 6px; font-
 .ic-price strong { color: var(--accent); font-size: 1.2rem; }
 .set-sealed-link { margin: 14px 0 4px; }
 .item-card .buy-links, .sealed-card .buy-links { display: grid; grid-template-columns: 1fr 1fr; }
+
+/* Visuels des produits */
+.visuel { position: relative; height: 150px; margin: -14px 0 0; border-bottom: 1px solid var(--line); border-radius: var(--radius) var(--radius) 0 0; overflow: hidden; display: grid; place-items: center; }
+.visuel svg { width: 100%; height: 100%; padding: 10px 0; filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .45)); }
+.visuel-real { position: absolute; inset: 8px; width: calc(100% - 16px); height: calc(100% - 16px); object-fit: contain; filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .45)); }
+.item-card .ic-head { padding-top: 2px; }

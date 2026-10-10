@@ -73,10 +73,10 @@ window.MG = window.MG || {};
     { type: "Pokébox", icon: "🥫", label: "Pokébox & mini-tins", desc: "Boîtes en métal avec boosters.", q: "pokebox mini tin" },
   ];
   const EXTRAS = [
-    { icon: "🧸", label: "Peluches", desc: "Peluches des Pokémon de la série.", q: "peluche" },
-    { icon: "📒", label: "Classeurs & portfolios", desc: "Pour ranger ta collection.", q: "classeur portfolio" },
-    { icon: "🛡️", label: "Protège-cartes", desc: "Sleeves aux couleurs de la série.", q: "protège cartes sleeves" },
-    { icon: "🗿", label: "Figurines", desc: "Figurines et objets de collection.", q: "figurine" },
+    { v: "Peluches", icon: "🧸", label: "Peluches", desc: "Peluches des Pokémon de la série.", q: "peluche" },
+    { v: "Classeur", icon: "📒", label: "Classeurs & portfolios", desc: "Pour ranger ta collection.", q: "classeur portfolio" },
+    { v: "Protège-cartes", icon: "🛡️", label: "Protège-cartes", desc: "Sleeves aux couleurs de la série.", q: "protège cartes sleeves" },
+    { v: "Figurines", icon: "🗿", label: "Figurines", desc: "Figurines et objets de collection.", q: "figurine" },
   ];
   const LANG_WORD = { fr: "FR", en: "anglais", ja: "japonais", "zh-tw": "chinois", "zh-cn": "chinois", ko: "coréen" };
 
@@ -144,14 +144,15 @@ window.MG = window.MG || {};
         </a>`).join("")}</div>
       <section>
         <h2>🧸 Produits dérivés de la série</h2>
-        <div class="item-grid">${EXTRAS.map((it) => itemCard(it, q + " " + it.q, "pokemon " + serie.name)).join("")}</div>
+        <div class="item-grid">${EXTRAS.map((it) => itemCard(it, q + " " + it.q, "pokemon " + serie.name, "", MG.logoImg(serie.logo))).join("")}</div>
       </section>`;
   }
 
-  function itemCard(it, query, cmQuery, extra) {
+  function itemCard(it, query, cmQuery, extra, logoUrl, realUrl) {
     const { esc } = ui();
     return `<div class="item-card">
-      <div class="ic-head"><span class="ic-icon">${it.icon}</span><div><b>${esc(it.label)}</b><small class="muted">${esc(it.desc)}</small></div></div>
+      ${MG.visuel ? MG.visuel(it.v || it.type || "Autre", logoUrl, realUrl, it.label) : ""}
+      <div class="ic-head"><div><b>${esc(it.label)}</b><small class="muted">${esc(it.desc)}</small></div></div>
       ${extra || ""}
       ${searchLinks(query, cmQuery)}
     </div>`;
@@ -181,6 +182,9 @@ window.MG = window.MG || {};
       return `<button class="ic-price" data-open="${esc(p.id)}">
         <span>${e ? esc(e.label) : "Prix estimé"}</span><strong>${e ? eur(e.value) : "—"}</strong><small class="muted">voir le détail →</small></button>`;
     };
+    const setLogo = MG.logoImg(set.logo);
+    const boosterArt = (set.boosters || []).map((b) => b && b.artwork_front).find((u) => MG.logoImg(u));
+    const boosterReal = boosterArt ? MG.logoImg(boosterArt) : "";
     const others = known.filter((p) => !SET_ITEMS.some((it) => it.type === p.type || (it.type === "Pokébox" && p.type === "Mini-tin")));
     const serieId = set.serie && set.serie.id;
     view().innerHTML = `
@@ -193,8 +197,8 @@ window.MG = window.MG || {};
 
       <section style="margin-top:8px">
         <h2>Produits de l'extension</h2>
-        <div class="item-grid">${SET_ITEMS.map((it) => itemCard(it, base + " " + it.q, it.q.split(" ")[0] + " " + set.name, priceBox(it.type))).join("")}
-          ${others.map((p) => itemCard({ icon: "⭐", label: p.name, desc: p.content || p.type }, "pokemon " + p.name, p.name,
+        <div class="item-grid">${SET_ITEMS.map((it) => itemCard(it, base + " " + it.q, it.q.split(" ")[0] + " " + set.name, priceBox(it.type), setLogo, it.type === "Booster" ? boosterReal : "")).join("")}
+          ${others.map((p) => itemCard({ v: p.type, label: p.name, desc: p.content || p.type }, "pokemon " + p.name, p.name,
             `<button class="ic-price" data-open="${esc(p.id)}"><span>${estimate(p) ? esc(estimate(p).label) : "Prix estimé"}</span><strong>${estimate(p) ? eur(estimate(p).value) : "—"}</strong><small class="muted">voir le détail →</small></button>`)).join("")}
         </div>
         <p class="muted small">Tous les produits n'existent pas pour chaque extension (par exemple, peu d'extensions ont un UPC). Les boutons lancent une recherche sur chaque site.</p>
@@ -202,7 +206,7 @@ window.MG = window.MG || {};
 
       <section>
         <h2>🧸 Produits dérivés</h2>
-        <div class="item-grid">${EXTRAS.map((it) => itemCard(it, base + " " + it.q, "pokemon " + set.name)).join("")}</div>
+        <div class="item-grid">${EXTRAS.map((it) => itemCard(it, base + " " + it.q, "pokemon " + set.name, "", setLogo)).join("")}</div>
       </section>
       <p class="disclaimer">Prix estimé (quand il est affiché) : prix constatés par les membres sur 30 jours, sinon prix de sortie. MGTCG ne vend rien et ne touche aucune commission. 🛡 Pour le scellé, méfie-toi des films refaits (« reseal ») : achète à des vendeurs bien notés.</p>`;
     bindCards(view());

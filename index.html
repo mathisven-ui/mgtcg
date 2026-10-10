@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
   <header class="topbar">
@@ -41,6 +41,7 @@
     </nav>
 
     <label class="lang" title="Langue des cartes">
+      <span id="lang-flag" class="lang-flag"></span>
       <select id="lang" aria-label="Langue des cartes"></select>
     </label>
 
@@ -69,17 +70,19 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- L'ordre compte : api → rarity → store → config → supabase → auth → app -->
-  <script src="api.js?v=14"></script>
-  <script src="rarity.js?v=14"></script>
-  <script src="store.js?v=14"></script>
-  <script src="config.js?v=14"></script>
+  <script src="api.js?v=15"></script>
+  <script src="rarity.js?v=15"></script>
+  <script src="drapeaux.js?v=15"></script>
+  <script src="store.js?v=15"></script>
+  <script src="config.js?v=15"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js" crossorigin="anonymous"></script>
-  <script src="auth.js?v=14"></script>
-  <script src="boutiques.js?v=14"></script>
-  <script src="agenda.js?v=14"></script>
-  <script src="valeur.js?v=14"></script>
-  <script src="visuels.js?v=14"></script>
-  <script src="scelle.js?v=14"></script>
-  <script src="app.js?v=14"></script>
+  <script src="auth.js?v=15"></script>
+  <script src="boutiques.js?v=15"></script>
+  <script src="agenda.js?v=15"></script>
+  <script src="valeur.js?v=15"></script>
+  <script src="visuels.js?v=15"></script>
+  <script src="scelle.js?v=15"></script>
+  <script src="ouvertures.js?v=15"></script>
+  <script src="app.js?v=15"></script>
 </body>
 </html>

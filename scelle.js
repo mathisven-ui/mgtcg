@@ -13,7 +13,8 @@ window.MG = window.MG || {};
 
   const TYPES = ["ETB", "Display", "UPC", "Coffret", "Collection premium", "Pokébox", "Tripack", "Blister", "Mini-tin", "Booster", "Autre"];
   const SOURCES = ["Cardmarket", "Boutique", "Grande enseigne", "eBay", "Vinted", "Leboncoin", "Autre"];
-  const LANGS = { fr: "🇫🇷 FR", en: "🇬🇧 EN", ja: "🇯🇵 JP", zh: "🇨🇳 CN", ko: "🇰🇷 KR", autre: "Autre" };
+  const LANGS = { fr: "FR", en: "EN", ja: "JP", zh: "CN", ko: "KR", autre: "Autre" };
+  const langTag = (l) => (MG.flag ? MG.flag(l) + " " : "") + (LANGS[l] || "");
   const C_LINE = "#b88a00";
   const WINDOW_DAYS = 30; // la cote = médiane des prix signalés sur 30 jours
 
@@ -240,7 +241,7 @@ window.MG = window.MG || {};
     const evo = c && p.msrp ? ((c.value - p.msrp) / p.msrp) * 100 : null;
     return `<div class="sealed-card" data-id="${esc(p.id)}">
       <button class="sc-open" data-open="${esc(p.id)}" aria-label="Voir ${esc(p.name)}">
-        <div class="sc-top"><span class="sc-type">${esc(p.type)}</span><span class="muted small">${LANGS[p.lang] || ""}</span></div>
+        <div class="sc-top"><span class="sc-type">${esc(p.type)}</span><span class="muted small">${langTag(p.lang)}</span></div>
         <b class="sc-name">${esc(p.name)}</b>
         ${p.content ? `<span class="muted small">${esc(p.content)}</span>` : ""}
         <div class="sc-est">
@@ -348,7 +349,7 @@ window.MG = window.MG || {};
 
     openModal(`
       <div class="product-detail">
-        <p class="eyebrow">${esc(p.type)} · ${LANGS[p.lang] || ""}${p.set_name ? " · " + esc(p.set_name) : ""}</p>
+        <p class="eyebrow">${esc(p.type)} · ${langTag(p.lang)}${p.set_name ? " · " + esc(p.set_name) : ""}</p>
         <h2 id="modal-title">${esc(p.name)}</h2>
         <div class="badges">
           ${p.release_date ? `<span class="badge">📅 Sortie le ${esc(fmtDay(p.release_date))}</span>` : ""}

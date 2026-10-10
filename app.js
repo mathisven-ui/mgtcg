@@ -78,7 +78,7 @@
       </div>
       <div class="tile-info">
         <div class="tile-row">
-          <span class="num">${opts.showLang ? langInfo(lang).flag + " " : ""}#${esc(card.localId ?? card.id)}</span>
+          <span class="num">${opts.showLang ? MG.flag(lang, langInfo(lang).label) + " " : ""}#${esc(card.localId ?? card.id)}</span>
           <span class="rar ${r ? r.cls : "r-wait"}" title="${esc(r ? r.label : "")}">${r ? esc(r.icon) : ""}</span>
         </div>
         <div class="tile-name">${esc(card.name)}</div>
@@ -127,7 +127,7 @@
     view().innerHTML = `
       <section class="hero">
         <div>
-          <p class="eyebrow">Pokémon TCG · ${langInfo(lang).flag} ${esc(langInfo(lang).label)}</p>
+          <p class="eyebrow">Pokémon TCG · ${MG.flag(lang)} ${esc(langInfo(lang).label)}</p>
           <h1>Ton classeur Pokémon,<br><span class="accent">toujours dans ta poche.</span></h1>
           <p class="lead">Parcours toutes les séries, coche tes cartes et vois tout de suite ce qu'il te manque pour finir ton master set.</p>
         </div>
@@ -145,7 +145,8 @@
       </section>`;
 
     try {
-      const series = (await MG.api.series(lang)).slice().reverse();
+      // Les cartes du jeu mobile « Pocket » ne sont pas de vraies cartes : on les cache
+      const series = (await MG.api.series(lang)).slice().reverse().filter((x) => !/pocket/i.test(x.name + " " + x.id));
       $("#series").innerHTML = `<div class="serie-grid">${series.map((s) => `
         <a class="serie" href="#/serie/${enc(s.id)}">
           ${MG.logoImg(s.logo) ? `<img src="${esc(MG.logoImg(s.logo))}" alt="" loading="lazy">` : `<span class="serie-ph">${esc(s.name.slice(0, 2))}</span>`}
@@ -168,7 +169,7 @@
 
   function setProgressCard(g) {
     return `<a class="set-card" href="#/set/${enc(g.setId)}/${enc(g.lang)}">
-      <div class="set-card-top"><strong>${esc(g.setName || g.setId)}</strong><span>${langInfo(g.lang).flag}</span></div>
+      <div class="set-card-top"><strong>${esc(g.setName || g.setId)}</strong><span>${MG.flag(g.lang, langInfo(g.lang).label)}</span></div>
       ${progressBar(g.owned, g.total || g.owned, "Cartes")}
       <span class="muted small">Valeur estimée : ${eur(g.value)}</span>
     </a>`;
@@ -221,11 +222,12 @@
       <header class="page-head set-head">
         ${MG.logoImg(set.logo) ? `<img class="page-logo" src="${esc(MG.logoImg(set.logo))}" alt="">` : ""}
         <div class="grow">
-          <h1>${esc(set.name)} <span class="flag">${langInfo(lang).flag}</span></h1>
+          <h1>${esc(set.name)} <span class="flag">${MG.flag(lang, langInfo(lang).label)}</span></h1>
           <p class="muted">${set.releaseDate ? "Sorti le " + esc(fmtDate(set.releaseDate)) + " · " : ""}${official} cartes officielles · ${total} au total (avec les secrètes)</p>
           <div class="head-links">
             <a class="chip-link" target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/results?search_query=${ytQuery}">▶ Vidéos de ce set</a>
             <a class="chip-link" target="_blank" rel="noopener noreferrer" href="https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=${enc(set.name)}">Cardmarket</a>
+            <a class="chip-link" target="_blank" rel="noopener noreferrer" href="https://www.google.com/search?q=${enc("site:pokecardex.com " + set.name)}">PokéCardex</a>
           </div>
         </div>
       </header>
@@ -240,6 +242,7 @@
       </section>
 
       <div id="set-sealed"></div>
+      <div id="set-drops"></div>
 
       <div class="toolbar">
         <div class="chips" role="tablist">
@@ -261,6 +264,7 @@
     const grid = $("#grid");
     bindGrid(grid, getCard);
     if (MG.scelle && MG.scelle.mountSet) MG.scelle.mountSet($("#set-sealed"), set.name, lang, set.id);
+    if (MG.drops) MG.drops.mountSet($("#set-drops"), set, lang, () => [...details.values()]);
 
     function computeStats() {
       let ownedCards = 0, ownedValue = 0, missingValue = 0, variantsTotal = 0, variantsOwned = 0;
@@ -398,7 +402,7 @@
             const [lang, id] = i.k.split("|");
             const r = MG.rarity(i.m.rarity);
             return `<tr class="clickable" data-lang="${esc(lang)}" data-id="${esc(id)}">
-              <td>${langInfo(lang).flag} ${esc(i.m.name || id)} <span class="muted">#${esc(i.m.localId)}</span></td>
+              <td>${MG.flag(lang, langInfo(lang).label)} ${esc(i.m.name || id)} <span class="muted">#${esc(i.m.localId)}</span></td>
               <td>${esc(i.m.setName || i.m.setId)}</td>
               <td><span class="rar ${r.cls}">${esc(r.icon)}</span></td>
               <td class="right">${i.v ? eur(i.v) : "<span class='muted'>ouvre la carte</span>"}</td></tr>`;
@@ -531,7 +535,7 @@
             ${MG.cardImg(card.image, "high") ? `<img src="${esc(MG.cardImg(card.image, "high"))}" alt="${esc(card.name)}">` : `<div class="noimg big">${esc(card.name)}</div>`}
           </div>
           <div class="cd-info">
-            <p class="eyebrow">${langInfo(lang).flag} ${card.set ? `<a href="#/set/${enc(card.set.id)}" data-close>${esc(card.set.name)}</a>` : ""} · #${esc(card.localId)}${card.set && card.set.cardCount ? " / " + esc(card.set.cardCount.official) : ""}</p>
+            <p class="eyebrow">${MG.flag(lang, langInfo(lang).label)} ${card.set ? `<a href="#/set/${enc(card.set.id)}" data-close>${esc(card.set.name)}</a>` : ""} · #${esc(card.localId)}${card.set && card.set.cardCount ? " / " + esc(card.set.cardCount.official) : ""}</p>
             <h2 id="modal-title">${esc(card.name)}</h2>
             <div class="badges">
               <span class="badge"><span class="rar ${r.cls}">${esc(r.icon)}</span> ${esc(r.label)}</span>
@@ -595,6 +599,7 @@
               <a target="_blank" rel="noopener noreferrer" href="https://www.ebay.fr/sch/i.html?_nkw=${qShort}">eBay</a>
               <a target="_blank" rel="noopener noreferrer" href="https://www.leboncoin.fr/recherche?text=${qShort}">Leboncoin</a>
               <a target="_blank" rel="noopener noreferrer" href="https://www.vinted.fr/catalog?search_text=${qShort}">Vinted</a>
+              <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/search?q=${enc("site:pokecardex.com " + card.name + " " + (card.set ? card.set.name : ""))}">Voir sur PokéCardex</a>
             </div>
             <p class="warn">🛡 Avant d'acheter à un particulier : demande des photos recto/verso avec ton pseudo écrit à côté, méfie-toi des prix bien plus bas que la cote, et ne paie jamais « entre amis » (aucune protection en cas d'arnaque).</p>
 
@@ -695,7 +700,10 @@
   function init() {
     // Menu des langues
     const sel = $("#lang");
-    sel.innerHTML = MG.LANGS.map((l) => `<option value="${l.code}">${l.flag} ${esc(l.label)}</option>`).join("");
+    sel.innerHTML = MG.LANGS.map((l) => `<option value="${l.code}">${esc(l.label)}</option>`).join("");
+    const showFlag = () => { const f = $("#lang-flag"); if (f) f.innerHTML = MG.flag(sel.value, langInfo(sel.value).label); };
+    showFlag();
+    sel.addEventListener("change", showFlag);
     sel.value = MG.store.lang;
     sel.addEventListener("change", () => {
       MG.store.setLang(sel.value);

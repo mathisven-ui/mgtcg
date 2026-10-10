@@ -81,11 +81,14 @@ mgtcg/
 ├── scelle.js           → produits scellés : séries → extensions → produits + liens d'achat (V2)
 ├── visuels.js          → illustrations des produits avec le logo de l'extension
 ├── agenda.js           → agenda des sorties et conventions, carte, trajet (V2)
+├── ouvertures.js       → tracker d'ouvertures et taux de drop de la communauté (V2)
+├── drapeaux.js         → drapeaux dessinés (lisibles aussi sur Windows)
 ├── app.js              → les pages du site
 ├── supabase-setup.sql  → à coller une fois dans Supabase (comptes + sécurité)
 ├── supabase-boutiques.sql → à coller une fois dans Supabase (boutiques + restocks)
 ├── supabase-scelle.sql → à coller une fois dans Supabase (produits scellés + prix)
-└── supabase-agenda.sql → à coller une fois dans Supabase (agenda + premiers événements)
+├── supabase-agenda.sql → à coller une fois dans Supabase (agenda + premiers événements)
+└── supabase-ouvertures.sql → à coller une fois dans Supabase (ouvertures de boosters)
 ```
 
 ---
@@ -201,7 +204,18 @@ Page **Agenda** :
 
 ---
 
-## 10. La suite (feuille de route)
+## 10. Taux de drop (V2)
+
+Sur la page de chaque extension (onglet Séries) : bloc **« 🎲 Taux de drop de la communauté »**.
+- Un membre connecté clique sur **« J'ai ouvert des boosters »**, choisit le produit (booster, ETB = 9, display = 36…) et clique sur les cartes rares et plus qu'il a tirées.
+- Le site calcule, pour chaque rareté, le taux par booster et « 1 tous les X boosters », plus les cartes les plus tirées.
+- Pokémon ne publie pas de taux officiels : ce sont des estimations communautaires (avertissement si moins de 100 boosters).
+
+**Activation** : Supabase → SQL Editor → New query → colle `supabase-ouvertures.sql` → **Run**.
+
+---
+
+## 11. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

@@ -11,8 +11,8 @@ window.MG = window.MG || {};
   "use strict";
 
   const KINDS = {
-    sortie: { label: "Sortie France", icon: "🇫🇷", cls: "k-sortie" },
-    "sortie-jp": { label: "Sortie Japon", icon: "🇯🇵", cls: "k-jp" },
+    sortie: { label: "Sortie France", icon: "📦", flag: "fr", cls: "k-sortie" },
+    "sortie-jp": { label: "Sortie Japon", icon: "🗾", flag: "ja", cls: "k-jp" },
     "avant-premiere": { label: "Avant-première", icon: "⭐", cls: "k-ap" },
     convention: { label: "Convention / salon", icon: "🎪", cls: "k-conv" },
     tournoi: { label: "Tournoi", icon: "🏆", cls: "k-tournoi" },
@@ -161,7 +161,7 @@ window.MG = window.MG || {};
       return `${head}<article class="ag-item ${e.lat != null ? "has-map" : ""} ${S.selected === e.id ? "sel" : ""}" data-id="${esc(e.id)}">
         <div class="ag-date"><b>${esc(new Date(e.start_date + "T12:00:00").getDate())}</b><span>${esc(new Date(e.start_date + "T12:00:00").toLocaleDateString("fr-FR", { month: "short" }))}</span></div>
         <div class="ag-main">
-          <div class="ag-tags"><span class="ag-kind ${k.cls}">${k.icon} ${esc(e.jpOut ? "Déjà sortie au Japon" : k.label)}</span>${e.confirmed === false ? `<span class="ag-rumeur">rumeur</span>` : ""}${soon}${dist}</div>
+          <div class="ag-tags"><span class="ag-kind ${k.cls}">${k.flag && MG.flag ? MG.flag(k.flag) : k.icon} ${esc(e.jpOut ? "Déjà sortie au Japon" : k.label)}</span>${e.confirmed === false ? `<span class="ag-rumeur">rumeur</span>` : ""}${soon}${dist}</div>
           <b class="ag-title">${esc(e.title)}</b>
           <span class="muted small">${esc(dayFr(e.start_date))}${e.end_date && e.end_date !== e.start_date ? " → " + esc(dayFr(e.end_date)) : ""}${e.city ? " · " + esc(e.city) : ""}</span>
           ${e.description ? `<span class="small">${esc(e.description)}</span>` : ""}

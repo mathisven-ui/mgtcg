@@ -11,6 +11,6 @@
    ========================================================== */
 window.MG = window.MG || {};
 window.MG.config = {
-  SUPABASE_URL: "",       // ex : "https://abcdefghijk.supabase.co"
-  SUPABASE_ANON_KEY: "",  // ex : "eyJhbGciOi..." ou "sb_publishable_..."
+  SUPABASE_URL: "https://dftiwsidwgsyblzonvju.supabase.co",       // ex : "https://abcdefghijk.supabase.co"
+  SUPABASE_ANON_KEY: "sb_publishable_kJBwUbqWMGIToxOPxhb1Iw_Kg_Qwdgp",  // ex : "eyJhbGciOi..." ou "sb_publishable_..."
 };

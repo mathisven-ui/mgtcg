@@ -83,6 +83,7 @@ mgtcg/
 ├── agenda.js           → agenda des sorties et conventions, carte, trajet (V2)
 ├── ouvertures.js       → tracker d'ouvertures et taux de drop de la communauté (V2)
 ├── drapeaux.js         → drapeaux dessinés (lisibles aussi sur Windows)
+├── outils.js           → outils : grading rentable ?, France ou Japon ?, journal des ventes (V2)
 ├── app.js              → les pages du site
 ├── supabase-setup.sql  → à coller une fois dans Supabase (comptes + sécurité)
 ├── supabase-boutiques.sql → à coller une fois dans Supabase (boutiques + restocks)
@@ -215,7 +216,16 @@ Sur la page de chaque extension (onglet Séries) : bloc **« 🎲 Taux de drop d
 
 ---
 
-## 11. La suite (feuille de route)
+## 11. Outils de collectionneur (V2)
+
+Page **Outils** (aussi accessible depuis la fiche de chaque carte) :
+- **Faire grader : est-ce rentable ?** — tarifs 2026 de PCA, CCC et PSA pré-remplis selon la valeur de la carte (à vérifier sur leur site), port, assurance, frais de revente, chance d'obtenir la note, liens vers les ventes terminées eBay ; gain ou perte moyenne et prix d'équilibre.
+- **France ou Japon ?** — taux de change du jour (BCE), port, TVA à l'import, droits et frais de dédouanement → coût réel comparé au prix en France.
+- **Mes ventes** — journal des ventes (prix, frais, envoi, prix d'achat), bénéfice réel par année, export CSV, rappel des seuils de déclaration des plateformes. Synchronisé avec le compte.
+
+---
+
+## 12. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

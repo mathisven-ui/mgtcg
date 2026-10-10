@@ -20,7 +20,7 @@ window.MG = window.MG || {};
   };
 
   function empty() {
-    return { version: 1, lang: "fr", owned: {}, fav: {}, wish: {}, meta: {}, paid: {}, alerts: {}, history: {}, lastRefresh: 0, sealed: {} };
+    return { version: 1, lang: "fr", owned: {}, fav: {}, wish: {}, meta: {}, paid: {}, alerts: {}, history: {}, lastRefresh: 0, sealed: {}, sales: [] };
   }
 
   let data = load();
@@ -82,6 +82,14 @@ window.MG = window.MG || {};
       const qty = Math.min(999, Math.max(0, parseInt(v.qty, 10) || 0));
       if (!qty) continue;
       out.sealed[id] = { qty, paid: money(v.paid), date: isDate(v.date) ? v.date : "", name: str(v.name, 120), type: str(v.type, 30) };
+    }
+    // Journal des ventes
+    for (const v of Array.isArray(obj.sales) ? obj.sales.slice(-2000) : []) {
+      if (!v || typeof v !== "object" || money(v.price) == null || !isDate(v.date)) continue;
+      out.sales.push({
+        id: str(v.id, 40) || Math.random().toString(36).slice(2, 12), name: str(v.name, 100), date: v.date, where: str(v.where, 30),
+        price: money(v.price), fees: money(v.fees) || 0, ship: money(v.ship) || 0, cost: v.cost == null ? null : money(v.cost), key: str(v.key, 80),
+      });
     }
     return out;
   }
@@ -242,6 +250,12 @@ window.MG = window.MG || {};
       };
       save();
     },
+    sales: () => data.sales.slice(),
+    addSale(v) {
+      const clean = sanitize({ sales: [Object.assign({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6) }, v)] }).sales[0];
+      if (clean) { data.sales.push(clean); save(); }
+    },
+    removeSale(id) { data.sales = data.sales.filter((x) => x.id !== id); save(); },
     history: () => Object.entries(data.history).sort((a, b) => (a[0] < b[0] ? -1 : 1)),
     get lastRefresh() { return data.lastRefresh || 0; },
     markRefreshed() { data.lastRefresh = Date.now(); save(); },
@@ -265,6 +279,8 @@ window.MG = window.MG || {};
       for (const [day, v] of Object.entries(r.history)) if (data.history[day] == null) data.history[day] = v;
       data.lastRefresh = Math.max(data.lastRefresh || 0, r.lastRefresh || 0);
       for (const [id, v] of Object.entries(r.sealed)) if (!data.sealed[id]) data.sealed[id] = v;
+      const known = new Set(data.sales.map((x) => x.id));
+      for (const v of r.sales) if (!known.has(v.id)) data.sales.push(v);
       save();
     },
     // Vide la collection du navigateur à la déconnexion (ordinateur partagé)

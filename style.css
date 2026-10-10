@@ -700,3 +700,30 @@ h1 .flag .flag-img { width: 30px; height: 20px; vertical-align: 2px; }
 .pick-card img { width: 100%; border-radius: 4px; }
 .form input[type=search] { background: var(--bg-2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px; font: inherit; }
 .form input[type=search]:focus { outline: none; border-color: var(--accent); }
+
+/* ==========================================================
+   Outils (V2)
+   ========================================================== */
+.tool-tabs { margin-bottom: 16px; }
+.tool-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; align-items: start; }
+.tool-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+.tool-card h2 { margin-top: 0; }
+.tool-card .buy-links { padding: 0; margin-top: 8px; }
+.form input[type=range] { accent-color: var(--accent); }
+.calc-lines { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 12px; }
+.calc-lines div { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px dashed var(--line); font-size: .92rem; }
+.calc-lines div span { color: var(--muted); }
+.calc-lines .total { border-bottom: 0; border-top: 1px solid var(--line); padding-top: 10px; font-size: 1rem; }
+.calc-lines .total span { color: var(--text); font-weight: 600; }
+.verdict { border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+.verdict strong { font-size: 1.1rem; }
+.verdict span { font-size: .88rem; color: var(--muted); }
+.verdict.ok { background: rgba(62, 207, 142, .1); border: 1px solid var(--green); }
+.verdict.ok strong { color: var(--green); }
+.verdict.ko { background: rgba(239, 75, 60, .08); border: 1px solid rgba(239, 75, 60, .5); }
+.verdict.ko strong { color: #ff8a7f; }
+@media (max-width: 860px) { .tool-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1400px) and (min-width: 861px) {
+  .nav a { padding: 8px 8px; font-size: .92rem; }
+  .topbar { gap: 10px; }
+}

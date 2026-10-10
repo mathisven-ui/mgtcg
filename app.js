@@ -593,6 +593,13 @@
             ${al ? `<p class="small ${now && now <= al.below ? "pl up" : "muted"}">${now && now <= al.below ? "✅ Alerte déclenchée : la cote (" + eur(now) + ") est sous ton prix !" : "Alerte active : tu seras prévenu sur MGTCG quand la cote passera sous " + eur(al.below) + "."}</p>` : ""}`;
             })()}
 
+            <h3>🧮 Outils</h3>
+            <div class="links">
+              <a href="#/outils/grading/${enc(MG.store.key(lang, card.id))}" data-close>🏅 La faire grader : rentable ?</a>
+              <a href="#/outils/import/${enc(MG.store.key(lang, card.id))}" data-close>🗾 France ou Japon ?</a>
+              ${Object.keys(owned).length ? `<a href="#/outils/ventes/${enc(MG.store.key(lang, card.id))}" data-close>💶 J'ai vendu cette carte</a>` : ""}
+            </div>
+
             <h3>Trouver cette carte</h3>
             <div class="links">
               <a target="_blank" rel="noopener noreferrer" href="https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=${enc(card.name)}">Cardmarket</a>
@@ -611,11 +618,11 @@
 
             <h3>Faire grader</h3>
             <div class="links">
-              <a target="_blank" rel="noopener noreferrer" href="https://www.pcagrade.com">PCA 🇫🇷</a>
-              <a target="_blank" rel="noopener noreferrer" href="https://www.cccgrading.com">CCC 🇫🇷</a>
-              <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/search?q=${enc("CollectAura grading")}">CollectAura 🇫🇷</a>
-              <a target="_blank" rel="noopener noreferrer" href="https://www.psacard.com">PSA 🇺🇸</a>
-              <a target="_blank" rel="noopener noreferrer" href="https://www.cgccards.com">CGC 🇺🇸</a>
+              <a target="_blank" rel="noopener noreferrer" href="https://www.pcagrade.com">PCA ${MG.flag("fr")}</a>
+              <a target="_blank" rel="noopener noreferrer" href="https://www.cccgrading.com">CCC ${MG.flag("fr")}</a>
+              <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/search?q=${enc("CollectAura grading")}">CollectAura ${MG.flag("fr")}</a>
+              <a target="_blank" rel="noopener noreferrer" href="https://www.psacard.com">PSA (USA)</a>
+              <a target="_blank" rel="noopener noreferrer" href="https://www.cgccards.com">CGC (USA)</a>
             </div>
           </div>
         </div>`;

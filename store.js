@@ -197,6 +197,27 @@ window.MG = window.MG || {};
     },
     reset() { data = Object.assign(empty(), { lang: data.lang }); save(); },
 
+    // Import depuis une autre appli : ajoute (sans rien supprimer) des cartes en une fois
+    // entries = [{ lang, card, variants: ["normal", …], paid: { price, date } | null }]
+    bulkImport(entries) {
+      let added = 0;
+      for (const e of entries) {
+        if (!e || !e.card || !e.card.id || !MG.LANGS.some((l) => l.code === e.lang)) continue;
+        const key = k(e.lang, e.card.id);
+        const cur = Object.assign({}, data.owned[key] || {});
+        if (!data.owned[key]) added++;
+        (e.variants || []).forEach((v) => { if (VARIANTS.includes(v)) cur[v] = true; });
+        if (!Object.keys(cur).length) cur.normal = true;
+        data.owned[key] = cur;
+        if (e.paid && isFinite(e.paid.price) && e.paid.price >= 0 && e.paid.price < 1e7 && !data.paid[key]) {
+          data.paid[key] = { price: Math.round(e.paid.price * 100) / 100, date: /^\d{4}-\d{2}-\d{2}$/.test(e.paid.date || "") ? e.paid.date : "" };
+        }
+        this.remember(e.lang, e.card);
+      }
+      save();
+      return added;
+    },
+
     /* ---- Prix d'achat, alertes, historique ---- */
     paid: (key) => data.paid[key] || null,
     paidKeys: () => Object.keys(data.paid),

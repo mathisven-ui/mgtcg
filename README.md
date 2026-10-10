@@ -234,7 +234,17 @@ Page **Actus** :
 
 ---
 
-## 13. La suite (feuille de route)
+## 13. Importer depuis une autre appli (V3)
+
+Page **Importer** (bouton dans **Ma collection**) :
+- Dépose un fichier **CSV** ou **Excel (.xlsx)** exporté d'une autre appli ou d'un tableur, ou colle directement un tableau.
+- MGTCG devine les colonnes (extension, numéro, nom, langue, version, quantité, prix et date d'achat), retrouve les cartes (par nom d'extension, code comme « MEW » ou identifiant comme « sv3pt5 ») et affiche la valeur estimée avant d'ajouter.
+- Les lignes non reconnues sont listées avec la raison, et téléchargeables pour les corriger.
+- Le fichier ne quitte jamais l'appareil. L'import ajoute des cartes, il ne supprime rien. Un modèle à remplir est téléchargeable sur la page.
+
+---
+
+## 14. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

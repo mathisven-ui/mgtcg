@@ -90,6 +90,7 @@ window.MG = window.MG || {};
   MG.api = {
     series: (lang) => get(`/${lang}/series`, { persist: true }),
     serie: (lang, id) => get(`/${lang}/series/${enc(id)}`, { persist: true }),
+    sets: (lang) => get(`/${lang}/sets`, { persist: true }),
     set: (lang, id) => get(`/${lang}/sets/${enc(id)}`, { persist: true }),
     search: (lang, q, page = 1) =>
       get(`/${lang}/cards?name=${enc(q)}&pagination:page=${page}&pagination:itemsPerPage=60`),

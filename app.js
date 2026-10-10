@@ -393,7 +393,7 @@
         <div class="stat small"><strong>${total ? pct(top3, total) + "%" : "—"}</strong><span>de la valeur dans tes 3 meilleures cartes</span></div>
       </div>
 
-      ${keys.length === 0 ? `<div class="state"><p>Ta collection est vide pour l'instant. Va dans un set et clique sur le <b>+</b> des cartes que tu possèdes.</p><a class="btn" href="#/">Parcourir les séries</a></div>` : `
+      ${keys.length === 0 ? `<div class="state"><p>Ta collection est vide pour l'instant. Va dans un set et clique sur le <b>+</b> des cartes que tu possèdes.</p><div class="row" style="justify-content:center"><a class="btn" href="#/">Parcourir les séries</a><a class="btn ghost" href="#/importer">📥 Importer depuis une autre appli</a></div></div>` : `
       <section><h2>Mes sets</h2><div class="set-grid">${sets.map(setProgressCard).join("")}</div></section>
       <section><h2>Mes cartes les plus précieuses</h2>
         <div class="table-wrap"><table class="table">
@@ -416,6 +416,7 @@
         <div class="row">
           <button class="btn" id="exp">⬇ Exporter ma collection</button>
           <label class="btn ghost">⬆ Importer un fichier<input type="file" id="imp" accept=".json,application/json" hidden></label>
+          <a class="btn ghost" href="#/importer">📥 Importer depuis une autre appli (CSV, Excel)</a>
           <button class="btn danger" id="reset">Tout effacer</button>
         </div>
       </section>`;

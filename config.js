@@ -15,5 +15,5 @@ window.MG.config = {
   SUPABASE_ANON_KEY: "sb_publishable_kJBwUbqWMGIToxOPxhb1Iw_Kg_Qwdgp",  // ex : "eyJhbGciOi..." ou "sb_publishable_..."
   // Anti-robot Cloudflare Turnstile (gratuit) : colle ici la « Site Key » (clé publique).
   // ⚠️ La « Secret Key » se colle UNIQUEMENT dans Supabase, jamais ici. Laisse vide pour désactiver.
-  TURNSTILE_SITE_KEY: "",
+  TURNSTILE_SITE_KEY: "0x4AAAAAAFTsKaeeLY5rG7Mq",
 };

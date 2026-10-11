@@ -14,7 +14,7 @@ window.MG = window.MG || {};
   const MIN_PRICE = 2;      // on ignore les cartes à moins de 2 € (variations sans intérêt)
   const ui = () => MG.ui;
   const auth = () => MG.auth;
-  const eur = (n) => n.toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
+  const eur = (n) => MG.money(n);
   const S = { news: [], setId: null, stop: null };
 
   /* ---------------- Page ---------------- */
@@ -52,7 +52,7 @@ window.MG = window.MG || {};
       <section class="tool-card">
         <div class="section-head"><h2 style="margin:0">📈 Tendances de la semaine</h2>
           ${sets.length ? `<select id="mk-set" aria-label="Extension">${sets.map((x) => `<option value="${esc(x.id)}" ${x.id === S.setId ? "selected" : ""}>${esc(x.name)}</option>`).join("")}</select>` : ""}</div>
-        <p class="muted small">Prix moyen des 7 derniers jours comparé aux 30 derniers jours, sur Cardmarket (cartes à plus de ${MIN_PRICE} €). Données indicatives, pas des conseils d'achat.</p>
+        <p class="muted small">Prix moyen des 7 derniers jours comparé aux 30 derniers jours, sur Cardmarket (cartes à plus de ${eur(MIN_PRICE)}). Données indicatives, pas des conseils d'achat.</p>
         <div id="mk-body">${sets.length ? ui().loading("Analyse des prix…") : `<p class="muted">Base de cartes indisponible pour le moment.</p>`}</div>
       </section>
 

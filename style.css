@@ -855,7 +855,7 @@ h1 .flag .flag-img { width: 30px; height: 20px; vertical-align: 2px; }
 @media (max-width: 700px) { .tr-two { grid-template-columns: 1fr; } }
 
 /* Barre du haut sur écran moyen : le menu passe sur une 2e ligne */
-@media (min-width: 861px) and (max-width: 1499px) {
+@media (min-width: 861px) and (max-width: 1799px) {
   .topbar { flex-wrap: wrap; row-gap: 6px; }
   .topbar .search { flex: 1 1 260px; max-width: none; }
   .topbar .nav { order: 10; flex-basis: 100%; overflow-x: auto; scrollbar-width: none; margin: 0 -4px; }
@@ -949,3 +949,11 @@ h1 .flag .flag-img { width: 30px; height: 20px; vertical-align: 2px; }
 .pt-net span { color: var(--text) !important; font-weight: 600; }
 .pt-scen { grid-template-columns: 1fr 1fr; }
 @media (max-width: 800px) { .pt-two, .pt-scen { grid-template-columns: 1fr; } .pt-bar { grid-template-columns: 1fr 90px; } .pt-bar .bar { grid-column: 1 / -1; grid-row: 2; } }
+
+/* ---------- Devise d'affichage (V3) ---------- */
+select.cur { background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 8px 6px; font: inherit; cursor: pointer; width: auto; min-width: 58px; }
+.cur-note { flex-basis: 100%; margin-top: 6px; }
+
+/* ---------- Appli installable / hors ligne (V3) ---------- */
+.offline-banner { background: #f5a524; color: #12131a; text-align: center; font-weight: 600; font-size: .88rem; padding: 8px 16px; position: sticky; top: 0; z-index: 30; }
+#pwa-link { margin-top: 6px; }

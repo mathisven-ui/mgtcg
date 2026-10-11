@@ -17,8 +17,7 @@
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const enc = encodeURIComponent;
 
-  const eur = (n) => (typeof n === "number" && !isNaN(n)
-    ? n.toLocaleString("fr-FR", { style: "currency", currency: "EUR" }) : "—");
+  const eur = (n) => MG.money(n); // devise choisie (devises.js)
   const usd = (n) => (typeof n === "number" ? n.toLocaleString("fr-FR", { style: "currency", currency: "USD" }) : "—");
   const pct = (a, b) => (a && b ? Math.round((a / b) * 100) : 0);
   const langInfo = (code) => MG.LANGS.find((l) => l.code === code) || MG.LANGS[0];

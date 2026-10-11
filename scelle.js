@@ -22,7 +22,7 @@ window.MG = window.MG || {};
 
   const ui = () => MG.ui;
   const auth = () => MG.auth;
-  const eur = (n) => (typeof n === "number" && isFinite(n) ? n.toLocaleString("fr-FR", { style: "currency", currency: "EUR" }) : "—");
+  const eur = (n) => MG.money(n);
   const fmtDay = (d) => { try { return new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }); } catch (e) { return d; } };
   const median = (arr) => { if (!arr.length) return null; const s = arr.slice().sort((a, b) => a - b); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
 

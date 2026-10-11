@@ -110,7 +110,7 @@ window.MG = window.MG || {};
     const pct = Math.round((cur / b.target) * 100);
     return `<div class="pf-badge ${on ? "on" : ""}" title="${esc(b.desc)}">
       <span class="pf-ico">${b.icon}</span><b>${esc(b.name)}</b><small>${esc(b.desc)}</small>
-      ${!on && s ? `<span class="bar"><span style="width:${pct}%"></span></span><small class="muted">${b.field === "value" ? Math.floor(cur) + " / " + b.target + " €" : cur + " / " + b.target}</small>` : ""}
+      ${!on && s ? `<span class="bar"><span style="width:${pct}%"></span></span><small class="muted">${b.field === "value" ? MG.money(cur, { round: true }) + " / " + MG.money(b.target, { round: true }) : cur + " / " + b.target}</small>` : ""}
     </div>`;
   };
 
@@ -205,7 +205,7 @@ window.MG = window.MG || {};
         const [lang, id] = [g.setKey.slice(0, g.setKey.indexOf("|")), g.setKey.slice(g.setKey.indexOf("|") + 1)];
         link = `<a class="accent-link small" href="#/completer/${enc(id)}/${enc(lang)}">Ce qu'il me manque →</a>`;
       } else if (g.type === "cartes") cur = s.cards;
-      else cur = Math.floor(s.value);
+      else { cur = Math.floor(s.value); label = `Collection à ${eur(target)}`; }
       const pct = target ? Math.min(100, Math.round((cur / target) * 100)) : 0;
       const done = target && cur >= target;
       const late = !done && g.deadline && g.deadline < t;

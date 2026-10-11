@@ -52,7 +52,7 @@ window.MG = window.MG || {};
       </div></header>
       ${all.length ? `
       <div class="imp-stats pf4">
-        <div><b>${eur(value)}</b><span>valeur estimée (${all.length} cartes)</span></div>
+        <div><b>${eur(value)}</b><span>valeur estimée (${all.length} carte${all.length > 1 ? "s" : ""})</span></div>
         <div><b>${paid.length ? eur(invested) : "—"}</b><span>investi (${paid.length} carte${paid.length > 1 ? "s" : ""} avec prix d'achat)</span></div>
         <div><b class="${valuePaid - invested >= 0 ? "up" : "down"}">${paid.length ? (valuePaid - invested >= 0 ? "+" : "") + eur(valuePaid - invested) : "—"}</b><span>plus-value latente sur ces cartes</span></div>
         <div><b>${value ? Math.round((top10 / value) * 100) : 0} %</b><span>de la valeur dans tes 10 meilleures cartes</span></div>

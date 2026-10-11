@@ -311,7 +311,16 @@ Page **Portefeuille** (lien en haut de **Ma collection**, et onglet dans **Outil
 
 ---
 
-## 20. La suite (feuille de route)
+## 20. Devises et appli installable (V3)
+
+- **Devise d'affichage** : petit menu à côté de la langue (€, $, £, CHF, CA$, ¥). Les prix Cardmarket (en euros) sont convertis avec le taux du jour de la Banque centrale européenne ; un rappel apparaît en bas de page. Les montants que l'on saisit restent en euros.
+- **Appli installable** : lien « 📱 Installer l'appli » en bas de page (instructions iPhone, Android, ordinateur). Le site s'ouvre alors en plein écran depuis l'écran d'accueil, avec l'icône MGTCG.
+- **Hors ligne** : le site, la collection, les listes et les cartes déjà consultées restent disponibles sans réseau (bandeau « Hors ligne »). Fichiers : `manifest.json`, `sw.js`, `pwa.js`, icônes `icone-192.png`, `icone-512.png`, `icone-maskable-512.png`, `apple-touch-icon.png`.
+- ⚠️ À chaque mise à jour, le numéro `VERSION` en haut de `sw.js` doit être le même que le `?v=` de `index.html` (sinon les visiteurs gardent l'ancienne version en cache).
+
+---
+
+## 21. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

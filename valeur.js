@@ -16,8 +16,8 @@ window.MG = window.MG || {};
   const REFRESH_EVERY = 12 * 3600 * 1000;
   const MAX_REFRESH = 800;     // cartes actualisées par passage
 
-  const eur = (n) => (typeof n === "number" && isFinite(n) ? n.toLocaleString("fr-FR", { style: "currency", currency: "EUR" }) : "—");
-  const eur0 = (n) => n.toLocaleString("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: n >= 100 ? 0 : 2 });
+  const eur = (n) => MG.money(n);
+  const eur0 = (n) => MG.money(n, { round: true });
   const dayFr = (d, opt) => new Date(d + "T12:00:00").toLocaleDateString("fr-FR", opt || { day: "numeric", month: "short" });
 
   /* ---------------- Actualisation des prix ---------------- */

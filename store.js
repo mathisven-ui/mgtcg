@@ -88,6 +88,7 @@ window.MG = window.MG || {};
       out.meta[k] = {
         name: str(m.name), image: str(m.image, 300), localId: str(String(m.localId ?? ""), 20),
         setId: str(parentSet(m.setId), 40), setName: MG.SET_MERGE && MG.SET_MERGE[m.setId] ? parentName(str(m.setName)) : str(m.setName), setTotal: MG.SET_MERGE && MG.SET_MERGE[m.setId] ? 0 : Number(m.setTotal) || 0,
+        setMain: MG.SET_MERGE && MG.SET_MERGE[m.setId] ? 0 : Number(m.setMain) || 0,
         price: Number(m.price) || 0, priceHolo: Number(m.priceHolo) || 0,
         rarity: str(m.rarity, 60),
       };
@@ -140,9 +141,18 @@ window.MG = window.MG || {};
     return out;
   }
 
+  // Écrit la collection. Si le stockage du navigateur est plein (à cause du cache
+  // des cartes), on vide ce cache — jamais la collection — et on réessaie.
+  function writeData() {
+    const json = JSON.stringify(data);
+    try { localStorage.setItem(KEY, json); return true; }
+    catch (e) {
+      try { if (MG.clearCache) MG.clearCache(); localStorage.setItem(KEY, json); return true; }
+      catch (e2) { return false; }
+    }
+  }
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(data)); }
-    catch (e) { alert("Impossible d'enregistrer : le stockage du navigateur est plein."); }
+    if (!writeData()) alert("Impossible d'enregistrer : le stockage du navigateur est plein.");
     MG.emit && MG.emit("store");
   }
 
@@ -150,9 +160,7 @@ window.MG = window.MG || {};
   let quietTimer = 0;
   function saveQuiet() {
     clearTimeout(quietTimer);
-    quietTimer = setTimeout(() => {
-      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* plein */ }
-    }, 500);
+    quietTimer = setTimeout(writeData, 500);
   }
 
   const k = (lang, id) => lang + "|" + id;
@@ -161,13 +169,16 @@ window.MG = window.MG || {};
     get lang() { return data.lang; },
     setLang(l) { data.lang = l; save(); },
     // Met à jour le nom et le nombre de cartes d'une extension dans les fiches mémorisées
-    fixSetMeta(lang, setId, name, total) {
+    fixSetMeta(lang, setId, name, total, main) {
       let n = 0;
       for (const [key, m] of Object.entries(data.meta)) {
         if (!key.startsWith(lang + "|") || !m || m.setId !== setId) continue;
-        if ((name && m.setName !== name) || (total && m.setTotal !== total)) { if (name) m.setName = name; if (total) m.setTotal = total; n++; }
+        if ((name && m.setName !== name) || (total && m.setTotal !== total) || (main && m.setMain !== main)) {
+          if (name) m.setName = name; if (total) m.setTotal = total; if (main) m.setMain = main; n++;
+        }
       }
       if (n) saveQuiet();
+      return n;
     },
 
     key: k,
@@ -189,7 +200,8 @@ window.MG = window.MG || {};
         localId: String(card.localId ?? prev.localId ?? ""),
         setId: parentSet((card.set && card.set.id) || extra.setId || prev.setId || card.id.split("-").slice(0, -1).join("-")),
         setName: (card.set && card.set.name) || extra.setName || prev.setName || "",
-        setTotal: (card.set && card.set.cardCount && card.set.cardCount.official) || extra.setTotal || prev.setTotal || 0,
+        setTotal: Number(card.set && card.set.cardCount && card.set.cardCount.official) || extra.setTotal || prev.setTotal || 0,
+        setMain: Number(card.set && card.set.cardCount && (card.set.cardCount.main || card.set.cardCount.official)) || extra.setMain || prev.setMain || 0,
         rarity: card.rarity || prev.rarity || "",
         price: cm ? (cm.trend ?? cm.avg ?? 0) : prev.price || 0,
         priceHolo: cm ? (cm["trend-holo"] ?? cm["avg-holo"] ?? 0) : prev.priceHolo || 0,

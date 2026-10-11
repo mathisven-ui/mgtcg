@@ -1093,3 +1093,13 @@ body.noscroll .as-fab { display: none; }
 .ag-thumb .vc-type { display: none; }
 @media (max-width: 560px) { .ag-thumb { width: 84px; } .ag-thumb .vc-card { width: 32px; } .ag-thumb .vc-card:nth-child(2) { width: 36px; } }
 .tile-img img.img-missing { visibility: hidden; }
+/* Visuel réel du booster chargé : on masque l'image de secours en dessous */
+.visuel.real-ok > svg, .visuel.real-ok > .vc-cards, .visuel.real-ok > .vc-logo { visibility: hidden; }
+/* Petits écrans : les cartes d'outils ne dépassent jamais la largeur de l'écran */
+.tool-grid > *, .wg-layout > * { min-width: 0; }
+.tool-card select, .tool-card input, .tool-card textarea { max-width: 100%; min-width: 0; }
+.row > .grow { min-width: 0; }
+/* Case à cocher dans une barre d'outils (ex. « Afficher les événements passés ») */
+.toolbar .check { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); cursor: pointer; }
+.toolbar .check input { flex: none; width: 18px; height: 18px; min-width: 0; padding: 0; accent-color: var(--accent); }
+@media (max-width: 560px) { .ag-thumb { width: 72px; } }

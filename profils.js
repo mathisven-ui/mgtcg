@@ -34,7 +34,9 @@ window.MG = window.MG || {};
       const sk = lang + "|" + m.setId;
       const g = sets.get(sk) || { key: sk, lang, setId: m.setId, name: m.setName || m.setId, total: m.setTotal || 0, n: 0 };
       if (m.setTotal) g.total = m.setTotal;
-      if (/^\d+$/.test(String(m.localId)) && (!g.total || parseInt(m.localId, 10) <= g.total)) g.n++;
+      // Carte « normale » du set (pas une secrète) : compte pour « set complet »
+      const id = k.slice(k.indexOf("|") + 1);
+      if (MG.isSecretCard ? !MG.isSecretCard({ id, localId: m.localId }, m.setMain || g.total) : /^\d+$/.test(String(m.localId)) && (!g.total || parseInt(m.localId, 10) <= g.total)) g.n++;
       sets.set(sk, g);
     }
     const setList = [...sets.values()];
@@ -86,7 +88,7 @@ window.MG = window.MG || {};
     await Promise.all(todo.map(async (key) => {
       const [lang, id] = [key.slice(0, key.indexOf("|")), key.slice(key.indexOf("|") + 1)];
       try { const c = await MG.api.card(lang, id); S.names.set(key, { name: c.name, image: c.image, setName: c.set ? c.set.name : "", localId: c.localId }); }
-      catch (e) { S.names.set(key, { name: id, image: "", setName: "" }); }
+      catch (e) { S.names.set(key, { name: "Carte inconnue", image: "", setName: "" }); }
     }));
   }
   function vitrine(keys) {
@@ -128,8 +130,11 @@ window.MG = window.MG || {};
       if (error) pubErr = true; else pub = (data || [])[0] || null;
       // Met à jour les chiffres du profil public s'ils ont changé
       if (pub && !pub.blocked && (pub.cards !== s.cards || pub.sets_done !== s.setsDone || pub.langs !== s.langs || (pub.badges || []).length !== got.length)) {
-        await a.client.from("public_profiles").update({ cards: s.cards, sets_done: s.setsDone, langs: s.langs, badges: got.map((b) => b.id) }).eq("user_id", a.user.id);
-        Object.assign(pub, { cards: s.cards, sets_done: s.setsDone, langs: s.langs, badges: got.map((b) => b.id) });
+        // Le serveur vérifie les chiffres (cartes, langues, échanges) : on affiche ce qu'il a gardé
+        const up = await a.client.from("public_profiles").update({ cards: s.cards, sets_done: s.setsDone, langs: s.langs, badges: got.map((b) => b.id) })
+          .eq("user_id", a.user.id).select("user_id,pseudo,showcase,badges,cards,sets_done,langs,visible,blocked");
+        if (up && !up.error && up.data && up.data[0]) pub = up.data[0];
+        else Object.assign(pub, { cards: s.cards, sets_done: s.setsDone, langs: s.langs, badges: got.map((b) => b.id) });
       }
     }
     view().innerHTML = `
@@ -293,7 +298,7 @@ window.MG = window.MG || {};
     view().innerHTML = `
       <nav class="crumbs"><a href="#/classements">Classements</a> › <span>${esc(p.pseudo)}</span></nav>
       <header class="page-head"><div><h1>👤 ${esc(p.pseudo)}</h1>
-        <p class="muted small">Chiffres déclarés par le membre à partir de sa collection MGTCG.</p></div></header>
+        <p class="muted small">Chiffres calculés à partir de sa collection MGTCG.</p></div></header>
       <div class="imp-stats pf-stats">
         <div><b>${p.cards}</b><span>cartes</span></div>
         <div><b>${p.sets_done}</b><span>sets complétés</span></div>

@@ -50,6 +50,7 @@
   }
 
   function progressBar(owned, total, label) {
+    owned = Number(owned) || 0; total = Number(total) || 0;
     const p = pct(owned, total);
     return `<div class="progress">
       <div class="progress-top"><span>${esc(label)}</span><strong>${owned} / ${total} · ${p}%</strong></div>
@@ -188,13 +189,14 @@
           <div><h1>${esc(serie.name)}</h1><p class="muted">${sets.length} sets · du plus récent au plus ancien</p></div>
         </header>
         <div class="set-grid">${sets.map((s) => {
-          const total = (s.cardCount && s.cardCount.official) || 0;
+          const total = Number(s.cardCount && s.cardCount.official) || 0;
+          const all = Number(s.cardCount && s.cardCount.total) || 0;
           const owned = ownedInSet(lang, s.id).length;
           return `<a class="set-card" href="#/set/${enc(s.id)}">
             <div class="set-logo">${MG.logoImg(s.logo) ? `<img src="${esc(MG.logoImg(s.logo))}" alt="" loading="lazy">` : `<span>${esc(s.name)}</span>`}</div>
             <div class="set-card-top"><strong>${esc(s.name)}</strong>
             ${MG.logoImg(s.symbol) ? `<img class="sym" src="${esc(MG.logoImg(s.symbol))}" alt="" loading="lazy">` : ""}</div>
-            ${progressBar(owned, total, total + " cartes officielles" + (s.cardCount && s.cardCount.total > total ? " (+" + (s.cardCount.total - total) + " secrètes)" : ""))}
+            ${progressBar(owned, total, total + " cartes officielles" + (all > total ? " (+" + (all - total) + " secrètes)" : ""))}
           </a>`;
         }).join("")}</div>`;
     } catch (e) { view().innerHTML = errorBox(e); }
@@ -211,9 +213,9 @@
     const briefs = set.cards || [];
     const details = new Map(); // id → carte complète (rareté, prix, versions)
     const getCard = (cid) => details.get(cid) || briefs.find((c) => c.id === cid);
-    const official = (set.cardCount && set.cardCount.official) || briefs.length;
-    const total = (set.cardCount && set.cardCount.total) || briefs.length;
-    MG.store.fixSetMeta(lang, set.id, set.name, official);
+    const official = Number(set.cardCount && set.cardCount.official) || briefs.length;
+    const total = Number(set.cardCount && set.cardCount.total) || briefs.length;
+    MG.store.fixSetMeta(lang, set.id, set.name, official, Number(set.cardCount && set.cardCount.main) || official);
     let filter = "all", rarityFilter = "", textFilter = "";
 
     const ytQuery = enc("pokemon " + set.name + " " + (lang === "fr" ? "ouverture master set" : "master set"));
@@ -310,7 +312,7 @@
       details.set(card.id, card);
       // Mémorise les prix des cartes déjà possédées (valeur de la collection)
       if (MG.store.isOwned(lang, card.id) || MG.store.isFav(lang, card.id) || MG.store.isWish(lang, card.id)) {
-        MG.store.remember(lang, card, { setTotal: official });
+        MG.store.remember(lang, card, { setTotal: official, setMain: Number(set.cardCount && set.cardCount.main) || official });
       }
       const tile = grid.querySelector(`.tile[data-id="${CSS.escape(card.id)}"]`);
       if (tile) refreshTile(tile, card, lang);
@@ -494,7 +496,7 @@
         <h2>Tes données (RGPD)</h2>
         <p><b>Sans compte</b> : ta collection, tes favoris et ta wishlist sont enregistrés uniquement dans ton navigateur (stockage local). Aucune donnée personnelle n'est collectée.</p>
         <p><b>Avec un compte</b> : MGTCG enregistre ton adresse email, ton mot de passe (chiffré, jamais visible, même par l'administrateur), la date de création du compte et ta collection, pour te permettre de la retrouver sur tous tes appareils. Ces données sont hébergées par Supabase (serveurs dans l'Union européenne si la région choisie est européenne) et ne sont ni vendues, ni partagées, ni utilisées pour de la publicité.</p>
-        <p><b>Fonctions facultatives pour les membres</b> : si tu les utilises, MGTCG enregistre aussi ta liste d'échange (pseudo, département, cartes à échanger et recherchées) et tes propositions d'échange (visibles par toi et l'autre membre), ton profil public (pseudo, badges, chiffres et vitrine, visibles par tous), tes contributions (boutiques, événements, actus, alertes, prix, ouvertures, avis : la note et les points cochés sont publics, le commentaire seulement après validation) et tes signalements (visibles seulement par l'administrateur). Les photos du passeport de tes cartes sont stockées dans un espace <b>privé</b> que toi seul peux voir ; elles sont réduites et débarrassées de leurs informations cachées (lieu GPS, appareil) avant l'envoi. Tu peux supprimer chacun de ces éléments depuis la page correspondante.</p>
+        <p><b>Fonctions facultatives pour les membres</b> : si tu les utilises, MGTCG enregistre aussi ta liste d'échange (pseudo, département, cartes à échanger et recherchées) et tes propositions d'échange (visibles par toi et l'autre membre), ton profil public (pseudo, badges, chiffres et vitrine, visibles par tous), tes contributions (boutiques, événements, actus, alertes, prix, ouvertures, avis : la note et les points cochés sont publics, le commentaire seulement après validation ; personne ne peut voir quel membre les a ajoutées) et tes signalements (visibles seulement par l'administrateur). Les photos du passeport de tes cartes sont stockées dans un espace <b>privé</b> que toi seul peux voir ; elles sont réduites et débarrassées de leurs informations cachées (lieu GPS, appareil) avant l'envoi. Tu peux supprimer chacun de ces éléments depuis la page correspondante.</p>
         <p>Tu peux à tout moment : exporter ta collection (page « Ma collection »), supprimer ta collection en ligne (page « Mon compte »), ou demander la suppression complète de ton compte et l'accès à tes données en écrivant à l'adresse de contact ci-dessus. Tu peux aussi saisir la CNIL (cnil.fr) si tu estimes que tes droits ne sont pas respectés.</p>
         <p><b>Sécurité</b> : tu peux activer la double authentification (code d'une appli d'authentification) dans « Mon compte ». Si la vérification anti-robot est activée, le service gratuit Cloudflare Turnstile vérifie que tu n'es pas un robot au moment de la connexion, de l'inscription ou du mot de passe oublié.</p>
         <p>Cookies : le site n'utilise ni cookies publicitaires ni traceurs. Seul le stockage local du navigateur est utilisé, pour faire fonctionner le site (collection, connexion).</p>
@@ -547,7 +549,7 @@
             ${MG.cardImg(card.image, "high") ? `<img src="${esc(MG.cardImg(card.image, "high"))}" alt="${esc(card.name)}">` : `<div class="noimg big">${esc(card.name)}</div>`}
           </div>
           <div class="cd-info">
-            <p class="eyebrow">${MG.flag(lang, langInfo(lang).label)} ${card.set ? `<a href="#/set/${enc(card.set.id)}" data-close>${esc(card.set.name)}</a>` : ""} · #${esc(card.localId)}${card.set && card.set.cardCount ? " / " + esc(card.set.cardCount.official) : ""}</p>
+            <p class="eyebrow">${MG.flag(lang, langInfo(lang).label)} ${card.set ? `<a href="#/set/${enc(card.set.id)}" data-close>${esc(card.set.name)}</a>` : ""} · #${esc(card.localId)}${card.set && card.set.cardCount && Number(card.set.cardCount.official) ? " / " + Number(card.set.cardCount.official) : ""}</p>
             <h2 id="modal-title">${esc(card.name)}</h2>
             <div class="badges">
               <span class="badge"><span class="rar ${r.cls}">${esc(r.icon)}</span> ${esc(r.label)}</span>
@@ -762,6 +764,29 @@
     $("#year").textContent = new Date().getFullYear();
     window.addEventListener("hashchange", route);
     route();
+    // Extensions regroupées (réimpressions, galeries…) : met à jour en arrière-plan
+    // le nom et le nombre de cartes mémorisés pour les cartes déjà cochées
+    setTimeout(refreshMergedMeta, 4000);
+  }
+
+  async function refreshMergedMeta() {
+    const parents = new Set(Object.values(MG.SET_MERGE || {}));
+    const todo = new Map();
+    for (const k of MG.store.ownedKeys()) {
+      const m = MG.store.meta(k);
+      if (!m || !parents.has(m.setId)) continue;
+      const lang = k.slice(0, k.indexOf("|"));
+      todo.set(lang + "|" + m.setId, { lang, id: m.setId });
+    }
+    let changed = 0;
+    for (const { lang, id } of todo.values()) {
+      try {
+        const set = await MG.api.set(lang, id);
+        const off = Number(set.cardCount && set.cardCount.official) || 0;
+        changed += MG.store.fixSetMeta(lang, set.id, set.name, off, Number(set.cardCount && set.cardCount.main) || off) || 0;
+      } catch (e) { /* hors ligne : ce sera fait à la prochaine visite */ }
+    }
+    if (changed && ["", "#", "#/", "#/collection", "#/completer", "#/profil"].includes(location.hash) && $("#modal").hidden) route();
   }
 
   document.addEventListener("DOMContentLoaded", init);

@@ -27,6 +27,7 @@ alter table public.profiles    enable row level security;
 alter table public.collections enable row level security;
 
 -- Fonction qui dit si la personne connectée est administrateur
+-- (si l'admin a activé la double authentification, il doit avoir tapé son code)
 create or replace function public.is_admin()
 returns boolean
 language sql
@@ -34,7 +35,9 @@ stable
 security definer
 set search_path = public
 as $$
-  select exists (select 1 from public.profiles where id = auth.uid() and role = 'admin');
+  select exists (select 1 from public.profiles where id = auth.uid() and role = 'admin')
+     and (coalesce(auth.jwt() ->> 'aal', 'aal1') = 'aal2'
+          or not exists (select 1 from auth.mfa_factors f where f.user_id = auth.uid() and f.status = 'verified'));
 $$;
 
 drop policy if exists "profil : lire le sien (ou admin)" on public.profiles;

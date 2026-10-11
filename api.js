@@ -27,6 +27,10 @@ window.MG = window.MG || {};
     { code: "pt-br", label: "Portugais (Brésil)", flag: "🇧🇷" },
   ];
 
+  // Texte « sûr » (mêmes règles que la base) : pas de lien, d'e-mail, de téléphone ni de réseau social
+  const CONTACT_RE = /(@|https?:\/\/|www\.|(\+33|\b0)[1-9]([ .-]?\d{2}){4}|\d{6,}|\b(snap|snapchat|insta|instagram|whatsapp|discord|telegram|tiktok|facebook|messenger|wechat|onlyfans|twitch)\b)/i;
+  MG.texteSur = (t) => !CONTACT_RE.test(String(t ?? ""));
+
   const memory = new Map(); // cache en mémoire (le temps de la visite)
   const CACHE_PREFIX = "mgtcg:cache:";
   const CACHE_TTL = 1000 * 60 * 60 * 12; // 12 h : les prix Cardmarket changent 1x/jour
@@ -105,18 +109,26 @@ window.MG = window.MG || {};
   MG.setParent = (id) => MG.SET_MERGE[id] || id;
   const childrenOf = (id) => Object.keys(MG.SET_MERGE).filter((c) => MG.SET_MERGE[c] === id);
   MG.setChildren = childrenOf;
-  const count = (c) => ({ official: (c && c.official) || 0, total: (c && (c.total || c.official)) || 0 });
+  const count = (c) => ({ official: Number(c && c.official) || 0, total: Number(c && (c.total || c.official)) || 0 });
+  // Carte « secrète » (au-delà du numéro officiel de l'extension principale) ?
+  // Les cartes des sous-extensions regroupées (réimpressions, galeries…) comptent comme normales.
+  MG.isSecretCard = function (card, mainOfficial) {
+    const id = String((card && card.id) || "");
+    if (MG.SET_MERGE[id.slice(0, id.lastIndexOf("-"))]) return false;
+    const n = String((card && card.localId) ?? "");
+    return !/^\d+$/.test(n) || (mainOfficial > 0 && parseInt(n, 10) > mainOfficial);
+  };
   // Liste d'extensions : on retire les sous-extensions et on ajoute leurs cartes à l'extension principale
   function mergeList(list) {
     if (!Array.isArray(list)) return list;
     const kids = new Map();
     list.forEach((s) => { if (s && MG.SET_MERGE[s.id]) kids.set(s.id, s); });
     return list.filter((s) => !(s && MG.SET_MERGE[s.id])).map((s) => {
-      const ch = childrenOf(s.id).map((c) => kids.get(c)).filter(Boolean);
-      if (!ch.length) return s;
+      if (!s) return s;
       const a = count(s.cardCount);
-      ch.forEach((c) => { const b = count(c.cardCount); a.official += b.official; a.total += b.total; });
-      return Object.assign({}, s, { cardCount: Object.assign({}, s.cardCount, a) });
+      a.main = a.official;
+      childrenOf(s.id).map((c) => kids.get(c)).filter(Boolean).forEach((c) => { const b = count(c.cardCount); a.official += b.official; a.total += b.total; });
+      return Object.assign({}, s, { cardCount: a });
     });
   }
   function fillBriefs(set) {
@@ -128,16 +140,17 @@ window.MG = window.MG || {};
     return Object.assign({}, set, { cards: cards.map((c) => (c && !safeAsset(c.image) && c.localId ? Object.assign({}, c, { image: p + c.localId, imageFallback: true }) : c)) });
   }
   async function mergedSet(lang, id) {
-    const main = fillBriefs(await get(`/${lang}/sets/${enc(id)}`, { persist: true }));
+    const raw = fillBriefs(await get(`/${lang}/sets/${enc(id)}`, { persist: true }));
+    const main = Object.assign({}, raw, { cardCount: Object.assign(count(raw.cardCount), { main: count(raw.cardCount).official }) });
     const ch = childrenOf(id);
     if (!ch.length) return main;
     const subs = (await Promise.all(ch.map((c) => get(`/${lang}/sets/${enc(c)}`, { persist: true }).then(fillBriefs).catch(() => null)))).filter(Boolean);
     if (!subs.length) return main;
-    const a = count(main.cardCount);
+    const a = Object.assign({}, main.cardCount);
     let cards = (main.cards || []).slice();
     subs.forEach((x) => { const b = count(x.cardCount); a.official += b.official; a.total += b.total; cards = cards.concat(x.cards || []); });
     a.total = Math.max(a.total, cards.length);
-    return Object.assign({}, main, { cards, cardCount: Object.assign({}, main.cardCount, a), merged: subs.map((x) => x.id) });
+    return Object.assign({}, main, { cards, cardCount: a, merged: subs.map((x) => x.id) });
   }
   // Une carte d'une sous-extension est rattachée à l'extension principale
   async function fixCardSet(lang, c) {
@@ -176,6 +189,11 @@ window.MG = window.MG || {};
     if (m[1] !== "en" && m[1] !== "univ" && !t.dataset.fb) { t.dataset.fb = "1"; t.src = "https://assets.tcgdex.net/en/" + m[2]; return; }
     if (t.closest(".tile-img")) { t.classList.add("img-missing"); return; }
     t.remove();
+  }, true);
+  // Visuel réel d'un produit chargé : on masque l'image de secours en dessous
+  document.addEventListener("load", (e) => {
+    const t = e.target;
+    if (t && t.tagName === "IMG" && t.classList.contains("visuel-real") && t.parentElement) t.parentElement.classList.add("real-ok");
   }, true);
 
   /* ---------- Appels ---------- */

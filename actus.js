@@ -39,7 +39,7 @@ window.MG = window.MG || {};
 
     let newsOk = false;
     if (a && a.enabled) {
-      const { data, error } = await a.client.from("news").select("id,title,summary,category,url,source,published,status,created_by").order("published", { ascending: false }).limit(60);
+      const { data, error } = await a.client.from("news").select("id,title,summary,category,url,source,published,status").order("published", { ascending: false }).limit(60);
       if (!error) { S.news = (data || []).filter((n) => n.status === "approved"); newsOk = true; }
     }
 

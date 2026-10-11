@@ -33,8 +33,8 @@ window.MG = window.MG || {};
     if (S.loaded && !force) return true;
     const since = new Date(Date.now() - 365 * 86400000).toISOString();
     const [{ data: products, error: e1 }, { data: prices }] = await Promise.all([
-      a.client.from("products").select("id,name,type,lang,serie,set_name,release_date,msrp,content,status,created_by").order("release_date", { ascending: false, nullsFirst: false }).limit(1000),
-      a.client.from("product_prices").select("id,product_id,price,source,user_id,created_at").gte("created_at", since).order("created_at", { ascending: true }).limit(10000),
+      a.client.from("products").select("id,name,type,lang,serie,set_name,release_date,msrp,content,status").order("release_date", { ascending: false, nullsFirst: false }).limit(1000),
+      a.client.from("product_prices").select("id,product_id,price,source,created_at").gte("created_at", since).order("created_at", { ascending: true }).limit(10000),
     ]);
     if (e1) return false;
     S.products = (products || []).map((p) => Object.assign(p, { msrp: p.msrp != null ? Number(p.msrp) : null }));
@@ -349,6 +349,7 @@ window.MG = window.MG || {};
     const c = cote(id);
     const own = MG.store.sealed(id);
     const prices = (S.prices.get(id) || []).slice();
+    const minePrices = a && a.user && a.mesAjouts && prices.length ? await a.mesAjouts("product_prices") : new Set();
     const q = encodeURIComponent(p.name);
     const evo = c && p.msrp ? ((c.value - p.msrp) / p.msrp) * 100 : null;
     const plUnit = own && own.paid != null && c ? c.value - own.paid : null;
@@ -397,7 +398,7 @@ window.MG = window.MG || {};
 
         ${prices.length ? `<h3>Derniers prix signalés</h3>
         <ul class="restock-list price-list">${prices.slice(-10).reverse().map((r) => `<li><div><span><b>${eur(r.price)}</b> · ${esc(r.source)}</span><small>${esc(fmtDay(r.created_at))}</small></div>
-          ${(a.user && (r.user_id === a.user.id || (a.isAdmin && a.isAdmin()))) ? `<button class="link-btn small" data-pdel="${esc(r.id)}">Supprimer</button>` : ""}</li>`).join("")}</ul>` : ""}
+          ${(a.user && (minePrices.has(r.id) || (a.isAdmin && a.isAdmin()))) ? `<button class="link-btn small" data-pdel="${esc(r.id)}">Supprimer</button>` : ""}</li>`).join("")}</ul>` : ""}
 
         <h3>⭐ Avis des membres</h3>
         <div id="p-avis"></div>

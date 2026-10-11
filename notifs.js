@@ -61,7 +61,10 @@ window.MG = window.MG || {};
       }
     }
     // 3) Commentaires d'avis validés
-    const { data: revs } = await c.from("reviews").select("id,target_name,comment_ok,updated_at").eq("created_by", uid).eq("comment_ok", true).limit(50);
+    let revs = null;
+    const rp = await c.rpc("mes_avis_publies");
+    if (rp && !rp.error) revs = rp.data;
+    else { const old = await c.from("reviews").select("id,target_name,comment_ok,updated_at").eq("created_by", uid).eq("comment_ok", true).limit(50); revs = old && old.data; }
     for (const r of revs || []) out.push({ id: `avis:${r.id}`, icon: "💬", text: `Ton commentaire sur « ${r.target_name} » a été publié`, href: "#/communaute", date: (r.updated_at || "").slice(0, 10) });
     // 4) Admin : éléments à valider
     if (a.isAdmin && a.isAdmin()) {

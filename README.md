@@ -89,7 +89,8 @@ mgtcg/
 ├── supabase-boutiques.sql → à coller une fois dans Supabase (boutiques + restocks)
 ├── supabase-scelle.sql → à coller une fois dans Supabase (produits scellés + prix)
 ├── supabase-agenda.sql → à coller une fois dans Supabase (agenda + premiers événements)
-└── supabase-ouvertures.sql → à coller une fois dans Supabase (ouvertures de boosters)
+├── supabase-ouvertures.sql → à coller une fois dans Supabase (ouvertures de boosters)
+└── supabase-securite-2.sql → à coller une fois dans Supabase (protection renforcée des membres, v=34)
 ```
 
 ---
@@ -381,6 +382,22 @@ Page **Widgets** (onglet dans **Outils**, et lien « 🧩 Widget pour mon site �
 - **Images qui ne chargent pas** : si une carte n'a pas d'image dans la langue choisie, le site prend l'image anglaise ; un symbole d'extension manquant est simplement masqué.
 - **Bouton de l'assistant** : « IA » au lieu de l'emoji.
 - **Faire grader ?** simplifié : la note que tu penses avoir + le prix d'une carte avec cette note → « Rentable » ou « Pas rentable ».
+
+**🛡️ Vérification complète et protection des membres (v=34)** — fichier `supabase-securite-2.sql` :
+1. Envoie d'abord tous les fichiers du site sur GitHub et attends 1 à 2 minutes.
+2. Ensuite seulement : Supabase → SQL Editor → New query → colle `supabase-securite-2.sql` → **Run** (une seule fois).
+
+Ce que ça change :
+- **Pas de coordonnées cachées** dans les petits textes publics (restocks, ouvertures, avis, pseudos, listes d'échange) : téléphone, e-mail, lien, Snap, Insta, Discord… sont refusés. Une carte inconnue s'affiche « Carte inconnue » (jamais un texte tapé par quelqu'un).
+- **Anti-spam impossible à contourner** : la date de chaque ajout est celle du serveur, et un membre ne peut pas envoyer plusieurs ajouts en même temps pour dépasser les limites.
+- **Vie privée** : on voit toujours les restocks, prix, ouvertures, avis, actus et événements, mais plus *quel membre* les a ajoutés (impossible de suivre les déplacements d'un membre). Chacun peut toujours supprimer ses propres ajouts.
+- **Blocage dans les deux sens** : un membre bloqué ne voit plus la liste d'échange de celui qui l'a bloqué.
+- **Profils publics vérifiés** : le nombre de cartes et de langues ne peut pas dépasser la collection enregistrée, et les badges d'échange demandent de vrais échanges acceptés sur MGTCG.
+- **Classement des boutiques** : une boutique y apparaît seulement quand 2 membres différents l'ont notée.
+- **Double authentification** : si un membre l'a activée, rien ne peut être publié en son nom sans son code.
+- **Modération** : l'admin peut aussi bloquer une liste ou valider un commentaire directement depuis le tableau Supabase (Table Editor).
+- **Navigateur** : le site n'accepte plus de scripts venant d'autres sites que ceux prévus (Supabase, la carte, Cloudflare) ; si le stockage du navigateur est plein, le cache des cartes est vidé pour ne jamais perdre la collection.
+- **Petites corrections** : outils et widgets ne dépassent plus de l'écran sur téléphone, case « événements passés » de l'agenda, carte de l'agenda indisponible mieux expliquée, comptes des extensions regroupées (cartes secrètes, « set complet ») justes partout.
 
 ---
 

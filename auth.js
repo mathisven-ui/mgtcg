@@ -143,6 +143,19 @@ window.MG = window.MG || {};
   const isAdmin = () => !!(auth.profile && auth.profile.role === "admin");
   auth.isAdmin = isAdmin;
 
+  // Identifiants de MES ajouts (restocks, ouvertures, prix) pour afficher « Supprimer » :
+  // la base ne montre plus qui a ajouté quoi (protection des membres).
+  auth.mesAjouts = async function (table) {
+    if (!auth.user || !auth.client) return new Set();
+    try {
+      const r = await auth.client.rpc("mes_ajouts", { t: table });
+      if (r && !r.error) return new Set((r.data || []).map((x) => (x && typeof x === "object" ? x.id : x)).filter(Boolean));
+      // Base pas encore mise à jour (supabase-securite-2.sql) : ancienne méthode
+      const q = await auth.client.from(table).select("id").eq("user_id", auth.user.id).limit(1000);
+      return new Set(((q && q.data) || []).map((x) => x.id));
+    } catch (e) { return new Set(); }
+  };
+
   /* ---------------- Synchronisation de la collection ---------------- */
   async function pullCollection() {
     auth.syncState = "syncing";

@@ -32,7 +32,9 @@ window.MG = window.MG || {};
     const h = mode === "low" ? (cm["low-holo"] || cm["trend-holo"] || cm["avg-holo"]) : (cm["trend-holo"] || cm["avg-holo"]);
     return (variant === "normal" || variant === "firstEdition" ? (n || h) : (h || n)) || 0;
   }
-  const isSecret = (card, official) => !/^\d+$/.test(String(card.localId)) || parseInt(card.localId, 10) > official;
+  // Carte secrète = au-delà du numéro officiel de l'extension principale (les réimpressions
+  // et galeries regroupées avec l'extension comptent comme des cartes normales)
+  const isSecret = (card, official) => (MG.isSecretCard ? MG.isSecretCard(card, official) : !/^\d+$/.test(String(card.localId)) || parseInt(card.localId, 10) > official);
   const variantsOf = (card) => { const v = MG.VARIANTS.filter((x) => card.variants && card.variants[x]); return v.length ? v : ["normal"]; };
 
   /* ---------------- Liste des sets commencés ---------------- */
@@ -79,7 +81,7 @@ window.MG = window.MG || {};
     try { set = await MG.api.set(lang, setId); }
     catch (e) { view().innerHTML = `<div class="state"><p>Extension introuvable.</p><a class="btn" href="#/completer">Retour</a></div>`; return; }
     const briefs = set.cards || [];
-    const official = (set.cardCount && set.cardCount.official) || briefs.length;
+    const official = Number(set.cardCount && (set.cardCount.main || set.cardCount.official)) || briefs.length;
     const cards = new Map();
     const o = S.opts;
 

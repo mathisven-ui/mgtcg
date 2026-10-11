@@ -112,10 +112,14 @@ window.MG = window.MG || {};
       const { data, error } = await a.client.from("reviews").select(COLS).order("created_at", { ascending: false }).limit(500);
       err = !!error; list = data || [];
     }
+    // Une boutique n'entre au classement qu'avec l'avis d'au moins 2 membres différents
+    // (une seule personne ne peut pas inventer une boutique « la mieux notée »).
+    // Le nom affiché est celui donné par la majorité des avis.
     const group = (kind) => {
       const m = new Map();
-      list.filter((r) => r.target_kind === kind).forEach((r) => { const g = m.get(r.target_id) || { name: r.target_name, list: [] }; g.list.push(r); m.set(r.target_id, g); });
-      return [...m.values()].map((g) => Object.assign(g, summary(g.list))).filter((g) => g.n >= 1)
+      list.filter((r) => r.target_kind === kind).forEach((r) => { const g = m.get(r.target_id) || { names: new Map(), list: [] }; g.names.set(r.target_name, (g.names.get(r.target_name) || 0) + 1); g.list.push(r); m.set(r.target_id, g); });
+      return [...m.values()].map((g) => Object.assign(g, summary(g.list), { name: [...g.names.entries()].sort((x, y) => y[1] - x[1])[0][0] }))
+        .filter((g) => g.n >= (kind === "boutique" ? 2 : 1) && (!MG.texteSur || MG.texteSur(g.name)))
         .sort((x, y) => (y.avg * Math.min(y.n, 5)) - (x.avg * Math.min(x.n, 5)) || y.n - x.n).slice(0, 8);
     };
     const shops = group("boutique"), prods = group("produit");
@@ -128,7 +132,7 @@ window.MG = window.MG || {};
       </div></header>
       ${err ? `<p class="muted">Avis bientôt disponibles (admin : lance <code>supabase-avis.sql</code>).</p>` : `
       <div class="av-cols">
-        <section class="tool-card"><h2>🏪 Boutiques les mieux notées</h2>${shops.length ? `<ul class="av-top">${shops.map(top).join("")}</ul>` : `<p class="muted small">Pas encore d'avis sur les boutiques.</p>`}</section>
+        <section class="tool-card"><h2>🏪 Boutiques les mieux notées</h2>${shops.length ? `<ul class="av-top">${shops.map(top).join("")}</ul>` : `<p class="muted small">Une boutique apparaît ici dès que 2 membres l'ont notée.</p>`}</section>
         <section class="tool-card"><h2>📦 Produits les mieux notés</h2>${prods.length ? `<ul class="av-top">${prods.map(top).join("")}</ul>` : `<p class="muted small">Pas encore d'avis sur les produits.</p>`}</section>
       </div>
       <section><h2>🗨️ Derniers commentaires</h2>

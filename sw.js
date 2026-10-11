@@ -4,7 +4,7 @@
    ⚠️ Le numéro VERSION doit suivre le ?v= de index.html.
    Créé par Mathis GILLIG.
    ========================================================== */
-const VERSION = 33;
+const VERSION = 34;
 const SHELL = "mgtcg-site-v" + VERSION;
 const DATA = "mgtcg-donnees";
 const FILES = [

@@ -36,7 +36,7 @@ window.MG = window.MG || {};
     if (!a || !a.enabled) return false;
     const from = new Date(Date.now() - 60 * 86400000).toISOString().slice(0, 10);
     const { data, error } = await a.client.from("events")
-      .select("id,kind,title,start_date,end_date,city,address,lat,lon,url,description,source,confirmed,status,created_by")
+      .select("id,kind,title,start_date,end_date,city,address,lat,lon,url,description,source,confirmed,status")
       .gte("start_date", from).order("start_date", { ascending: true }).limit(1000);
     if (error) return false;
     S.events = (data || []).filter((e) => e.status === "approved");
@@ -207,7 +207,12 @@ window.MG = window.MG || {};
 
   /* ---------------- Carte ---------------- */
   async function initMap() {
-    try { await MG.trajet.loadMapLibre(); } catch (e) { const m = document.getElementById("ag-map"); if (m) m.innerHTML = `<p class="muted small" style="padding:20px">Carte indisponible.</p>`; return; }
+    try { await MG.trajet.loadMapLibre(); } catch (e) {
+      const m = document.getElementById("ag-map"), b3 = document.getElementById("ag-3d");
+      if (m) m.innerHTML = `<p class="muted small" style="padding:20px">Carte indisponible pour le moment (connexion ?). La liste des événements reste complète.</p>`;
+      if (b3) b3.hidden = true;
+      return;
+    }
     if (!document.getElementById("ag-map")) return;
     if (S.map) { try { S.map.remove(); } catch (e) { /* rien */ } }
     S.map = new maplibregl.Map({ container: "ag-map", style: MG.trajet.MAP_STYLE, center: [2.4, 46.6], zoom: 4.6, pitch: 0, attributionControl: { compact: true } });

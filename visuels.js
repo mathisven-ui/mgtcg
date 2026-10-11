@@ -153,13 +153,26 @@ window.MG = window.MG || {};
     return `<div class="visuel-slot" ${attrs}>${MG.visuel(type, opts.logoUrl || "", "", opts.label)}</div>`;
   };
   const norm = (x) => String(x || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
-  MG.visuelFill = async function (root) {
+  // Les images sont préparées seulement quand la place arrive à l'écran
+  // (moins de téléchargements et de stockage utilisé)
+  const lists = new Map(), sets = new Map();
+  const setsOf = (lang) => { if (!lists.has(lang)) lists.set(lang, MG.api.sets(lang).catch(() => [])); return lists.get(lang); };
+  const setOf = (lang, id) => { const k = lang + "|" + id; if (!sets.has(k)) sets.set(k, MG.api.set(lang, id).catch(() => null)); return sets.get(k); };
+  let io = null;
+  MG.visuelFill = function (root) {
     if (!root || !MG.api) return;
-    const slots = [...root.querySelectorAll(".visuel-slot:not([data-done])")];
-    const lists = new Map(), sets = new Map();
-    const setsOf = (lang) => { if (!lists.has(lang)) lists.set(lang, MG.api.sets(lang).catch(() => [])); return lists.get(lang); };
-    const setOf = (lang, id) => { const k = lang + "|" + id; if (!sets.has(k)) sets.set(k, MG.api.set(lang, id).catch(() => null)); return sets.get(k); };
+    const slots = [...root.querySelectorAll(".visuel-slot:not([data-done]):not([data-wait])")];
+    if (!("IntersectionObserver" in window)) return fillSlots(slots);
+    if (!io) io = new IntersectionObserver((entries) => {
+      const ready = entries.filter((e) => e.isIntersecting).map((e) => e.target);
+      ready.forEach((el) => io.unobserve(el));
+      if (ready.length) fillSlots(ready);
+    }, { rootMargin: "300px" });
+    slots.forEach((el) => { el.dataset.wait = "1"; io.observe(el); });
+  };
+  async function fillSlots(slots) {
     for (const el of slots) {
+      if (el.dataset.done) continue;
       el.dataset.done = "1";
       const lang = el.dataset.lang || (MG.store && MG.store.lang) || "fr";
       let id = el.dataset.set;
@@ -177,7 +190,7 @@ window.MG = window.MG || {};
       const [b1, b2] = BG[type] || ["#232738", "#1b1e2c"];
       el.innerHTML = cardsVisual(type, MG.logoImg(set.logo), cards, el.dataset.label, `background: radial-gradient(circle at 50% 35%, ${b1}, ${b2} 75%)`);
     }
-  };
+  }
 
   // type : clé de SHAPES ; logoUrl : logo de l'extension ; realUrl : visuel réel (booster TCGdex)
   // cards (facultatif) : cartes de l'extension à montrer → vraie image au lieu du dessin
@@ -185,11 +198,12 @@ window.MG = window.MG || {};
     const i = ++uid;
     const [b1, b2] = BG[type] || ["#232738", "#1b1e2c"];
     const bg = `background: radial-gradient(circle at 50% 35%, ${b1}, ${b2} 75%)`;
-    if (cards && cards.length && !realUrl) return cardsVisual(type, logoUrl, cards, alt, bg);
+    // Visuel réel du produit (booster TCGdex) par-dessus : s'il ne charge pas, il est retiré
+    // (voir api.js) et l'image du dessous (cartes ou dessin) reste visible
+    const real = realUrl ? `<img class="visuel-real" src="${esc(realUrl)}" alt="${esc(alt || type)}" loading="lazy">` : "";
+    if (cards && cards.length) return cardsVisual(type, logoUrl, cards, alt, bg).replace(/<\/div>\s*$/, real + "</div>");
     const draw = SHAPES[type] || SHAPES.Coffret;
     const svg = `<svg viewBox="0 0 160 120" role="img" aria-label="${esc(alt || type)}">${draw(logoUrl, i)}</svg>`;
-    // Visuel réel par-dessus le dessin : s'il ne charge pas, le dessin reste visible
-    const real = realUrl ? `<img class="visuel-real" src="${esc(realUrl)}" alt="${esc(alt || type)}" loading="lazy" onerror="this.remove()">` : "";
     return `<div class="visuel" style="${bg}">${svg}${real}</div>`;
   };
 })(window.MG);

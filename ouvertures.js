@@ -18,31 +18,41 @@ window.MG = window.MG || {};
   const auth = () => MG.auth;
   const pct = (x) => (x * 100).toLocaleString("fr-FR", { maximumFractionDigits: x < 0.01 ? 2 : 1 }) + " %";
 
-  async function fetchOpenings(lang, setId) {
+  // Extension regroupée (ex. 30 ans + réimpressions) : on lit aussi les ouvertures des sous-extensions
+  async function fetchOpenings(lang, setIds) {
     const a = auth();
     if (!a || !a.enabled) return null;
-    const { data, error } = await a.client.from("openings").select("id,user_id,product,boosters,pulls,created_at")
-      .eq("lang", lang).eq("set_id", setId).order("created_at", { ascending: false }).limit(5000);
+    const { data, error } = await a.client.from("openings").select("id,product,boosters,pulls,created_at")
+      .eq("lang", lang).in("set_id", setIds).order("created_at", { ascending: false }).limit(5000);
     return error ? null : data || [];
   }
+  // Nombre de membres (calculé par la base, sans dévoiler qui ils sont)
+  async function countMembers(lang, setIds) {
+    try {
+      const r = await auth().client.rpc("ouvertures_membres", { l: lang, s: setIds });
+      return r && !r.error && typeof r.data === "number" ? r.data : null;
+    } catch (e) { return null; }
+  }
 
-  function stats(list) {
+  // Nom affiché : celui de TCGdex (jamais un texte tapé par quelqu'un)
+  const safe = (t) => (MG.texteSur ? MG.texteSur(t) : true);
+  function stats(list, nameOf) {
     let boosters = 0;
-    const byRarity = new Map(), byCard = new Map(), users = new Set();
+    const byRarity = new Map(), byCard = new Map();
     for (const o of list) {
       boosters += o.boosters;
-      users.add(o.user_id);
       for (const p of Array.isArray(o.pulls) ? o.pulls : []) {
         if (!p || typeof p !== "object") continue;
-        const r = String(p.rarity || "Inconnue").slice(0, 60);
+        const raw = String(p.rarity || "Inconnue").slice(0, 60);
+        const r = safe(raw) ? raw : "Inconnue";
         byRarity.set(r, (byRarity.get(r) || 0) + 1);
         const k = String(p.id || "").slice(0, 40);
-        if (k) { const c = byCard.get(k) || { id: k, name: String(p.name || k).slice(0, 80), rarity: r, n: 0 }; c.n++; byCard.set(k, c); }
+        if (k) { const c = byCard.get(k) || { id: k, name: nameOf(k), rarity: r, n: 0 }; c.n++; byCard.set(k, c); }
       }
     }
     const rarities = [...byRarity.entries()].map(([r, n]) => ({ r, n, rate: n / boosters })).sort((a, b) => a.rate - b.rate);
     const top = [...byCard.values()].sort((a, b) => b.n - a.n).slice(0, 10);
-    return { boosters, openings: list.length, users: users.size, rarities, top };
+    return { boosters, openings: list.length, rarities, top };
   }
 
   /* ---------------- Bloc sur la page d'une extension ---------------- */
@@ -50,17 +60,23 @@ window.MG = window.MG || {};
     if (!el) return;
     const { esc } = ui();
     const a = auth();
-    const list = await fetchOpenings(lang, set.id);
+    const setIds = [...new Set([set.id, ...(set.merged || []), ...(MG.setChildren ? MG.setChildren(set.id) : [])])];
+    const list = await fetchOpenings(lang, setIds);
     if (list === null) { el.innerHTML = ""; return; } // base pas encore prête
-    const st = stats(list);
-    const me = a.user ? list.filter((o) => o.user_id === a.user.id) : [];
-    const myStats = me.length ? stats(me) : null;
+    const names = new Map((set.cards || []).map((c) => [c.id, c.name]));
+    const nameOf = (id) => names.get(id) || "Carte inconnue";
+    const st = stats(list, nameOf);
+    st.users = list.length ? await countMembers(lang, setIds) : 0;
+    const mine = a.user && a.mesAjouts ? await a.mesAjouts("openings") : new Set();
+    const me = list.filter((o) => mine.has(o.id));
+    const myStats = me.length ? stats(me, nameOf) : null;
+    if (!el.isConnected) return;
 
     el.innerHTML = `<details class="serie-block drops" open>
       <summary><span class="sb-title">🎲 Taux de drop de la communauté</span>
         <span class="muted small">${st.boosters ? st.boosters + " booster" + (st.boosters > 1 ? "s" : "") + " ouvert" + (st.boosters > 1 ? "s" : "") : "aucune ouverture"}</span></summary>
       ${st.boosters ? `
-        <p class="muted small">${st.openings} ouverture${st.openings > 1 ? "s" : ""} enregistrée${st.openings > 1 ? "s" : ""} par ${st.users} membre${st.users > 1 ? "s" : ""}.
+        <p class="muted small">${st.openings} ouverture${st.openings > 1 ? "s" : ""} enregistrée${st.openings > 1 ? "s" : ""}${st.users ? ` par ${st.users} membre${st.users > 1 ? "s" : ""}` : ""}.
         ${st.boosters < MIN_RELIABLE ? "<b>Encore peu de données :</b> ces chiffres deviendront fiables avec plus d'ouvertures." : ""}</p>
         ${st.rarities.length ? `<div class="table-wrap"><table class="table">
           <thead><tr><th>Rareté</th><th class="right">Tirées</th><th class="right">Taux par booster</th><th class="right">En moyenne</th></tr></thead>
@@ -79,8 +95,8 @@ window.MG = window.MG || {};
 
     const add = el.querySelector("#add-opening");
     if (add) add.addEventListener("click", () => openForm(set, lang, getCards, () => mountSet(el, set, lang, getCards)));
-    const mine = el.querySelector("#my-openings");
-    if (mine) mine.addEventListener("click", () => openMine(me, () => mountSet(el, set, lang, getCards)));
+    const mineBtn = el.querySelector("#my-openings");
+    if (mineBtn) mineBtn.addEventListener("click", () => openMine(me, nameOf, () => mountSet(el, set, lang, getCards)));
   }
 
   /* ---------------- Formulaire « j'ai ouvert… » ---------------- */
@@ -147,19 +163,19 @@ window.MG = window.MG || {};
         product: PRODUCTS[form.product.value] ? form.product.value : "Autre", boosters, pulls,
       });
       btn.disabled = false;
-      if (error) { msg.textContent = /limite/i.test(error.message || "") ? error.message : "Impossible d'enregistrer. Réessaie."; msg.className = "form-msg err"; return; }
+      if (error) { msg.textContent = /limite|[àéèêç]/i.test(error.message || "") ? error.message : "Impossible d'enregistrer. Réessaie."; msg.className = "form-msg err"; return; }
       $("#modal").hidden = true; document.body.classList.remove("noscroll");
       ui().toast("Merci ! Ouverture enregistrée 🎲");
       done();
     });
   }
 
-  function openMine(list, done) {
+  function openMine(list, nameOf, done) {
     const { $, esc } = ui();
     $("#modal-body").innerHTML = `<h2 id="modal-title">Mes ouvertures</h2>
       <div class="mod-list">${list.map((o) => `<div class="mod-item" data-id="${esc(o.id)}">
         <div><b>${esc(o.product)}</b> · ${o.boosters} booster${o.boosters > 1 ? "s" : ""} · <span class="muted small">${esc(new Date(o.created_at).toLocaleDateString("fr-FR"))}</span><br>
-        <span class="small">${(o.pulls || []).map((p) => esc(p.name)).join(", ") || "<span class='muted'>aucune carte rare</span>"}</span></div>
+        <span class="small">${(o.pulls || []).map((p) => esc(nameOf(String(p.id || "")))).join(", ") || "<span class='muted'>aucune carte rare</span>"}</span></div>
         <button class="btn ghost" data-del="${esc(o.id)}">Supprimer</button></div>`).join("")}</div>`;
     $("#modal").hidden = false; document.body.classList.add("noscroll");
     $("#modal-body").querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", async () => {

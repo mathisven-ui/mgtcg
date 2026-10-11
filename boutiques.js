@@ -683,16 +683,18 @@ window.MG = window.MG || {};
     const a = MG.auth;
     if (!a || !a.enabled) { box.innerHTML = `<p class="muted small">Les restocks arrivent dès que les comptes sont activés.</p>`; return; }
     const since = new Date(Date.now() - 30 * 86400000).toISOString();
-    const { data, error } = await a.client.from("restocks").select("id,product,set_name,note,user_id,created_at")
-      .eq("shop_key", s.key).gte("created_at", since).order("created_at", { ascending: false }).limit(20);
+    const [{ data, error }, mine] = await Promise.all([
+      a.client.from("restocks").select("id,product,set_name,note,created_at")
+        .eq("shop_key", s.key).gte("created_at", since).order("created_at", { ascending: false }).limit(20),
+      a.mesAjouts ? a.mesAjouts("restocks") : Promise.resolve(new Set()),
+    ]);
     if (!document.getElementById("restocks") || S.selected !== s.key) return;
-    const me = a.user && a.user.id;
     const list = error ? [] : data || [];
     box.innerHTML = `
       ${list.length ? `<ul class="restock-list">${list.map((r) => `<li>
           <div><b>${esc(r.product)}</b>${r.set_name ? " · " + esc(r.set_name) : ""}<small>${esc(ago(r.created_at))}</small></div>
           ${r.note ? `<p class="small muted">${esc(r.note)}</p>` : ""}
-          ${(r.user_id === me || (a.isAdmin && a.isAdmin())) ? `<button class="link-btn small" data-del="${esc(r.id)}">Supprimer</button>` : ""}
+          ${(mine.has(r.id) || (a.isAdmin && a.isAdmin())) ? `<button class="link-btn small" data-del="${esc(r.id)}">Supprimer</button>` : ""}
         </li>`).join("")}</ul>`
       : `<p class="muted small">Aucun restock signalé ces 30 derniers jours.</p>`}
       ${a.user ? `
@@ -716,6 +718,10 @@ window.MG = window.MG || {};
     if (form) form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const f = new FormData(form);
+      const m0 = form.querySelector("#rs-msg");
+      if (MG.texteSur && !(MG.texteSur(f.get("set_name")) && MG.texteSur(f.get("note")))) {
+        m0.textContent = "Pas de lien, de pseudo ni de coordonnées (téléphone, Snap…) dans un restock."; m0.className = "form-msg err"; return;
+      }
       const btn = form.querySelector("button"); btn.disabled = true;
       const { error: err } = await a.client.from("restocks").insert({
         shop_key: s.key, shop_name: s.name.slice(0, 80),
@@ -726,7 +732,7 @@ window.MG = window.MG || {};
       });
       btn.disabled = false;
       if (err) {
-        const msg = /limite/i.test(err.message || "") ? err.message : "Impossible d'enregistrer. Réessaie.";
+        const msg = /limite|[àéèêç]/i.test(err.message || "") ? err.message : "Impossible d'enregistrer. Réessaie.";
         const m = form.querySelector("#rs-msg"); m.textContent = msg; m.className = "form-msg err";
         return;
       }

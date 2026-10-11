@@ -37,7 +37,7 @@ window.MG = window.MG || {};
     const m = info(key);
     const lang = key.slice(0, key.indexOf("|"));
     const flag = MG.flag(lang, (MG.LANGS.find((x) => x.code === lang) || {}).label || lang);
-    return `<span class="tr-card" data-key="${esc(key)}">${flag} <b>${m ? esc(m.name) : "…"}</b>${m ? ` <small class="muted">${esc(m.setName || "")} #${esc(m.localId || "")}</small>` : ""}${m && m.price ? ` <small class="tr-price">${eur(m.price)}</small>` : ""}</span>`;
+    return `<span class="tr-card" data-key="${esc(key)}">${flag} <b>${m ? esc(m.name) : "…"}</b>${m && (m.setName || m.localId) ? ` <small class="muted">${esc(m.setName || "")}${m.localId ? " #" + esc(m.localId) : ""}</small>` : ""}${m && m.price ? ` <small class="tr-price">${eur(m.price)}</small>` : ""}</span>`;
   }
   // Récupère le nom des cartes qu'on ne connaît pas encore (cartes des autres membres)
   async function resolve(keys, root) {
@@ -51,7 +51,7 @@ window.MG = window.MG || {};
           const c = await MG.api.card(lang, id);
           const cm = c.cardmarket || {};
           S.names.set(key, { name: c.name, setName: c.set ? c.set.name : "", localId: c.localId, price: cm.trend || cm.avg || cm["trend-holo"] || 0 });
-        } catch (e) { S.names.set(key, { name: id, setName: "", localId: "" }); }
+        } catch (e) { S.names.set(key, { name: "Carte inconnue", setName: "", localId: "" }); }
       }
     }));
     if (root && root.isConnected) root.querySelectorAll(".tr-card").forEach((el) => { if (todo.includes(el.dataset.key)) el.outerHTML = chip(el.dataset.key); });

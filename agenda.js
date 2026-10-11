@@ -89,6 +89,7 @@ window.MG = window.MG || {};
         <h1>📅 Agenda</h1>
         <p class="muted">Les prochaines sorties de cartes et de produits (France et Japon), les avant-premières et les conventions en France, avec trajet et coût pour y aller.</p>
       </div></header>
+      <p class="ag-2027">📅 <b>Agenda 2027</b> : les dates de Japan Expo, Paris Manga, Paris Card Show et des autres conventions arrivent dès qu'elles sont publiées par les organisateurs.</p>
 
       <div class="toolbar static">
         <div class="chips" id="ag-f">${FILTERS.map(([k, l]) => `<button class="chip ${S.filter === k ? "active" : ""}" data-f="${k}">${l}</button>`).join("")}</div>

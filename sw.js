@@ -4,7 +4,7 @@
    ⚠️ Le numéro VERSION doit suivre le ?v= de index.html.
    Créé par Mathis GILLIG.
    ========================================================== */
-const VERSION = 29;
+const VERSION = 31;
 const SHELL = "mgtcg-site-v" + VERSION;
 const DATA = "mgtcg-donnees";
 const FILES = [
@@ -35,7 +35,8 @@ const FILES = [
   "avis.js",
   "assistant.js",
   "app.js",
-  "pwa.js"
+  "pwa.js",
+  "notifs.js"
 ].map((f) => f + "?v=" + VERSION).concat(["./", "index.html", "manifest.json", "icone-192.png", "icone-512.png", "icone-maskable-512.png", "apple-touch-icon.png"]);
 const SUPABASE_JS = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js";
 
@@ -94,4 +95,15 @@ self.addEventListener("fetch", (e) => {
     e.respondWith(networkFirst(req, DATA).finally(() => trimData()));
   }
   // Tout le reste (comptes Supabase, cartes, images…) : pas de copie
+});
+
+// Clic sur une notification : ouvre MGTCG sur la bonne page
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const href = (e.notification.data && e.notification.data.href) || "#/";
+  e.waitUntil((async () => {
+    const list = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    for (const c of list) { if ("focus" in c) { c.postMessage({ mgtcgHref: href }); return c.focus(); } }
+    return self.clients.openWindow("./" + href);
+  })());
 });

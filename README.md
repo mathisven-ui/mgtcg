@@ -349,7 +349,29 @@ Page **Widgets** (onglet dans **Outils**, et lien « 🧩 Widget pour mon site �
 
 ---
 
-## 24. La suite (feuille de route)
+## 24. Notifications, sécurité renforcée, agenda 2027
+
+**🔔 Notifications** (cloche en haut du site, à côté du compte) :
+- Alertes de prix déclenchées, nouvelle proposition d'échange, proposition acceptée / refusée / contre-proposition, rendez-vous d'échange dans les 2 jours, commentaire d'avis validé, et pour l'admin le nombre d'éléments à valider.
+- Option « Notifications sur cet appareil » : notifications du téléphone ou de l'ordinateur quand MGTCG est ouvert ou installé comme appli (vérification toutes les 5 minutes). Fichier : `notifs.js`.
+
+**🔐 Double authentification (2FA)** (« Mon compte » → Sécurité) :
+- Code à 6 chiffres d'une appli (Google Authenticator, Microsoft Authenticator, 2FAS…) demandé à chaque connexion, en plus du mot de passe. Gratuit (fonction de Supabase).
+- Lancer une fois `supabase-securite.sql` : quand la 2FA est activée, la collection, les échanges et les photos ne sont accessibles qu'après le code, et les pouvoirs d'admin aussi.
+
+**🤖 Anti-robot (CAPTCHA, gratuit)** avec Cloudflare Turnstile, sur la connexion, l'inscription et le mot de passe oublié :
+1. Crée un compte gratuit sur dash.cloudflare.com → **Turnstile** → **Add widget** : nom « MGTCG », domaine `mathisven-ui.github.io`, mode « Managed ». Tu obtiens une **Site Key** et une **Secret Key**.
+2. Colle la **Site Key** dans `config.js` (ligne `TURNSTILE_SITE_KEY`) et envoie `config.js` sur GitHub. Attends 1 minute.
+3. Seulement ensuite : Supabase → **Authentication** → **Attack Protection** (protection contre les robots) → active **CAPTCHA protection**, choisis **Turnstile**, colle la **Secret Key** → Save.
+⚠️ La Secret Key ne va JAMAIS dans `config.js`. Respecte l'ordre (sinon les connexions sont bloquées le temps de faire l'étape 2).
+
+**🌐 Nom de domaine** (payant, environ 10 à 15 € par an, facultatif) : achète un domaine (ex. `mgtcg.fr`) chez un registrar, puis GitHub → Settings → Pages → Custom domain, ajoute chez le registrar un enregistrement `CNAME www → mathisven-ui.github.io` et les 4 enregistrements `A` de GitHub Pages (185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153), coche « Enforce HTTPS ». Ensuite, mets la nouvelle adresse dans Supabase (Authentication → URL Configuration) et dans le widget Turnstile.
+
+**📅 Agenda 2027** : un encadré sur la page Agenda annonce que les dates 2027 (Japan Expo, Paris Manga, Paris Card Show…) arrivent dès qu'elles sont publiées.
+
+---
+
+## 25. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

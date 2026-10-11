@@ -104,23 +104,36 @@ window.MG = window.MG || {};
     if (location.search.includes("code=")) history.replaceState(null, "", location.pathname + location.hash);
   }
 
-  let lastUserId = null;
+  // Double authentification : faut-il encore taper le code ?
+  async function needsCode() {
+    try {
+      const { data } = await auth.client.auth.mfa.getAuthenticatorAssuranceLevel();
+      return !!(data && data.nextLevel === "aal2" && data.currentLevel !== "aal2");
+    } catch (e) { return false; }
+  }
+
+  let lastUserId = null, lastReady = false;
   async function applySession(session, event) {
     const user = session ? session.user : null;
     const changed = (user && user.id) !== lastUserId;
     auth.user = user;
     lastUserId = user ? user.id : null;
-    if (user && changed) {
+    auth.mfaPending = user ? await needsCode() : false;
+    const ready = !!user && !auth.mfaPending;
+    if (ready && (changed || !lastReady)) {
       await loadProfile();
       await pullCollection();
-      if (event === "SIGNED_IN") MG.ui.toast("Connecté ✓");
+      if (event === "SIGNED_IN" || event === "MFA_CHALLENGE_VERIFIED") MG.ui.toast("Connecté ✓");
     }
+    if (user && auth.mfaPending) { auth.profile = null; if (!location.hash.startsWith("#/connexion/2fa")) location.hash = "#/connexion/2fa"; }
+    const becameReady = ready && !lastReady;
+    lastReady = ready;
     if (!user) { auth.profile = null; auth.syncState = "off"; }
     renderAccountButton();
     MG.emit("auth");
     // Rafraîchit la page si on est sur une page liée au compte
     const page = (location.hash.split("/")[1] || "");
-    if (changed && ["compte", "connexion", "admin", "collection", ""].includes(page)) MG.route();
+    if ((changed || becameReady) && ["compte", "connexion", "admin", "collection", ""].includes(page)) MG.route();
   }
 
   async function loadProfile() {
@@ -143,12 +156,12 @@ window.MG = window.MG || {};
 
   let pushTimer = 0, pausePush = false;
   function schedulePush() {
-    if (!auth.user || pausePush) return;
+    if (!auth.user || pausePush || auth.mfaPending) return;
     clearTimeout(pushTimer);
     pushTimer = setTimeout(pushCollection, 1500);
   }
   async function pushCollection() {
-    if (!auth.user) return;
+    if (!auth.user || auth.mfaPending) return;
     auth.syncState = "syncing"; renderAccountButton();
     const payload = MG.store.snapshot();
     const { error } = await auth.client.from("collections").upsert({
@@ -183,9 +196,80 @@ window.MG = window.MG || {};
   }
 
   /* ---------- Connexion / inscription / mot de passe oublié ---------- */
+  /* ---------- Anti-robot (Cloudflare Turnstile, gratuit) ----------
+     Actif seulement si TURNSTILE_SITE_KEY est rempli dans config.js. */
+  const CAPTCHA = /^[0-9A-Za-z_-]{10,80}$/.test(cfg.TURNSTILE_SITE_KEY || "") ? cfg.TURNSTILE_SITE_KEY : "";
+  let tsLoading = null;
+  function loadTurnstile() {
+    if (!CAPTCHA) return Promise.resolve(null);
+    if (window.turnstile) return Promise.resolve(window.turnstile);
+    if (!tsLoading) tsLoading = new Promise((res) => {
+      const sc = document.createElement("script");
+      sc.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      sc.async = true; sc.onload = () => res(window.turnstile || null); sc.onerror = () => { tsLoading = null; res(null); };
+      document.head.appendChild(sc);
+    });
+    return tsLoading;
+  }
+  function mountCaptcha(form) {
+    if (!CAPTCHA || !form) return { token: () => "", reset: () => {}, on: false };
+    const box = document.createElement("div");
+    box.className = "captcha";
+    form.querySelector("button[type=submit]").before(box);
+    const api = { id: null, ts: null, on: true, token: () => (api.ts && api.id !== null ? api.ts.getResponse(api.id) || "" : ""), reset: () => { if (api.ts && api.id !== null) api.ts.reset(api.id); } };
+    loadTurnstile().then((ts) => {
+      if (!ts) { box.innerHTML = `<p class="small muted">Vérification anti-robot indisponible pour le moment : recharge la page.</p>`; return; }
+      api.ts = ts; api.id = ts.render(box, { sitekey: CAPTCHA, language: "fr", theme: "dark" });
+    });
+    return api;
+  }
+
+  /* ---------- Code de double authentification ---------- */
+  function page2fa() {
+    const { view, $ } = MG.ui;
+    if (!auth.user) { location.hash = "#/connexion"; return; }
+    if (!auth.mfaPending) { location.hash = "#/compte"; return; }
+    view().innerHTML = `
+      <div class="auth-wrap"><div class="auth-card">
+        <h1>🔐 Code de sécurité</h1>
+        <p class="muted small">Ton compte est protégé par la double authentification. Ouvre ton appli d'authentification (Google Authenticator, Microsoft Authenticator, 2FAS…) et tape le code à 6 chiffres affiché pour MGTCG.</p>
+        <form id="f-2fa" class="form" novalidate>
+          <label>Code à 6 chiffres<input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required class="code-input"></label>
+          <p class="form-msg" id="msg" role="alert"></p>
+          <button class="btn full" type="submit">Valider</button>
+          <button class="link-btn small" type="button" id="b-cancel">Annuler et se déconnecter</button>
+        </form>
+      </div></div>`;
+    const form = $("#f-2fa");
+    const msg = (t) => { const m = $("#msg"); m.textContent = t; m.className = "form-msg err"; };
+    form.code.focus();
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const mins = lockedMinutes();
+      if (mins) return msg(`Trop d'essais ratés. Réessaie dans ${mins} min.`);
+      const code = String(form.code.value).replace(/\s/g, "");
+      if (!/^[0-9]{6}$/.test(code)) return msg("Le code fait 6 chiffres.");
+      const btn = form.querySelector("button[type=submit]"); btn.disabled = true;
+      const { data: fl } = await auth.client.auth.mfa.listFactors();
+      const factor = ((fl && fl.totp) || []).find((f) => f.status === "verified");
+      if (!factor) { btn.disabled = false; return msg("Aucune double authentification trouvée sur ce compte."); }
+      const ch = await auth.client.auth.mfa.challenge({ factorId: factor.id });
+      const vr = ch.error ? ch : await auth.client.auth.mfa.verify({ factorId: factor.id, challengeId: ch.data.id, code });
+      btn.disabled = false;
+      if (vr.error) { addFail(); form.code.value = ""; return msg("Code incorrect ou expiré. Réessaie avec le nouveau code."); }
+      resetFails();
+      auth.mfaPending = false;
+      const { data } = await auth.client.auth.getSession();
+      await applySession(data.session, "MFA_CHALLENGE_VERIFIED");
+      location.hash = "#/compte";
+    });
+    $("#b-cancel").addEventListener("click", () => signOut("local"));
+  }
+
   R.connexion = function (tab) {
     if (!auth.enabled) return notConfigured();
-    if (auth.user) { location.hash = "#/compte"; return; }
+    if (tab === "2fa") return page2fa();
+    if (auth.user) { location.hash = auth.mfaPending ? "#/connexion/2fa" : "#/compte"; return; }
     const { view, $, $$ } = MG.ui;
     tab = ["inscription", "oubli"].includes(tab) ? tab : "connexion";
 
@@ -241,6 +325,7 @@ window.MG = window.MG || {};
     const redirect = location.origin + location.pathname;
 
     const login = $("#f-login");
+    const capLogin = mountCaptcha(login);
     if (login) login.addEventListener("submit", async (e) => {
       e.preventDefault();
       const f = new FormData(login);
@@ -250,19 +335,23 @@ window.MG = window.MG || {};
       const email = String(f.get("email")).trim().toLowerCase();
       const pw = String(f.get("pw"));
       if (!validEmail(email) || !pw) return msg("Remplis ton email et ton mot de passe.");
+      const captchaToken = capLogin.token();
+      if (capLogin.on && !captchaToken) return msg("Coche d'abord la vérification anti-robot.");
       busy(login, true);
-      const { error } = await auth.client.auth.signInWithPassword({ email, password: pw });
+      const { error } = await auth.client.auth.signInWithPassword({ email, password: pw, options: captchaToken ? { captchaToken } : undefined });
       busy(login, false);
+      capLogin.reset();
       if (error) {
         const m = (error.message || "").toLowerCase();
         if (m.includes("invalid")) { addFail(); return msg("Email ou mot de passe incorrect."); }
         return msg(niceError(error));
       }
       resetFails();
-      location.hash = "#/compte";
+      location.hash = (await needsCode()) ? "#/connexion/2fa" : "#/compte";
     });
 
     const signup = $("#f-signup");
+    const capSignup = mountCaptcha(signup);
     if (signup) {
       const pwInput = signup.querySelector("[name=pw]");
       pwInput.addEventListener("input", () => {
@@ -282,9 +371,12 @@ window.MG = window.MG || {};
         if (probs.length) return msg("Mot de passe : " + probs.join(", ") + ".");
         if (pw !== pw2) return msg("Les deux mots de passe ne sont pas identiques.");
         if (!f.get("ok")) return msg("Accepte les mentions légales pour continuer.");
+        const captchaToken = capSignup.token();
+        if (capSignup.on && !captchaToken) return msg("Coche d'abord la vérification anti-robot.");
         busy(signup, true);
-        const { data, error } = await auth.client.auth.signUp({ email, password: pw, options: { emailRedirectTo: redirect } });
+        const { data, error } = await auth.client.auth.signUp({ email, password: pw, options: Object.assign({ emailRedirectTo: redirect }, captchaToken ? { captchaToken } : {}) });
         busy(signup, false);
+        capSignup.reset();
         if (error) return msg(niceError(error));
         if (data.session) { location.hash = "#/compte"; return; }
         signup.innerHTML = `<div class="state"><p>📧 C'est presque fini !</p><p>Un email de confirmation vient d'être envoyé à <b>${MG.ui.esc(email)}</b>. Clique sur le lien dedans pour activer ton compte (regarde aussi dans les spams).</p></div>`;
@@ -292,15 +384,19 @@ window.MG = window.MG || {};
     }
 
     const forgot = $("#f-forgot");
+    const capForgot = mountCaptcha(forgot);
     if (forgot) forgot.addEventListener("submit", async (e) => {
       e.preventDefault();
       const f = new FormData(forgot);
       if (f.get("website")) return;
       const email = String(f.get("email")).trim().toLowerCase();
       if (!validEmail(email)) return msg("Cet email n'a pas l'air valide.");
+      const captchaToken = capForgot.token();
+      if (capForgot.on && !captchaToken) return msg("Coche d'abord la vérification anti-robot.");
       busy(forgot, true);
-      const { error } = await auth.client.auth.resetPasswordForEmail(email, { redirectTo: redirect });
+      const { error } = await auth.client.auth.resetPasswordForEmail(email, Object.assign({ redirectTo: redirect }, captchaToken ? { captchaToken } : {}));
       busy(forgot, false);
+      capForgot.reset();
       if (error && (error.status === 429)) return msg(niceError(error));
       // Toujours le même message : on ne révèle pas si l'email existe
       msg("Si un compte existe avec cet email, un lien vient d'être envoyé. Pense à regarder dans les spams.", true);
@@ -344,6 +440,7 @@ window.MG = window.MG || {};
     if (!auth.enabled) return notConfigured();
     const { view, $, esc, fmtDate } = MG.ui;
     if (!auth.user) { location.hash = "#/connexion"; return; }
+    if (auth.mfaPending) { location.hash = "#/connexion/2fa"; return; }
     const syncText = {
       ok: "✅ Collection sauvegardée en ligne" + (auth.lastSync ? " (" + auth.lastSync.toLocaleTimeString("fr-FR") + ")" : ""),
       syncing: "🔄 Sauvegarde en cours…",
@@ -377,6 +474,8 @@ window.MG = window.MG || {};
           <button class="btn ghost" type="submit">Changer mon mot de passe</button>
           <p class="form-msg" id="msg" role="alert"></p>
         </form>
+        <h3>🔐 Double authentification (2FA)</h3>
+        <div id="mfa-box"><p class="muted small">Chargement…</p></div>
         <div class="row" style="margin-top:14px">
           <button class="btn ghost" id="b-out">Se déconnecter</button>
           <button class="btn ghost" id="b-out-all">Se déconnecter de tous mes appareils</button>
@@ -390,6 +489,7 @@ window.MG = window.MG || {};
       </section>`;
 
     $("#b-sync").addEventListener("click", async () => { await pullCollection(); R.compte(); });
+    renderMfa($("#mfa-box"));
     $("#b-out").addEventListener("click", () => signOut("local"));
     $("#b-out-all").addEventListener("click", () => signOut("global"));
     $("#b-del").addEventListener("click", async () => {
@@ -412,6 +512,63 @@ window.MG = window.MG || {};
     });
   };
 
+  // Activer / désactiver la double authentification (appli d'authentification, gratuit)
+  async function renderMfa(box) {
+    if (!box) return;
+    const { esc, toast } = MG.ui;
+    if (!auth.client.auth.mfa) { box.innerHTML = `<p class="muted small">Double authentification indisponible pour le moment.</p>`; return; }
+    const { data, error } = await auth.client.auth.mfa.listFactors().catch((e) => ({ error: e }));
+    if (error) { box.innerHTML = `<p class="muted small">Double authentification indisponible pour le moment.</p>`; return; }
+    const verified = ((data && data.totp) || []).find((f) => f.status === "verified");
+    if (verified) {
+      box.innerHTML = `<p>✅ <b>Activée.</b> À chaque connexion, MGTCG te demande le code de ton appli d'authentification.</p>
+        <button class="btn ghost" id="mfa-off">Désactiver la double authentification</button>`;
+      box.querySelector("#mfa-off").addEventListener("click", async () => {
+        if (!confirm("Désactiver la double authentification ? Ton compte sera moins protégé.")) return;
+        const r = await auth.client.auth.mfa.unenroll({ factorId: verified.id });
+        if (r.error) return toast("Impossible de désactiver (reconnecte-toi avec ton code, puis réessaie)");
+        await auth.client.auth.refreshSession().catch(() => null);
+        toast("Double authentification désactivée");
+        renderMfa(box);
+      });
+      return;
+    }
+    box.innerHTML = `<p class="muted small">Ajoute un code à 6 chiffres, donné par une appli sur ton téléphone (Google Authenticator, Microsoft Authenticator, 2FAS…), en plus de ton mot de passe. Même si quelqu'un vole ton mot de passe, il ne pourra pas entrer dans ton compte.${isAdmin() ? " <b>Fortement conseillé pour le compte administrateur.</b>" : ""}</p>
+      <button class="btn" id="mfa-on">🔐 Activer la double authentification</button>`;
+    box.querySelector("#mfa-on").addEventListener("click", async () => {
+      // On supprime les essais précédents non terminés
+      for (const f of ((data && data.all) || []).filter((x) => x.factor_type === "totp" && x.status !== "verified")) await auth.client.auth.mfa.unenroll({ factorId: f.id });
+      const en = await auth.client.auth.mfa.enroll({ factorType: "totp", friendlyName: "MGTCG " + new Date().toISOString().slice(0, 16) });
+      if (en.error) return toast("Impossible d'activer pour le moment, réessaie plus tard");
+      const qr = String(en.data.totp.qr_code || "");
+      const src = qr.startsWith("data:") ? qr : "data:image/svg+xml;utf8," + encodeURIComponent(qr);
+      box.innerHTML = `<ol class="sh-steps">
+          <li>Installe une appli d'authentification sur ton téléphone (Google Authenticator, Microsoft Authenticator, 2FAS…).</li>
+          <li>Dans l'appli, ajoute un compte en scannant ce QR code :<div class="mfa-qr"><img src="${esc(src)}" alt="QR code de double authentification" width="180" height="180"></div>
+            <span class="small muted">Ou tape cette clé à la main : <code class="mfa-secret">${esc(en.data.totp.secret || "")}</code></span></li>
+          <li>Tape le code à 6 chiffres affiché par l'appli :</li></ol>
+        <form id="f-mfa" class="form inline-form" novalidate>
+          <label>Code<input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="code-input"></label>
+          <button class="btn" type="submit">Vérifier et activer</button>
+          <button class="btn ghost" type="button" id="mfa-cancel">Annuler</button>
+          <p class="form-msg" id="mfa-msg" role="alert"></p>
+        </form>`;
+      const f = box.querySelector("#f-mfa");
+      box.querySelector("#mfa-cancel").addEventListener("click", async () => { await auth.client.auth.mfa.unenroll({ factorId: en.data.id }); renderMfa(box); });
+      f.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const m = box.querySelector("#mfa-msg");
+        const code = String(f.code.value).replace(/\s/g, "");
+        if (!/^[0-9]{6}$/.test(code)) { m.textContent = "Le code fait 6 chiffres."; m.className = "form-msg err"; return; }
+        const ch = await auth.client.auth.mfa.challenge({ factorId: en.data.id });
+        const vr = ch.error ? ch : await auth.client.auth.mfa.verify({ factorId: en.data.id, challengeId: ch.data.id, code });
+        if (vr.error) { m.textContent = "Code incorrect. Vérifie l'heure de ton téléphone et tape le nouveau code."; m.className = "form-msg err"; return; }
+        toast("Double authentification activée 🔐");
+        renderMfa(box);
+      });
+    });
+  }
+
   async function signOut(scope) {
     clearTimeout(pushTimer);
     await pushCollection();
@@ -428,6 +585,7 @@ window.MG = window.MG || {};
   /* ---------- Espace administrateur ---------- */
   R.admin = async function () {
     if (!auth.enabled) return notConfigured();
+    if (auth.mfaPending) { location.hash = "#/connexion/2fa"; return; }
     const { view, esc, fmtDate, loading } = MG.ui;
     // L'affichage est caché aux non-admins, mais la VRAIE protection est
     // côté serveur : les règles RLS refusent les données aux autres comptes.

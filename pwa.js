@@ -20,6 +20,9 @@ window.MG = window.MG || {};
     window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => { /* pas grave */ }); });
   }
 
+  // Clic sur une notification de l'appareil quand le site est déjà ouvert
+  if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message", (e) => { const h = e.data && e.data.mgtcgHref; if (typeof h === "string" && h.startsWith("#/")) location.hash = h; });
+
   window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferred = e; });
   window.addEventListener("appinstalled", () => { deferred = null; MG.ui && MG.ui.toast("MGTCG est installée ✓"); });
 

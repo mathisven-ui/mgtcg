@@ -1034,3 +1034,32 @@ select.cur { background: var(--surface); color: var(--text); border: 1px solid v
 .as-fab[hidden] { display: none; }
 body.noscroll .as-fab { display: none; }
 @media print { .as-fab { display: none; } }
+.ag-2027 { background: rgba(76, 141, 255, .08); border: 1px solid rgba(76, 141, 255, .4); border-radius: 12px; padding: 10px 14px; font-size: .9rem; margin: -4px 0 16px; }
+
+/* ---------- Notifications ---------- */
+.bell { position: relative; background: var(--surface); border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 7px 10px; font-size: 1.05rem; cursor: pointer; line-height: 1; }
+.bell:hover { border-color: var(--accent); }
+.bell-n { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #ff4d4d; color: #fff; font-size: .7rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.bell-n[hidden] { display: none; }
+.notif-panel { position: fixed; top: 64px; right: 16px; z-index: 60; width: min(380px, calc(100vw - 32px)); max-height: min(70vh, 560px); overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 16px 40px rgba(0, 0, 0, .5); padding: 12px; }
+.notif-panel[hidden] { display: none; }
+.np-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.np-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.np-list a { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; border-radius: 10px; text-decoration: none; color: var(--text); font-size: .9rem; }
+.np-list a:hover { background: var(--bg-2); }
+.np-list li.new a { background: rgba(255, 203, 5, .08); }
+.np-ico { font-size: 1.1rem; }
+.np-t { display: flex; flex-direction: column; gap: 2px; }
+.np-t small { font-size: .75rem; }
+.np-empty { padding: 8px 4px; }
+.np-foot { border-top: 1px solid var(--line); margin-top: 10px; padding-top: 10px; }
+.np-foot .check { display: flex; gap: 8px; align-items: center; font-size: .88rem; }
+.np-foot p { margin: 6px 0 0; }
+
+/* ---------- Sécurité : 2FA et anti-robot ---------- */
+.captcha { min-height: 65px; display: flex; justify-content: center; }
+.code-input { font-size: 1.4rem !important; letter-spacing: .35em; text-align: center; font-variant-numeric: tabular-nums; }
+.mfa-qr { background: #fff; display: inline-block; padding: 10px; border-radius: 12px; margin: 8px 0; }
+.mfa-qr img { display: block; }
+.mfa-secret { word-break: break-all; background: var(--bg-2); padding: 2px 6px; border-radius: 6px; }
+@media (max-width: 860px) { .notif-panel { top: 118px; } }

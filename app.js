@@ -608,6 +608,7 @@
               ${Object.keys(owned).length ? `<a href="#/passeport/${enc(MG.store.key(lang, card.id))}" data-close>🛂 Passeport de la carte${MG.store.passport(MG.store.key(lang, card.id)) ? " ✓" : ""}</a>` : ""}
               <a href="#/outils/grading/${enc(MG.store.key(lang, card.id))}" data-close>🏅 La faire grader : rentable ?</a>
               <a href="#/outils/import/${enc(MG.store.key(lang, card.id))}" data-close>🗾 France ou Japon ?</a>
+              <a href="#/widgets/carte/${enc(MG.store.key(lang, card.id))}" data-close>🧩 Widget pour mon site</a>
               ${Object.keys(owned).length ? `<a href="#/outils/ventes/${enc(MG.store.key(lang, card.id))}" data-close>💶 J'ai vendu cette carte</a>` : ""}
             </div>
 
@@ -698,6 +699,15 @@
         const [setId, l] = rest.map(decodeURIComponent);
         if (l && l !== MG.store.lang && MG.LANGS.some((x) => x.code === l)) { MG.store.setLang(l); $("#lang").value = l; }
         return pageSet(setId);
+      }
+      case "carte": {
+        // Lien direct vers une carte : #/carte/fr|sv03.5-199 (utilisé par les widgets)
+        const m = /^([a-z-]{2,6})\|([A-Za-z0-9._-]{1,50})$/.exec(arg);
+        if (!m) return pageHome();
+        const [, l, cid] = m;
+        if (l !== MG.store.lang && MG.LANGS.some((x) => x.code === l)) { MG.store.setLang(l); $("#lang").value = l; }
+        view().innerHTML = loading("Chargement de la carte…");
+        return MG.api.card(l, cid).then((c) => (c.set ? Promise.resolve(pageSet(c.set.id)).then(() => openCard(l, cid)) : pageHome())).catch(() => pageHome());
       }
       case "recherche": return pageSearch(arg);
       case "collection": return pageCollection();

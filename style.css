@@ -957,3 +957,22 @@ select.cur { background: var(--surface); color: var(--text); border: 1px solid v
 /* ---------- Appli installable / hors ligne (V3) ---------- */
 .offline-banner { background: #f5a524; color: #12131a; text-align: center; font-weight: 600; font-size: .88rem; padding: 8px 16px; position: sticky; top: 0; z-index: 30; }
 #pwa-link { margin-top: 6px; }
+
+/* ---------- Widgets créateurs (V3) ---------- */
+.wg-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.wg-search { display: flex; gap: 8px; margin-bottom: 10px; }
+.wg-search input { flex: 1; min-width: 0; background: var(--bg-2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: inherit; }
+.wg-res { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; max-height: 340px; overflow: auto; }
+.wg-pick { display: flex; flex-direction: column; gap: 4px; align-items: center; background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 6px; color: var(--text); cursor: pointer; font: inherit; font-size: .78rem; text-align: center; }
+.wg-pick:hover { border-color: var(--accent); }
+.wg-pick img { width: 100%; aspect-ratio: 63 / 88; object-fit: cover; border-radius: 6px; }
+.wg-prev { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 12px; }
+.wg-frame { padding: 10px; border-radius: 12px; max-width: 100%; overflow: auto; }
+.wg-frame iframe { border: 0; border-radius: 12px; display: block; max-width: 100%; }
+.wg-frame.checker { background: repeating-conic-gradient(#3a3d4c 0 25%, #2a2c38 0 50%) 0 0 / 20px 20px; }
+.wg-code-l { display: flex; flex-direction: column; gap: 6px; font-size: .85rem; font-weight: 600; margin-bottom: 10px; }
+#wg-code { background: var(--bg-2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px; font: .78rem/1.4 ui-monospace, Menlo, Consolas, monospace; resize: vertical; }
+.wg-help { margin-top: 12px; }
+.wg-help summary { cursor: pointer; font-weight: 600; }
+.wg-help ul { padding-left: 20px; display: grid; gap: 6px; }
+@media (max-width: 900px) { .wg-layout { grid-template-columns: 1fr; } }

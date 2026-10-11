@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MGTCG — widget</title>
+  <meta name="robots" content="noindex">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src https://assets.tcgdex.net data:; connect-src https://api.tcgdex.net https://*.supabase.co https://api.frankfurter.app; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <style>
+    :root { --bg: #12131a; --surface: #1b1d27; --line: #2c2f3d; --text: #f4f5fa; --muted: #9aa0b4; --accent: #ffcb05; --up: #3ecf8e; --down: #ff7a6e; }
+    .clair { --bg: #ffffff; --surface: #f4f5f9; --line: #dfe2ea; --text: #15161d; --muted: #5d6275; --accent: #b88a00; --up: #12805c; --down: #c4352a; }
+    .transparent { --bg: transparent; --surface: rgba(0,0,0,.35); --line: rgba(255,255,255,.25); --muted: #e6e8f0; }
+    .transparent body, .transparent .w { text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+    a { color: inherit; text-decoration: none; }
+    .w { height: 100%; display: flex; gap: 12px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+    .transparent .w { border: 0; }
+    .w.grand { flex-direction: column; align-items: center; text-align: center; }
+    .img { flex: none; width: 86px; aspect-ratio: 63/88; border-radius: 6px; object-fit: cover; background: var(--surface); }
+    .grand .img { width: 70%; max-width: 230px; }
+    .info { min-width: 0; display: flex; flex-direction: column; gap: 3px; justify-content: center; flex: 1; }
+    .name { font-weight: 700; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sub { color: var(--muted); font-size: .8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .price { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+    .chg { font-size: .85rem; font-weight: 700; }
+    .up { color: var(--up); } .down { color: var(--down); }
+    .row { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; justify-content: inherit; }
+    .grand .row { justify-content: center; }
+    .foot { margin-top: auto; font-size: .7rem; color: var(--muted); }
+    .foot b { color: var(--text); } .foot b span { color: var(--accent); }
+    .stats { display: flex; gap: 14px; }
+    .stats div { display: flex; flex-direction: column; }
+    .stats b { font-size: 1.2rem; }
+    .stats span { font-size: .72rem; color: var(--muted); }
+    .vit { display: flex; gap: 6px; margin: 6px 0; }
+    .vit img { width: 52px; aspect-ratio: 63/88; border-radius: 4px; object-fit: cover; background: var(--surface); }
+    .msg { margin: auto; color: var(--muted); text-align: center; }
+  </style>
+</head>
+<body>
+  <a id="w" class="w" target="_blank" rel="noopener"><div class="msg">Chargement…</div></a>
+  <script src="config.js?v=27"></script>
+  <script src="widget.js?v=27"></script>
+</body>
+</html>

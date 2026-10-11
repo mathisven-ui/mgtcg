@@ -320,7 +320,17 @@ Page **Portefeuille** (lien en haut de **Ma collection**, et onglet dans **Outil
 
 ---
 
-## 21. La suite (feuille de route)
+## 21. Widgets pour créateurs (V3)
+
+Page **Widgets** (onglet dans **Outils**, et lien « 🧩 Widget pour mon site » dans la fiche de chaque carte) :
+- **Prix d'une carte** : image, extension, prix Cardmarket, tendance sur 7 jours, prix reverse / holo. Thème sombre, clair ou transparent (pour OBS), format compact ou grand, devise au choix.
+- **Mon profil** : pseudo, nombre de cartes, sets complétés, badges et vitrine (profil public nécessaire).
+- Aperçu en direct, **code à copier** (iframe) pour un site / blog, ou **lien seul** pour une source « Navigateur » dans OBS. Mise à jour automatique toutes les 30 minutes.
+- Fichiers : `widget.html` + `widget.js` (la page du widget, légère et autonome) et `widgets.js` (le générateur). Lien direct vers une carte : `#/carte/fr|sv03.5-199`.
+
+---
+
+## 22. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

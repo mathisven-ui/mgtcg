@@ -67,6 +67,7 @@ window.MG = window.MG || {};
         <a class="chip ${t === "ventes" ? "active" : ""}" href="#/outils/ventes">💶 Mes ventes</a>
         <a class="chip" href="#/portefeuille/vente">💼 Simuler une vente</a>
         <a class="chip" href="#/bouclier">🛡️ Anti-arnaque</a>
+        <a class="chip" href="#/widgets">🧩 Widgets</a>
         <a class="chip" href="#/completer">🎯 Compléter mes sets</a>
         <a class="chip" href="#/importer">📥 Importer</a>
       </div>

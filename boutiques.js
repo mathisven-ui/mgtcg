@@ -536,13 +536,17 @@ window.MG = window.MG || {};
       </div>
 
       <h3>Restocks signalés</h3>
-      <div id="restocks"><p class="muted small">Chargement…</p></div>`;
+      <div id="restocks"><p class="muted small">Chargement…</p></div>
+
+      <h3>⭐ Avis des membres</h3>
+      <div id="shop-avis"></div>`;
 
     panel.querySelector("#back").addEventListener("click", () => { S.selected = null; S.lastRoute = null; drawRoute(null); renderMarkers(); renderPanel(); });
     panel.querySelectorAll("[data-mode]").forEach((b) => b.addEventListener("click", () => { S.mode = b.dataset.mode; panel.querySelectorAll("[data-mode]").forEach((x) => x.classList.toggle("active", x === b)); runTrip(s); }));
     bindTripSettings(panel, () => runTrip(s));
     panel.querySelector("#tour-btn").addEventListener("click", () => { toggleTour(s); renderShop(panel, s); });
     loadRestocks(s);
+    if (MG.avis) MG.avis.mount(panel.querySelector("#shop-avis"), "boutique", s.key, s.name);
     if (S.origin) runTrip(s);
   }
 

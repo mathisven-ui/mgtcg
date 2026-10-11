@@ -393,11 +393,15 @@ window.MG = window.MG || {};
         <ul class="restock-list price-list">${prices.slice(-10).reverse().map((r) => `<li><div><span><b>${eur(r.price)}</b> · ${esc(r.source)}</span><small>${esc(fmtDay(r.created_at))}</small></div>
           ${(a.user && (r.user_id === a.user.id || (a.isAdmin && a.isAdmin()))) ? `<button class="link-btn small" data-pdel="${esc(r.id)}">Supprimer</button>` : ""}</li>`).join("")}</ul>` : ""}
 
+        <h3>⭐ Avis des membres</h3>
+        <div id="p-avis"></div>
+
         <p class="warn">🛡 Produits scellés : méfie-toi des films plastiques refaits (« reseal »). Achète de préférence en boutique ou à des vendeurs bien notés, et vérifie le film, les logos et le poids.</p>
         ${a.isAdmin && a.isAdmin() ? `<p style="margin-top:14px"><button class="btn danger" id="p-del">Supprimer ce produit (admin)</button></p>` : ""}
       </div>`);
 
     drawPriceChart(document.getElementById("p-chart"), prices, p.msrp);
+    if (MG.avis) MG.avis.mount(document.getElementById("p-avis"), "produit", p.id, p.name);
 
     const fOwn = document.getElementById("f-own");
     if (fOwn) fOwn.addEventListener("submit", (e) => {

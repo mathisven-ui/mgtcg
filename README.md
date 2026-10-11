@@ -330,7 +330,17 @@ Page **Widgets** (onglet dans **Outils**, et lien « 🧩 Widget pour mon site �
 
 ---
 
-## 22. La suite (feuille de route)
+## 22. Communauté : avis encadrés (V3)
+
+- **Avis sur les boutiques** (fiche d'une boutique sur la carte) et **sur les produits scellés** (fiche produit) : note de 1 à 5 étoiles, points positifs / négatifs à cocher dans une liste, et un court commentaire facultatif (300 caractères).
+- La note et les points cochés sont publiés tout de suite ; le **commentaire n'apparaît qu'après validation** par l'admin (espace admin → « Commentaires d'avis à valider » : publier, refuser le commentaire ou masquer l'avis). Liens, pseudos, réseaux sociaux et numéros de téléphone sont refusés automatiquement.
+- Un avis par membre et par boutique / produit (modifiable), 10 avis par jour maximum.
+- Page **Communauté** (menu) : boutiques et produits les mieux notés, derniers commentaires, règles de la communauté.
+- Base de données : lancer une fois `supabase-avis.sql` dans Supabase.
+
+---
+
+## 23. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

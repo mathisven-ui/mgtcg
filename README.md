@@ -340,7 +340,16 @@ Page **Widgets** (onglet dans **Outils**, et lien « 🧩 Widget pour mon site �
 
 ---
 
-## 23. La suite (feuille de route)
+## 23. Assistant MGTCG (V3)
+
+- Bouton rond **🤖** en bas à droite de toutes les pages (et onglet dans **Outils**) → page **Assistant**.
+- Ce n'est **pas une IA payante** : il reconnaît les questions fréquentes et répond avec les données du site et de la collection, sans rien envoyer à un service d'IA. Gratuit et instantané.
+- Il sait répondre à : valeur de ma collection, prix d'une carte (« prix de Dracaufeu ex », ou juste un nom), cartes qui manquent dans un set, arnaques (PayPal entre amis, liens, faux, cartes gradées…), prochaines sorties et conventions, vendre (frais 2026), grading, échanges, boutiques, badges, import, appli installable, devises, taux de drop, passeport, avis.
+- Quand il ne comprend pas, il le dit et propose des exemples de questions.
+
+---
+
+## 24. La suite (feuille de route)
 
 - ✅ **Étape 2** : comptes (email + mot de passe), compte administrateur, sécurité, collection synchronisée sur tous tes appareils.
 - **V2** : graphique d'évolution de la collection, alertes de prix, produits scellés (ETB, UPC…), carte des boutiques en France avec itinéraire, sorties à venir.

@@ -1012,3 +1012,25 @@ select.cur { background: var(--surface); color: var(--text); border: 1px solid v
 .av-top li { display: flex; gap: 10px; align-items: baseline; background: var(--bg-2); border-radius: 10px; padding: 8px 12px; font-size: .9rem; }
 .av-top .grow { flex: 1; min-width: 0; }
 @media (max-width: 800px) { .av-cols { grid-template-columns: 1fr; } }
+
+/* ---------- Assistant (V3) ---------- */
+.as-chat { display: flex; flex-direction: column; gap: 12px; }
+.as-log { display: flex; flex-direction: column; gap: 10px; max-height: 60vh; min-height: 260px; overflow-y: auto; padding: 4px; }
+.as-msg { max-width: 85%; padding: 10px 14px; border-radius: 14px; line-height: 1.5; font-size: .95rem; }
+.as-msg.bot { background: var(--bg-2); border: 1px solid var(--line); align-self: flex-start; border-bottom-left-radius: 4px; }
+.as-msg.me { background: var(--accent); color: #12131a; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 500; }
+.as-msg ul { margin: 6px 0; padding-left: 18px; }
+.as-cards li { margin: 4px 0; }
+.as-card { text-align: left; color: var(--text); }
+.as-card:hover b { color: var(--accent); }
+.as-p { color: var(--accent); white-space: nowrap; }
+.as-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.as-chips .chip { font-size: .82rem; }
+.as-form { display: flex; gap: 8px; }
+.as-form input { flex: 1; min-width: 0; background: var(--bg-2); color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font: inherit; }
+.as-form input:focus { outline: none; border-color: var(--accent); }
+.as-fab { position: fixed; right: 18px; bottom: 18px; z-index: 40; width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; text-decoration: none; background: var(--accent); box-shadow: 0 6px 20px rgba(0, 0, 0, .45); transition: transform .15s; }
+.as-fab:hover { transform: scale(1.08); }
+.as-fab[hidden] { display: none; }
+body.noscroll .as-fab { display: none; }
+@media print { .as-fab { display: none; } }

@@ -4,7 +4,7 @@
    ⚠️ Le numéro VERSION doit suivre le ?v= de index.html.
    Créé par Mathis GILLIG.
    ========================================================== */
-const VERSION = 28;
+const VERSION = 29;
 const SHELL = "mgtcg-site-v" + VERSION;
 const DATA = "mgtcg-donnees";
 const FILES = [
@@ -33,6 +33,7 @@ const FILES = [
   "portefeuille.js",
   "widgets.js",
   "avis.js",
+  "assistant.js",
   "app.js",
   "pwa.js"
 ].map((f) => f + "?v=" + VERSION).concat(["./", "index.html", "manifest.json", "icone-192.png", "icone-512.png", "icone-maskable-512.png", "apple-touch-icon.png"]);

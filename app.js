@@ -58,8 +58,8 @@
   }
 
   function ownedInSet(lang, setId) {
-    const prefix = lang + "|" + setId + "-";
-    return MG.store.ownedKeys().filter((k) => k.startsWith(prefix));
+    const prefixes = [setId, ...(MG.setChildren ? MG.setChildren(setId) : [])].map((id) => lang + "|" + id + "-");
+    return MG.store.ownedKeys().filter((k) => prefixes.some((p) => k.startsWith(p)));
   }
 
   /* ---------------- Tuile de carte ---------------- */
@@ -213,6 +213,7 @@
     const getCard = (cid) => details.get(cid) || briefs.find((c) => c.id === cid);
     const official = (set.cardCount && set.cardCount.official) || briefs.length;
     const total = (set.cardCount && set.cardCount.total) || briefs.length;
+    MG.store.fixSetMeta(lang, set.id, set.name, official);
     let filter = "all", rarityFilter = "", textFilter = "";
 
     const ytQuery = enc("pokemon " + set.name + " " + (lang === "fr" ? "ouverture master set" : "master set"));

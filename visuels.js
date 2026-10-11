@@ -122,11 +122,70 @@ window.MG = window.MG || {};
     Peluches: ["#3f2f1d", "#1b1e2c"], Classeur: ["#1d2350", "#1b1e2c"], "Protège-cartes": ["#2b1d4f", "#1b1e2c"], Figurines: ["#1d3a3f", "#1b1e2c"],
   };
 
+  /* ---------- Vraies images : logo de l'extension + ses plus belles cartes (TCGdex) ---------- */
+  const TYPE_SHORT = { "Collection premium": "Premium", "Protège-cartes": "Protège-cartes" };
+  // Cartes « vitrine » d'une extension : les dernières du set (secrètes, illustrations spéciales,
+  // galeries, réimpressions…), différentes pour chaque produit grâce à « offset »
+  MG.showcase = function (set, n = 3, offset = 0) {
+    const all = ((set && set.cards) || []).filter((c) => c && MG.cardImg && MG.cardImg(c.image));
+    if (!all.length) return [];
+    const pool = all.slice(-Math.max(n * 4, Math.ceil(all.length * 0.3))).reverse();
+    const out = [];
+    for (let k = 0; k < Math.min(n, pool.length); k++) out.push(pool[(offset * n + k) % pool.length]);
+    return out;
+  };
+  function cardsVisual(type, logoUrl, cards, alt, bg) {
+    const imgs = cards.slice(0, 3).map((c, k, arr) => {
+      const rot = arr.length === 1 ? 0 : (k - (arr.length - 1) / 2) * 12;
+      return `<img class="vc-card" style="--r:${rot}deg;--i:${k}" src="${esc(MG.cardImg(c.image, "low"))}" alt="" loading="lazy">`;
+    }).join("");
+    return `<div class="visuel vc" style="${bg}" role="img" aria-label="${esc(alt || type)}">
+      <div class="vc-cards">${imgs}</div>
+      ${logoUrl ? `<img class="vc-logo" src="${esc(logoUrl)}" alt="" loading="lazy">` : ""}
+      ${type && type !== "Autre" ? `<span class="vc-type">${esc(TYPE_SHORT[type] || type)}</span>` : ""}
+    </div>`;
+  }
+
+  // Place réservée, remplie dès que les cartes de l'extension sont chargées (voir MG.visuelFill)
+  MG.visuelSlot = function (type, opts = {}) {
+    const attrs = Object.entries({ type, set: opts.setId, setname: opts.setName, lang: opts.lang, off: opts.offset || 0, label: opts.label || type })
+      .filter(([, v]) => v != null && v !== "").map(([k, v]) => `data-${k}="${esc(v)}"`).join(" ");
+    return `<div class="visuel-slot" ${attrs}>${MG.visuel(type, opts.logoUrl || "", "", opts.label)}</div>`;
+  };
+  const norm = (x) => String(x || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+  MG.visuelFill = async function (root) {
+    if (!root || !MG.api) return;
+    const slots = [...root.querySelectorAll(".visuel-slot:not([data-done])")];
+    const lists = new Map(), sets = new Map();
+    const setsOf = (lang) => { if (!lists.has(lang)) lists.set(lang, MG.api.sets(lang).catch(() => [])); return lists.get(lang); };
+    const setOf = (lang, id) => { const k = lang + "|" + id; if (!sets.has(k)) sets.set(k, MG.api.set(lang, id).catch(() => null)); return sets.get(k); };
+    for (const el of slots) {
+      el.dataset.done = "1";
+      const lang = el.dataset.lang || (MG.store && MG.store.lang) || "fr";
+      let id = el.dataset.set;
+      if (!id && el.dataset.setname) {
+        const n = norm(el.dataset.setname);
+        const list = (await setsOf(lang)) || [];
+        const hit = list.find((s) => norm(s.name) === n) || list.find((s) => n && norm(s.name).length >= 4 && (n.endsWith(norm(s.name)) || n.includes(norm(s.name))));
+        id = hit && hit.id;
+      }
+      if (!id) continue;
+      const set = await setOf(lang, id);
+      const cards = MG.showcase(set, 3, Number(el.dataset.off) || 0);
+      if (!cards.length) continue;
+      const type = el.dataset.type || "Autre";
+      const [b1, b2] = BG[type] || ["#232738", "#1b1e2c"];
+      el.innerHTML = cardsVisual(type, MG.logoImg(set.logo), cards, el.dataset.label, `background: radial-gradient(circle at 50% 35%, ${b1}, ${b2} 75%)`);
+    }
+  };
+
   // type : clé de SHAPES ; logoUrl : logo de l'extension ; realUrl : visuel réel (booster TCGdex)
-  MG.visuel = function (type, logoUrl, realUrl, alt) {
+  // cards (facultatif) : cartes de l'extension à montrer → vraie image au lieu du dessin
+  MG.visuel = function (type, logoUrl, realUrl, alt, cards) {
     const i = ++uid;
     const [b1, b2] = BG[type] || ["#232738", "#1b1e2c"];
     const bg = `background: radial-gradient(circle at 50% 35%, ${b1}, ${b2} 75%)`;
+    if (cards && cards.length && !realUrl) return cardsVisual(type, logoUrl, cards, alt, bg);
     const draw = SHAPES[type] || SHAPES.Coffret;
     const svg = `<svg viewBox="0 0 160 120" role="img" aria-label="${esc(alt || type)}">${draw(logoUrl, i)}</svg>`;
     // Visuel réel par-dessus le dessin : s'il ne charge pas, le dessin reste visible

@@ -219,7 +219,7 @@ Sur la page de chaque extension (onglet Séries) : bloc **« 🎲 Taux de drop d
 ## 11. Outils de collectionneur (V2)
 
 Page **Outils** (aussi accessible depuis la fiche de chaque carte) :
-- **Faire grader : est-ce rentable ?** — tarifs 2026 de PCA, CCC et PSA pré-remplis selon la valeur de la carte (à vérifier sur leur site), port, assurance, frais de revente, chance d'obtenir la note, liens vers les ventes terminées eBay ; gain ou perte moyenne et prix d'équilibre.
+- **Faire grader : est-ce rentable ?** — tarifs 2026 de PCA, CCC et PSA pré-remplis selon la valeur de la carte (à vérifier sur leur site), port, assurance, frais de revente ; tu choisis la note que tu penses avoir et le prix d'une carte avec cette note (liens vers les ventes terminées eBay) → « Rentable » ou « Pas rentable » et prix d'équilibre.
 - **France ou Japon ?** — taux de change du jour (BCE), port, TVA à l'import, droits et frais de dédouanement → coût réel comparé au prix en France.
 - **Mes ventes** — journal des ventes (prix, frais, envoi, prix d'achat), bénéfice réel par année, export CSV, rappel des seuils de déclaration des plateformes. Synchronisé avec le compte.
 
@@ -374,6 +374,13 @@ Page **Widgets** (onglet dans **Outils**, et lien « 🧩 Widget pour mon site �
 - Première visite : si le navigateur n'est pas en français, le site s'ouvre en anglais (et les cartes aussi, si le visiteur n'a encore rien enregistré).
 - Tout le site est traduit (menus, boutons, messages, dates, nombres). Les contenus ajoutés par les membres ou l'admin (actus, produits, événements, boutiques) restent dans leur langue d'origine.
 - Quand tu ajoutes un nouveau texte au site, il reste en français en version anglaise tant qu'il n'est pas ajouté au dictionnaire `i18n-en.js` (format `"texte français":"English text"`). Demande-moi, je le mets à jour.
+
+**🧩 Retouches (v=33)** :
+- **Extensions regroupées** : les cartes que TCGdex range à part (réimpressions « Collection Classique » des 30 ans et de Célébrations, Galerie Galaroise de Zénith Suprême, Galeries de Dresseurs, Coffres Étincelants, Collection Radiante) sont affichées et comptées avec leur extension principale. La liste est dans `api.js` (`MG.SET_MERGE`) : une ligne à ajouter si TCGdex sépare une nouvelle extension.
+- **Vraies images des produits scellés** : logo de l'extension + ses plus belles cartes (images TCGdex), sur les pages Scellés, les fiches d'extension et les sorties de l'agenda. Pas de photos officielles de produits (droits).
+- **Images qui ne chargent pas** : si une carte n'a pas d'image dans la langue choisie, le site prend l'image anglaise ; un symbole d'extension manquant est simplement masqué.
+- **Bouton de l'assistant** : « IA » au lieu de l'emoji.
+- **Faire grader ?** simplifié : la note que tu penses avoir + le prix d'une carte avec cette note → « Rentable » ou « Pas rentable ».
 
 ---
 

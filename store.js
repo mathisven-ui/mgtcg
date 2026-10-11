@@ -57,6 +57,14 @@ window.MG = window.MG || {};
     } catch (e) { return empty(); }
   }
 
+  // Sous-extensions (réimpressions, galeries…) rangées avec l'extension principale (voir api.js)
+  function parentSet(id) { return typeof id === "string" && MG.SET_MERGE && MG.SET_MERGE[id] ? MG.SET_MERGE[id] : id; }
+  function parentName(n) {
+    return String(n || "")
+      .replace(/\s*[:–-]?\s*(Galerie de Dresseurs|Galerie Galaroise|Coffre Étincelant|Collection Classique|Collection Radiante|Trainer Gallery|Galarian Gallery|Shiny Vault|Classic Collection|Radiant Collection)$/i, "")
+      .replace(/^(Collection Classique|Classic Collection)\s+/i, "").trim();
+  }
+
   // Vérifie qu'un fichier importé a la bonne forme (sécurité)
   function sanitize(obj) {
     const out = empty();
@@ -79,7 +87,7 @@ window.MG = window.MG || {};
       if (!isKey(k) || !m || typeof m !== "object") continue;
       out.meta[k] = {
         name: str(m.name), image: str(m.image, 300), localId: str(String(m.localId ?? ""), 20),
-        setId: str(m.setId, 40), setName: str(m.setName), setTotal: Number(m.setTotal) || 0,
+        setId: str(parentSet(m.setId), 40), setName: MG.SET_MERGE && MG.SET_MERGE[m.setId] ? parentName(str(m.setName)) : str(m.setName), setTotal: MG.SET_MERGE && MG.SET_MERGE[m.setId] ? 0 : Number(m.setTotal) || 0,
         price: Number(m.price) || 0, priceHolo: Number(m.priceHolo) || 0,
         rarity: str(m.rarity, 60),
       };
@@ -152,6 +160,15 @@ window.MG = window.MG || {};
   MG.store = {
     get lang() { return data.lang; },
     setLang(l) { data.lang = l; save(); },
+    // Met à jour le nom et le nombre de cartes d'une extension dans les fiches mémorisées
+    fixSetMeta(lang, setId, name, total) {
+      let n = 0;
+      for (const [key, m] of Object.entries(data.meta)) {
+        if (!key.startsWith(lang + "|") || !m || m.setId !== setId) continue;
+        if ((name && m.setName !== name) || (total && m.setTotal !== total)) { if (name) m.setName = name; if (total) m.setTotal = total; n++; }
+      }
+      if (n) saveQuiet();
+    },
 
     key: k,
     owned: (lang, id) => data.owned[k(lang, id)] || null,
@@ -170,7 +187,7 @@ window.MG = window.MG || {};
         name: card.name || prev.name || "",
         image: card.image || prev.image || "",
         localId: String(card.localId ?? prev.localId ?? ""),
-        setId: (card.set && card.set.id) || extra.setId || prev.setId || card.id.split("-").slice(0, -1).join("-"),
+        setId: parentSet((card.set && card.set.id) || extra.setId || prev.setId || card.id.split("-").slice(0, -1).join("-")),
         setName: (card.set && card.set.name) || extra.setName || prev.setName || "",
         setTotal: (card.set && card.set.cardCount && card.set.cardCount.official) || extra.setTotal || prev.setTotal || 0,
         rarity: card.rarity || prev.rarity || "",

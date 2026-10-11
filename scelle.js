@@ -145,14 +145,16 @@ window.MG = window.MG || {};
         </a>`).join("")}</div>
       <section>
         <h2>🧸 Produits dérivés de la série</h2>
-        <div class="item-grid">${EXTRAS.map((it) => itemCard(it, q + " " + it.q, "pokemon " + serie.name, "", MG.logoImg(serie.logo))).join("")}</div>
+        <div class="item-grid">${EXTRAS.map((it, k) => itemCard(it, q + " " + it.q, "pokemon " + serie.name, "", MG.logoImg(serie.logo), "", null, sets[0] ? { setId: sets[0].id, lang, offset: k } : null)).join("")}</div>
       </section>`;
+    if (MG.visuelFill) MG.visuelFill(view());
   }
 
-  function itemCard(it, query, cmQuery, extra, logoUrl, realUrl) {
+  function itemCard(it, query, cmQuery, extra, logoUrl, realUrl, cards, slot) {
     const { esc } = ui();
+    const type = it.v || it.type || "Autre";
     return `<div class="item-card">
-      ${MG.visuel ? MG.visuel(it.v || it.type || "Autre", logoUrl, realUrl, it.label) : ""}
+      ${slot && MG.visuelSlot ? MG.visuelSlot(type, Object.assign({ logoUrl, label: it.label }, slot)) : MG.visuel ? MG.visuel(type, logoUrl, realUrl, it.label, cards) : ""}
       <div class="ic-head"><div><b>${esc(it.label)}</b><small class="muted">${esc(it.desc)}</small></div></div>
       ${extra || ""}
       ${searchLinks(query, cmQuery)}
@@ -198,16 +200,16 @@ window.MG = window.MG || {};
 
       <section style="margin-top:8px">
         <h2>Produits de l'extension</h2>
-        <div class="item-grid">${SET_ITEMS.map((it) => itemCard(it, base + " " + it.q, it.q.split(" ")[0] + " " + set.name, priceBox(it.type), setLogo, it.type === "Booster" ? boosterReal : "")).join("")}
-          ${others.map((p) => itemCard({ v: p.type, label: p.name, desc: p.content || p.type }, "pokemon " + p.name, p.name,
-            `<button class="ic-price" data-open="${esc(p.id)}"><span>${estimate(p) ? esc(estimate(p).label) : "Prix estimé"}</span><strong>${estimate(p) ? eur(estimate(p).value) : "—"}</strong><small class="muted">voir le détail →</small></button>`)).join("")}
+        <div class="item-grid">${SET_ITEMS.map((it, k) => itemCard(it, base + " " + it.q, it.q.split(" ")[0] + " " + set.name, priceBox(it.type), setLogo, it.type === "Booster" ? boosterReal : "", MG.showcase ? MG.showcase(set, 3, k) : null)).join("")}
+          ${others.map((p, k) => itemCard({ v: p.type, label: p.name, desc: p.content || p.type }, "pokemon " + p.name, p.name,
+            `<button class="ic-price" data-open="${esc(p.id)}"><span>${estimate(p) ? esc(estimate(p).label) : "Prix estimé"}</span><strong>${estimate(p) ? eur(estimate(p).value) : "—"}</strong><small class="muted">voir le détail →</small></button>`, setLogo, "", MG.showcase ? MG.showcase(set, 3, SET_ITEMS.length + k) : null)).join("")}
         </div>
         <p class="muted small">Tous les produits n'existent pas pour chaque extension (par exemple, peu d'extensions ont un UPC). Les boutons lancent une recherche sur chaque site.</p>
       </section>
 
       <section>
         <h2>🧸 Produits dérivés</h2>
-        <div class="item-grid">${EXTRAS.map((it) => itemCard(it, base + " " + it.q, "pokemon " + set.name, "", setLogo)).join("")}</div>
+        <div class="item-grid">${EXTRAS.map((it, k) => itemCard(it, base + " " + it.q, "pokemon " + set.name, "", setLogo, "", MG.showcase ? MG.showcase(set, 3, SET_ITEMS.length + others.length + k) : null)).join("")}</div>
       </section>
       <p class="disclaimer">Prix estimé (quand il est affiché) : prix constatés par les membres sur 30 jours, sinon prix de sortie. MGTCG ne vend rien et ne touche aucune commission. 🛡 Pour le scellé, méfie-toi des films refaits (« reseal ») : achète à des vendeurs bien notés.</p>`;
     bindCards(view());
@@ -239,7 +241,9 @@ window.MG = window.MG || {};
     const e = estimate(p);
     const c = cote(p.id);
     const evo = c && p.msrp ? ((c.value - p.msrp) / p.msrp) * 100 : null;
+    const vLang = { fr: "fr", en: "en", ja: "ja", zh: "zh-tw", ko: "ko" }[p.lang] || "fr";
     return `<div class="sealed-card" data-id="${esc(p.id)}">
+      ${p.set_name && MG.visuelSlot ? MG.visuelSlot(p.type, { setName: p.set_name, lang: vLang, offset: (parseInt(String(p.id).slice(0, 2), 16) || 0) % 5, label: p.name }) : ""}
       <button class="sc-open" data-open="${esc(p.id)}" aria-label="Voir ${esc(p.name)}">
         <div class="sc-top"><span class="sc-type">${esc(p.type)}</span><span class="muted small">${langTag(p.lang)}</span></div>
         <b class="sc-name">${esc(p.name)}</b>
@@ -301,6 +305,7 @@ window.MG = window.MG || {};
       </details>`;
     }).join("");
     bindCards(grid);
+    if (MG.visuelFill) MG.visuelFill(grid);
   }
 
   /* ---------------- Bloc « produits de cette extension » (page d'un set) ---------------- */
@@ -324,6 +329,7 @@ window.MG = window.MG || {};
         </details>`
       : `<div class="set-sealed-link">${link}</div>`;
     bindCards(el);
+    if (MG.visuelFill) MG.visuelFill(el);
   }
 
   /* ---------------- Fiche produit ---------------- */

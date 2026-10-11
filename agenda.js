@@ -143,6 +143,22 @@ window.MG = window.MG || {};
     return list;
   }
 
+  // Type de produit deviné d'après le titre (pour l'image)
+  function guessType(t) {
+    const x = String(t || "").toLowerCase();
+    if (/\betb\b|dresseur d'élite/.test(x)) return "ETB";
+    if (/ultra[- ]premium|\bupc\b/.test(x)) return "UPC";
+    if (/premium/.test(x)) return "Collection premium";
+    if (/pokébox|pokebox|tin\b/.test(x)) return "Pokébox";
+    if (/tripack/.test(x)) return "Tripack";
+    if (/blister/.test(x)) return "Blister";
+    if (/display/.test(x)) return "Display";
+    if (/classeur/.test(x)) return "Classeur";
+    if (/coffret|collection/.test(x)) return "Coffret";
+    if (/booster/.test(x)) return "Booster";
+    return "Autre";
+  }
+
   function renderList() {
     const el = document.getElementById("ag-list");
     if (!el) return;
@@ -160,6 +176,7 @@ window.MG = window.MG || {};
       const dist = S.user && e.lat != null ? `<span class="ag-dist">📍 ${MG.trajet.km(MG.trajet.haversine(S.user, e))}</span>` : "";
       const url = safeUrl(e.url);
       return `${head}<article class="ag-item ${e.lat != null ? "has-map" : ""} ${S.selected === e.id ? "sel" : ""}" data-id="${esc(e.id)}">
+        ${["sortie", "sortie-jp", "avant-premiere"].includes(e.kind) && MG.visuelSlot ? `<div class="ag-thumb">${MG.visuelSlot(guessType(e.title), e.auto ? { setId: e.setId, lang: e.setLang } : { setName: e.title, lang: e.kind === "sortie-jp" ? "ja" : MG.store.lang === "ja" ? "fr" : MG.store.lang })}</div>` : ""}
         <div class="ag-date"><b>${esc(new Date(e.start_date + "T12:00:00").getDate())}</b><span>${esc(new Date(e.start_date + "T12:00:00").toLocaleDateString("fr-FR", { month: "short" }))}</span></div>
         <div class="ag-main">
           <div class="ag-tags"><span class="ag-kind ${k.cls}">${k.flag && MG.flag ? MG.flag(k.flag) : k.icon} ${esc(e.jpOut ? "Déjà sortie au Japon" : k.label)}</span>${e.confirmed === false ? `<span class="ag-rumeur">rumeur</span>` : ""}${soon}${dist}</div>
@@ -177,6 +194,7 @@ window.MG = window.MG || {};
         </div>
       </article>`;
     }).join("");
+    if (MG.visuelFill) MG.visuelFill(el);
     el.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => select(b.dataset.go, true)));
     el.querySelectorAll("[data-ics]").forEach((b) => b.addEventListener("click", () => downloadIcs(S.events.find((x) => x.id === b.dataset.ics))));
     el.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", async () => {

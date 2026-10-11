@@ -68,7 +68,7 @@ window.MG = window.MG || {};
         <a class="chip" href="#/portefeuille/vente">💼 Simuler une vente</a>
         <a class="chip" href="#/bouclier">🛡️ Anti-arnaque</a>
         <a class="chip" href="#/widgets">🧩 Widgets</a>
-        <a class="chip" href="#/assistant">🤖 Assistant</a>
+        <a class="chip" href="#/assistant">Assistant IA</a>
         <a class="chip" href="#/completer">🎯 Compléter mes sets</a>
         <a class="chip" href="#/importer">📥 Importer</a>
       </div>
@@ -102,18 +102,17 @@ window.MG = window.MG || {};
             <label class="grow">Société de grading<select name="grader">${Object.entries(GRADERS).map(([k, g]) => `<option value="${k}">${g.label}</option>`).join("")}</select></label>
           </div>
           <div class="row">
-            <label class="grow">Prix du grading (€ / carte)<input name="fee" type="number" min="0" step="0.01"></label>
-            <label class="grow">Port aller + retour, assuré (€)<input name="ship" type="number" min="0" step="0.01"></label>
+            <label class="grow">La note que je pense avoir<select name="note">${["10", "9.5", "9", "8.5", "8", "7", "6"].map((n) => `<option value="${n}" ${n === "9" ? "selected" : ""}>${n === "6" ? "6 ou moins" : n}</option>`).join("")}</select></label>
+            <label class="grow">Prix de vente d'une carte avec cette note (€)<input name="pHigh" type="number" min="0" step="0.01" required placeholder="regarde les ventes 👇"></label>
           </div>
-          <fieldset class="sells"><legend>Prix de revente de la carte gradée (regarde les ventes terminées 👇)</legend>
-            <div class="row">
-              <label class="grow">Si j'obtiens la note espérée (ex : 10)<input name="pHigh" type="number" min="0" step="0.01" required></label>
-              <label class="grow">Si j'ai une note en dessous (ex : 9)<input name="pLow" type="number" min="0" step="0.01" required></label>
-            </div>
-            <label>Chance d'avoir la note espérée : <b id="g-proba-v">50 %</b><input name="proba" type="range" min="0" max="100" step="5" value="50"></label>
-            <div class="buy-links" id="g-links"></div>
-          </fieldset>
+          <div class="buy-links" id="g-links"></div>
           <label>Où je revendrais<select name="sell">${Object.keys(SELL_FEES).map((k) => `<option>${k}</option>`).join("")}</select></label>
+          <details class="g-fees"><summary>Frais de grading et de port (remplis automatiquement)</summary>
+            <div class="row">
+              <label class="grow">Prix du grading (€ / carte)<input name="fee" type="number" min="0" step="0.01"></label>
+              <label class="grow">Port aller + retour, assuré (€)<input name="ship" type="number" min="0" step="0.01"></label>
+            </div>
+          </details>
         </form>
         <div class="tool-card" id="g-result"></div>
       </div>
@@ -133,10 +132,10 @@ window.MG = window.MG || {};
     setGrader();
 
     function links() {
-      const q = encodeURIComponent((f.name.value || "carte pokemon").trim() + " " + (f.grader.value.split(" ")[0]));
+      const note = f.note.value === "6" ? "" : " " + f.note.value;
+      const q = encodeURIComponent((f.name.value || "carte pokemon").trim() + " " + f.grader.value.split(" ")[0] + note);
       document.getElementById("g-links").innerHTML = `
-        <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.ebay.fr/sch/i.html?_nkw=${q}+10&LH_Sold=1&LH_Complete=1">eBay vendus (note 10)</a>
-        <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.ebay.fr/sch/i.html?_nkw=${q}+9&LH_Sold=1&LH_Complete=1">eBay vendus (note 9)</a>
+        <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.ebay.fr/sch/i.html?_nkw=${q}&LH_Sold=1&LH_Complete=1">Ventes eBay en note ${esc(f.note.value === "6" ? "6 ou moins" : f.note.value)}</a>
         <a target="_blank" rel="noopener noreferrer nofollow" href="https://www.cardmarket.com/fr/Pokemon/Products/Search?searchString=${encodeURIComponent(f.name.value || "")}">Cardmarket</a>`;
     }
 
@@ -145,32 +144,28 @@ window.MG = window.MG || {};
       const g = GRADERS[f.grader.value];
       const rawV = num(f.raw.value), fee = num(f.fee.value), ship = num(f.ship.value);
       const ins = g.insurance ? rawV * g.insurance : 0;
-      const p = num(f.proba.value, 50) / 100;
-      document.getElementById("g-proba-v").textContent = Math.round(p * 100) + " %";
-      const pH = num(f.pHigh.value), pL = num(f.pLow.value);
+      const pH = num(f.pHigh.value);
+      const note = f.note.value === "6" ? "6 ou moins" : f.note.value;
       const sellPct = SELL_FEES[f.sell.value] / 100;
       const out = document.getElementById("g-result");
-      if (!rawV || !pH) { out.innerHTML = `<h2>Résultat</h2><p class="muted">Indique la valeur de ta carte et son prix une fois gradée pour voir le calcul.</p>`; return; }
+      if (!rawV || !pH) { out.innerHTML = `<h2>Résultat</h2><p class="muted">Indique la valeur de ta carte, la note que tu penses avoir et le prix d'une carte avec cette note pour voir si c'est rentable.</p>`; return; }
       const cost = fee + ship + ins;
       const net = (x) => x * (1 - sellPct);
-      const expected = p * net(pH) + (1 - p) * net(pL || 0);
-      const gain = expected - rawV * (1 - sellPct) - cost; // comparé à vendre la carte sans la grader
-      const breakEven = p > 0 && sellPct < 1 ? (rawV * (1 - sellPct) + cost - (1 - p) * net(pL || 0)) / (p * (1 - sellPct)) : NaN;
+      const gain = net(pH) - net(rawV) - cost; // comparé à vendre la carte sans la grader
+      const breakEven = sellPct < 1 ? (net(rawV) + cost) / (1 - sellPct) : NaN;
       out.innerHTML = `<h2>Résultat</h2>
-        <div class="calc-lines">
-          <div><span>Frais de grading</span><b>${eur(fee)}</b></div>
-          <div><span>Port aller-retour</span><b>${eur(ship)}</b></div>
-          ${ins ? `<div><span>Assurance (2 % de la valeur)</span><b>${eur(ins)}</b></div>` : ""}
-          <div class="total"><span>Coût total du grading</span><b>${eur(cost)}</b></div>
-          <div><span>Revente moyenne attendue (après frais de vente)</span><b>${eur(expected)}</b></div>
-          <div><span>Si je vends sans grader (après frais)</span><b>${eur(rawV * (1 - sellPct))}</b></div>
-        </div>
         <div class="verdict ${gain >= 0 ? "ok" : "ko"}">
-          <strong>${gain >= 0 ? "▲ Gain moyen estimé : +" : "▼ Perte moyenne estimée : "}${eur(gain)}</strong>
-          <span>${gain >= 0 ? "Avec ces chiffres, grader rapporte en moyenne plus que vendre la carte telle quelle." : "Avec ces chiffres, grader coûte en moyenne plus qu'il ne rapporte."}</span>
+          <strong>${gain >= 0 ? "✅ Rentable : +" + eur(gain) : "❌ Pas rentable : " + eur(gain)}</strong>
+          <span>${gain >= 0 ? `Si ta carte obtient ${esc(note)}, la faire grader te rapporte plus que la vendre telle quelle.` : `Même avec ${esc(note)}, la faire grader coûte plus que ce qu'elle rapporte en plus.`}</span>
         </div>
-        ${isFinite(breakEven) ? `<p class="small muted">Pour être à l'équilibre, la carte avec la note espérée devrait se revendre au moins <b>${eur(breakEven)}</b>.</p>` : ""}
-        <p class="small muted">« En moyenne » : sur plusieurs cartes envoyées, avec ${Math.round(p * 100)} % de chances d'obtenir la note espérée. Une seule carte peut faire mieux… ou moins bien.</p>`;
+        <div class="calc-lines">
+          <div><span>Carte gradée ${esc(note)} vendue (après frais de vente)</span><b>${eur(net(pH))}</b></div>
+          <div><span>Carte vendue sans grader (après frais de vente)</span><b>${eur(net(rawV))}</b></div>
+          <div><span>Grading + port${ins ? " + assurance" : ""}</span><b>− ${eur(cost)}</b></div>
+          <div class="total"><span>Différence</span><b>${gain >= 0 ? "+" : ""}${eur(gain)}</b></div>
+        </div>
+        ${isFinite(breakEven) ? `<p class="small muted">C'est rentable à partir d'un prix de vente de <b>${eur(breakEven)}</b> pour la carte gradée.</p>` : ""}
+        <p class="small muted">Si la carte obtient une note plus basse que prévu, elle se vendra moins cher : refais le calcul avec cette note pour voir le risque.</p>`;
     }
     calc();
   }

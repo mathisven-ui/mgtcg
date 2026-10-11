@@ -644,6 +644,24 @@ code { background: var(--surface-2); padding: 1px 6px; border-radius: 6px; font-
 .visuel svg { width: 100%; height: 100%; padding: 10px 0; filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .45)); }
 .visuel-real { position: absolute; inset: 8px; width: calc(100% - 16px); height: calc(100% - 16px); object-fit: contain; filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .45)); }
 .item-card .ic-head { padding-top: 2px; }
+.item-card .visuel-slot { margin: -14px 0 0; }
+.item-card .visuel-slot .visuel, .sealed-card .visuel { margin: 0; }
+/* Vraies images : logo de l'extension + cartes en éventail */
+.visuel.vc { height: 170px; }
+.vc-cards { position: absolute; inset: 0; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 6px; }
+.vc-card {
+  width: 74px; aspect-ratio: 245 / 342; object-fit: cover; border-radius: 5px; margin: 0 -14px; background: #11131b;
+  transform: rotate(var(--r)); transform-origin: 50% 100%;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .5); transition: transform .2s ease;
+}
+.vc-card:nth-child(2) { z-index: 2; width: 82px; }
+.item-card:hover .vc-card, .sealed-card:hover .vc-card { transform: rotate(calc(var(--r) * 1.4)) translateY(-4px); }
+.vc-logo { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); max-width: 62%; max-height: 46px; object-fit: contain; z-index: 3; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, .7)); }
+.vc-type {
+  position: absolute; right: 8px; bottom: 8px; z-index: 4; font-size: .7rem; font-weight: 700; letter-spacing: .02em;
+  background: rgba(10, 11, 16, .78); color: #fff; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .18);
+}
+@media (prefers-reduced-motion: reduce) { .vc-card { transition: none; } }
 
 /* ==========================================================
    Agenda (V2)
@@ -1029,7 +1047,7 @@ select.cur { background: var(--surface); color: var(--text); border: 1px solid v
 .as-form { display: flex; gap: 8px; }
 .as-form input { flex: 1; min-width: 0; background: var(--bg-2); color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font: inherit; }
 .as-form input:focus { outline: none; border-color: var(--accent); }
-.as-fab { position: fixed; right: 18px; bottom: 18px; z-index: 40; width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; text-decoration: none; background: var(--accent); box-shadow: 0 6px 20px rgba(0, 0, 0, .45); transition: transform .15s; }
+.as-fab { position: fixed; right: 18px; bottom: 18px; z-index: 40; width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; font-weight: 800; letter-spacing: .04em; color: #12131a; text-decoration: none; background: var(--accent); box-shadow: 0 6px 20px rgba(0, 0, 0, .45); transition: transform .15s; }
 .as-fab:hover { transform: scale(1.08); }
 .as-fab[hidden] { display: none; }
 body.noscroll .as-fab { display: none; }
@@ -1063,3 +1081,15 @@ body.noscroll .as-fab { display: none; }
 .mfa-qr img { display: block; }
 .mfa-secret { word-break: break-all; background: var(--bg-2); padding: 2px 6px; border-radius: 6px; }
 @media (max-width: 860px) { .notif-panel { top: 118px; } }
+
+/* Agenda : petite image des sorties (logo + cartes) */
+.ag-thumb { flex: none; width: 112px; align-self: stretch; }
+.ag-thumb .visuel { margin: 0; height: 100%; min-height: 96px; border-radius: 10px; border: 1px solid var(--line); }
+.ag-thumb .visuel svg { padding: 4px 0; }
+.ag-thumb .visuel.vc { height: 100%; min-height: 110px; }
+.ag-thumb .vc-card { width: 40px; margin: 0 -8px; border-radius: 3px; }
+.ag-thumb .vc-card:nth-child(2) { width: 46px; }
+.ag-thumb .vc-logo { max-height: 28px; max-width: 80%; top: 5px; }
+.ag-thumb .vc-type { display: none; }
+@media (max-width: 560px) { .ag-thumb { width: 84px; } .ag-thumb .vc-card { width: 32px; } .ag-thumb .vc-card:nth-child(2) { width: 36px; } }
+.tile-img img.img-missing { visibility: hidden; }

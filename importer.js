@@ -287,7 +287,7 @@ window.MG = window.MG || {};
   /* ---------------- Recherche des cartes ---------------- */
   async function setIndex(lang, cache) {
     if (cache[lang]) return cache[lang];
-    const list = (await MG.api.sets(lang).catch(() => [])) || [];
+    const list = (await (MG.api.setsRaw || MG.api.sets)(lang).catch(() => [])) || [];
     const idx = { list, byId: new Map(), byName: new Map() };
     list.forEach((s) => { idx.byId.set(String(s.id).toLowerCase(), s); if (!idx.byName.has(norm(s.name))) idx.byName.set(norm(s.name), s); });
     cache[lang] = idx;
@@ -363,7 +363,9 @@ window.MG = window.MG || {};
       if (it.set) {
         const d = details[it.lang + "|" + it.set.id];
         const cards = (d && d.cards) || [];
-        let c = it.num ? cards.find((x) => normNum(x.localId) === it.num) : null;
+        // Extension regroupée (ex. Célébrations + Collection Classique) : on préfère les cartes de l'extension indiquée
+        const sameNum = it.num ? cards.filter((x) => normNum(x.localId) === it.num) : [];
+        let c = sameNum.find((x) => String(x.id).startsWith(it.set.id + "-") && !MG.SET_MERGE[it.set.id + "-" + String(x.id).slice(it.set.id.length + 1).split("-")[0]]) || sameNum.find((x) => String(x.id).startsWith(it.set.id + "-")) || sameNum[0] || null;
         if (!c && it.name) { const same = cards.filter((x) => norm(x.name) === norm(it.name)); if (same.length === 1) c = same[0]; else if (same.length > 1 && !it.num) { missing.push([it, "Plusieurs cartes portent ce nom : ajoute le numéro"]); continue; } }
         if (c) { found.push([it, c.id]); continue; }
         missing.push([it, it.num ? `Numéro ${it.numRaw} introuvable dans « ${it.set.name} »` : "Carte introuvable dans l'extension"]);

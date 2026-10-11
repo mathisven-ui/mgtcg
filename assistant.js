@@ -111,7 +111,7 @@ window.MG = window.MG || {};
     { test: (t) => has(t, ["ma collection", "mon classeur", "mes cartes", "my collection", "my cards"]) && has(t, ["vaut", "valeur", "combien", "estimation", "prix", "valent", "worth", "value", "how much"]), run: () => aCollection() },
     { test: (t) => has(t, ["sortie", "sorties", "sort quand", "prochaine extension", "prochain set", "agenda", "convention", "conventions", "salon", "avant premiere", "avant premieres", "tournoi", "evenement", "release", "releases", "next set", "event", "events", "tournament"]), run: () => aAgenda() },
     { test: (t) => has(t, ["grader", "grade", "gradee", "grading", "graded", "psa", "pca", "ccc", "cgc"]),
-      run: () => `Faire grader une carte coûte en général entre une dizaine et plusieurs dizaines d'euros (plus le port) selon la société et la valeur. Ça vaut le coup surtout pour une carte chère en très bon état.<br>👉 ${link("#/outils/grading", "🏅 Faire grader : rentable ?")} calcule le gain ou la perte selon la note espérée.` },
+      run: () => `Faire grader une carte coûte en général entre une dizaine et plusieurs dizaines d'euros (plus le port) selon la société et la valeur. Ça vaut le coup surtout pour une carte chère en très bon état.<br>👉 ${link("#/outils/grading", "🏅 Faire grader : rentable ?")} te dit si c'est rentable selon la note que tu penses avoir.` },
     { test: (t) => has(t, ["vendre", "revendre", "vente", "frais", "commission", "sell", "selling", "fees", "fee"]),
       run: () => `Frais pour un particulier en France (vérifiés en octobre 2026) : <b>Cardmarket</b> 5 % + 0,01 € par carte, <b>eBay</b> 0 % depuis le 1er septembre 2026, <b>Vinted / Leboncoin</b> 0 % pour le vendeur.<br>👉 ${link("#/portefeuille/vente", "💸 Simule ta vente")} pour savoir combien tu récupères, et note tes ventes dans ${link("#/outils/ventes", "💶 Mes ventes")}.` },
     { test: (t) => has(t, ["echange", "echanger", "echanges", "doubles", "troc", "trade", "trading", "swap", "duplicates"]),
@@ -151,8 +151,8 @@ window.MG = window.MG || {};
     const { view } = ui();
     view().innerHTML = `
       <header class="page-head"><div>
-        <h1>🤖 Assistant MGTCG</h1>
-        <p class="muted">Pose ta question avec tes mots. Je réponds aux questions fréquentes avec les données du site et de ta collection. Ce n'est pas une IA : tout reste dans ton navigateur.</p>
+        <h1>Assistant MGTCG</h1>
+        <p class="muted">Pose ta question avec tes mots. Je réponds aux questions fréquentes avec les données du site et de ta collection. Il est gratuit et fonctionne sans IA payante : tout reste dans ton navigateur.</p>
       </div></header>
       <section class="as-chat tool-card">
         <div id="as-log" class="as-log" aria-live="polite"></div>
@@ -193,7 +193,7 @@ window.MG = window.MG || {};
     if (document.getElementById("as-fab")) return;
     const a = document.createElement("a");
     a.id = "as-fab"; a.className = "as-fab"; a.href = "#/assistant"; a.title = "Assistant MGTCG"; a.setAttribute("aria-label", "Ouvrir l'assistant");
-    a.textContent = "🤖";
+    a.textContent = "IA";
     document.body.appendChild(a);
     const sync = () => { a.hidden = location.hash.startsWith("#/assistant"); };
     window.addEventListener("hashchange", sync); sync();

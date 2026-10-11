@@ -124,7 +124,7 @@ window.MG = window.MG || {};
     if (!newOnes.length || !("Notification" in window) || Notification.permission !== "granted" || !read(OPT, false)) return;
     const reg = "serviceWorker" in navigator ? await navigator.serviceWorker.getRegistration().catch(() => null) : null;
     for (const i of newOnes.slice(0, 3)) {
-      const opts = { body: i.text, icon: "icone-192.png", badge: "icone-192.png", tag: i.id, data: { href: i.href } };
+      const opts = { body: MG.t ? MG.t(i.text) : i.text, icon: "icone-192.png", badge: "icone-192.png", tag: i.id, data: { href: i.href } };
       try { if (reg && reg.showNotification) await reg.showNotification("MGTCG " + i.icon, opts); else new Notification("MGTCG " + i.icon, opts).onclick = () => { window.focus(); location.hash = i.href; }; }
       catch (e) { /* pas grave */ }
     }

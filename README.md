@@ -369,6 +369,12 @@ Page **Widgets** (onglet dans **Outils**, et lien « 🧩 Widget pour mon site �
 
 **📅 Agenda 2027** : un encadré sur la page Agenda annonce que les dates 2027 (Japan Expo, Paris Manga, Paris Card Show…) arrivent dès qu'elles sont publiées.
 
+**🌍 Site en anglais** (`i18n.js` + `i18n-en.js`) :
+- Bouton « English version / Version française » en bas de chaque page. Le choix est retenu sur l'appareil.
+- Première visite : si le navigateur n'est pas en français, le site s'ouvre en anglais (et les cartes aussi, si le visiteur n'a encore rien enregistré).
+- Tout le site est traduit (menus, boutons, messages, dates, nombres). Les contenus ajoutés par les membres ou l'admin (actus, produits, événements, boutiques) restent dans leur langue d'origine.
+- Quand tu ajoutes un nouveau texte au site, il reste en français en version anglaise tant qu'il n'est pas ajouté au dictionnaire `i18n-en.js` (format `"texte français":"English text"`). Demande-moi, je le mets à jour.
+
 ---
 
 ## 25. La suite (feuille de route)

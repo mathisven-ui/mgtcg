@@ -97,7 +97,7 @@ window.MG = window.MG || {};
   }
 
   const DAYS = { Mo: "Lun", Tu: "Mar", We: "Mer", Th: "Jeu", Fr: "Ven", Sa: "Sam", Su: "Dim", PH: "Fériés", off: "fermé" };
-  const hoursFr = (h) => String(h || "").replace(/\b(Mo|Tu|We|Th|Fr|Sa|Su|PH|off)\b/g, (d) => DAYS[d]).replace(/;\s*/g, " · ");
+  const hoursFr = (h) => (MG.uiLang && MG.uiLang() === "en") ? String(h || "").replace(/\bPH\b/g, "Holidays").replace(/;\s*/g, " · ") : String(h || "").replace(/\b(Mo|Tu|We|Th|Fr|Sa|Su|PH|off)\b/g, (d) => DAYS[d]).replace(/;\s*/g, " · ");
 
   function loadMapLibre() {
     if (window.maplibregl) return Promise.resolve();

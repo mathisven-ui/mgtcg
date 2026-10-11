@@ -17,7 +17,7 @@ window.MG = window.MG || {};
   const has = (t, words) => words.some((w) => new RegExp("(^|\\s)" + w + "(\\s|$)").test(t) || (w.length > 5 && t.includes(w)));
   const S = { msgs: [] };
   const EXAMPLES = ["Combien vaut ma collection ?", "Prix de Dracaufeu ex", "Il me manque quoi pour finir mon set ?", "C'est une arnaque si on me demande PayPal entre amis ?", "C'est quand la prochaine sortie ?", "Je veux vendre des cartes", "Ça vaut le coup de faire grader ?", "Comment échanger mes doubles ?"];
-  const STOP = ["prix", "cote", "combien", "vaut", "valent", "valeur", "coute", "coutent", "de", "du", "des", "la", "le", "les", "l", "d", "un", "une", "carte", "cartes", "quel", "quelle", "quels", "est", "c'est", "ce", "ca", "en", "a", "au", "pour", "sur", "moi", "ma", "mon", "svp", "stp", "s'il", "te", "plait", "the", "price", "pokemon", "aujourd'hui", "actuellement", "argus"];
+  const STOP = ["prix", "cote", "combien", "vaut", "valent", "valeur", "coute", "coutent", "de", "du", "des", "la", "le", "les", "l", "d", "un", "une", "carte", "cartes", "quel", "quelle", "quels", "est", "c'est", "ce", "ca", "en", "a", "au", "pour", "sur", "moi", "ma", "mon", "svp", "stp", "s'il", "te", "plait", "the", "price", "pokemon", "aujourd'hui", "actuellement", "argus", "of", "how", "much", "is", "what", "card", "cards", "cost", "worth", "value", "does", "price"];
 
   /* ---------------- Réponses ---------------- */
   const link = (href, txt) => `<a class="accent-link" href="${href}">${txt}</a>`;
@@ -104,32 +104,32 @@ window.MG = window.MG || {};
   }
 
   const INTENTS = [
-    { test: (t) => has(t, ["bonjour", "salut", "coucou", "hello", "aide", "help", "que sais tu faire", "tu sers a quoi"]) && t.split(" ").length < 6,
+    { test: (t) => has(t, ["bonjour", "salut", "coucou", "hello", "aide", "help", "que sais tu faire", "tu sers a quoi", "hi", "hey", "what can you do"]) && t.split(" ").length < 6,
       run: () => `Salut ! 👋 Je suis l'assistant de MGTCG. Je réponds aux questions fréquentes avec les données du site et de ta collection. Essaie par exemple :${chips(EXAMPLES.slice(0, 6))}` },
-    { test: (t) => has(t, ["arnaque", "arnaquer", "escroc", "escroquerie", "fiable", "entre amis", "entre proches", "faux", "fausse", "contrefacon", "fake", "suspect", "louche"]), run: (t) => aScam(t) },
-    { test: (t) => has(t, ["manque", "manquent", "manquantes", "completer", "finir", "terminer", "master set"]), run: (t, raw) => aMissing(raw) },
-    { test: (t) => has(t, ["ma collection", "mon classeur", "mes cartes"]) && has(t, ["vaut", "valeur", "combien", "estimation", "prix", "valent"]), run: () => aCollection() },
-    { test: (t) => has(t, ["sortie", "sorties", "sort quand", "prochaine extension", "prochain set", "agenda", "convention", "conventions", "salon", "avant premiere", "avant premieres", "tournoi", "evenement"]), run: () => aAgenda() },
-    { test: (t) => has(t, ["grader", "grade", "gradee", "grading", "psa", "pca", "ccc", "cgc"]),
+    { test: (t) => has(t, ["arnaque", "arnaquer", "escroc", "escroquerie", "fiable", "entre amis", "entre proches", "faux", "fausse", "contrefacon", "fake", "suspect", "louche", "scam", "scammer", "friends and family", "suspicious", "legit"]), run: (t) => aScam(t) },
+    { test: (t) => has(t, ["manque", "manquent", "manquantes", "completer", "finir", "terminer", "master set", "missing", "complete", "finish"]), run: (t, raw) => aMissing(raw) },
+    { test: (t) => has(t, ["ma collection", "mon classeur", "mes cartes", "my collection", "my cards"]) && has(t, ["vaut", "valeur", "combien", "estimation", "prix", "valent", "worth", "value", "how much"]), run: () => aCollection() },
+    { test: (t) => has(t, ["sortie", "sorties", "sort quand", "prochaine extension", "prochain set", "agenda", "convention", "conventions", "salon", "avant premiere", "avant premieres", "tournoi", "evenement", "release", "releases", "next set", "event", "events", "tournament"]), run: () => aAgenda() },
+    { test: (t) => has(t, ["grader", "grade", "gradee", "grading", "graded", "psa", "pca", "ccc", "cgc"]),
       run: () => `Faire grader une carte coûte en général entre une dizaine et plusieurs dizaines d'euros (plus le port) selon la société et la valeur. Ça vaut le coup surtout pour une carte chère en très bon état.<br>👉 ${link("#/outils/grading", "🏅 Faire grader : rentable ?")} calcule le gain ou la perte selon la note espérée.` },
-    { test: (t) => has(t, ["vendre", "revendre", "vente", "frais", "commission"]),
+    { test: (t) => has(t, ["vendre", "revendre", "vente", "frais", "commission", "sell", "selling", "fees", "fee"]),
       run: () => `Frais pour un particulier en France (vérifiés en octobre 2026) : <b>Cardmarket</b> 5 % + 0,01 € par carte, <b>eBay</b> 0 % depuis le 1er septembre 2026, <b>Vinted / Leboncoin</b> 0 % pour le vendeur.<br>👉 ${link("#/portefeuille/vente", "💸 Simule ta vente")} pour savoir combien tu récupères, et note tes ventes dans ${link("#/outils/ventes", "💶 Mes ventes")}.` },
-    { test: (t) => has(t, ["echange", "echanger", "echanges", "doubles", "troc"]),
+    { test: (t) => has(t, ["echange", "echanger", "echanges", "doubles", "troc", "trade", "trading", "swap", "duplicates"]),
       run: () => `Pour échanger : mets tes doubles « à échanger », ta wishlist sert de liste de recherche, et MGTCG trouve les membres compatibles. Les rendez-vous se font uniquement en lieu public (boutique ou convention), sans messagerie ni coordonnées.<br>👉 ${link("#/echanges", "🔄 Échanges entre membres")}` },
-    { test: (t) => has(t, ["boutique", "boutiques", "magasin", "magasins", "ou acheter", "pres de chez moi", "restock", "restocks"]),
+    { test: (t) => has(t, ["boutique", "boutiques", "magasin", "magasins", "ou acheter", "pres de chez moi", "restock", "restocks", "shop", "shops", "store", "stores", "near me", "where to buy"]),
       run: () => `La ${link("#/boutiques", "🗺️ carte des boutiques")} montre les boutiques spécialisées (en bleu) et les grandes enseignes (en rouge) près de chez toi, avec le trajet, son coût et les restocks signalés par les membres.` },
-    { test: (t) => has(t, ["badge", "badges", "objectif", "objectifs", "classement", "niveau"]), run: () => aBadges() },
-    { test: (t) => has(t, ["importer", "import", "excel", "csv", "autre appli", "tableur"]),
+    { test: (t) => has(t, ["badge", "badges", "objectif", "objectifs", "classement", "niveau", "goal", "goals", "ranking"]), run: () => aBadges() },
+    { test: (t) => has(t, ["importer", "import", "excel", "csv", "autre appli", "tableur", "spreadsheet"]),
       run: () => `Tu peux importer ta collection depuis un fichier CSV ou Excel (ou un tableau copié-collé) : MGTCG devine les colonnes et retrouve tes cartes.<br>👉 ${link("#/importer", "📥 Importer ma collection")}` },
-    { test: (t) => has(t, ["installer", "application", "appli", "hors ligne", "telephone", "ecran d'accueil"]),
+    { test: (t) => has(t, ["installer", "application", "appli", "hors ligne", "telephone", "ecran d'accueil", "install", "app", "offline", "phone"]),
       run: () => `MGTCG s'installe comme une appli, gratuitement, et marche même sans réseau pour ta collection. <button class="link-btn accent-link" data-install>📱 Voir comment l'installer</button>` },
-    { test: (t) => has(t, ["dollar", "dollars", "devise", "livre", "yen", "monnaie"]),
+    { test: (t) => has(t, ["dollar", "dollars", "devise", "livre", "yen", "monnaie", "currency", "pound"]),
       run: () => `Choisis ta devise dans le petit menu à côté de la langue, en haut (€, $, £, CHF, CA$, ¥). Les prix sont convertis avec le taux du jour de la Banque centrale européenne.` },
-    { test: (t) => has(t, ["taux", "drop", "chance", "chances", "pull", "pulls"]),
+    { test: (t) => has(t, ["taux", "drop", "chance", "chances", "pull", "pulls", "odds", "pull rate"]),
       run: () => `Les taux de drop sont estimés à partir des ouvertures déclarées par les membres, sur la page de chaque extension (bloc « 🎲 Taux de drop de la communauté »). Plus il y a d'ouvertures déclarées, plus c'est fiable. Ouvre une extension depuis ${link("#/", "Séries")}.` },
-    { test: (t) => has(t, ["passeport", "etat", "defaut", "defauts", "photo", "photos", "rangement"]),
+    { test: (t) => has(t, ["passeport", "etat", "defaut", "defauts", "photo", "photos", "rangement", "passport", "condition"]),
       run: () => `Le passeport d'une carte sert à noter son état, ses défauts, son certificat de grading, sa provenance et à ajouter tes photos.<br>👉 ${link("#/passeport", "🛂 Mes passeports")}` },
-    { test: (t) => has(t, ["avis", "note", "communaute"]),
+    { test: (t) => has(t, ["avis", "note", "communaute", "review", "reviews", "community"]),
       run: () => `Les avis des membres sur les boutiques et les produits sont dans ${link("#/communaute", "💬 Communauté")}. Pour donner le tien, ouvre une boutique sur la carte ou un produit dans les Scellés.` },
   ];
 
@@ -138,7 +138,7 @@ window.MG = window.MG || {};
     if (!t) return "";
     for (const it of INTENTS) if (it.test(t)) return it.run(t, raw);
     // Une question de prix, ou juste un nom de carte
-    if (has(t, ["prix", "cote", "combien", "vaut", "valent", "coute", "argus"]) || t.split(" ").length <= 4) {
+    if (has(t, ["prix", "cote", "combien", "vaut", "valent", "coute", "argus", "price", "cost", "worth", "value"]) || t.split(" ").length <= 4) {
       const r = await aPrice(raw);
       if (r) return r;
     }
@@ -181,7 +181,7 @@ window.MG = window.MG || {};
   function draw() {
     const log = document.getElementById("as-log");
     if (!log) return;
-    log.innerHTML = S.msgs.map((m) => `<div class="as-msg ${m.who}">${m.html}</div>`).join("");
+    log.innerHTML = S.msgs.map((m) => `<div class="as-msg ${m.who}"${m.who === "me" ? ' translate="no"' : ""}>${m.html}</div>`).join("");
     log.scrollTop = log.scrollHeight;
     log.querySelectorAll(".as-q").forEach((b) => b.addEventListener("click", () => ask(b.dataset.q)));
     log.querySelectorAll(".as-card").forEach((b) => b.addEventListener("click", () => ui().openCard(b.dataset.l, b.dataset.id)));

@@ -4,7 +4,7 @@
    ⚠️ Le numéro VERSION doit suivre le ?v= de index.html.
    Créé par Mathis GILLIG.
    ========================================================== */
-const VERSION = 31;
+const VERSION = 32;
 const SHELL = "mgtcg-site-v" + VERSION;
 const DATA = "mgtcg-donnees";
 const FILES = [
@@ -14,6 +14,8 @@ const FILES = [
   "rarity.js",
   "drapeaux.js",
   "store.js",
+  "i18n-en.js",
+  "i18n.js",
   "config.js",
   "auth.js",
   "boutiques.js",

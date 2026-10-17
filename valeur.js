@@ -47,9 +47,14 @@ window.MG = window.MG || {};
     return running;
   }
 
+  // Nouvelle source de prix (V3) : on actualise une fois tout de suite
+  // pour donner une valeur aux cartes enregistrées sans prix.
+  const PRICE_FIX = "mgtcg:prix-v3";
   function needsRefresh() {
-    return Date.now() - MG.store.lastRefresh > REFRESH_EVERY &&
-      (MG.store.ownedKeys().length > 0 || MG.store.alertKeys().length > 0);
+    const has = MG.store.ownedKeys().length > 0 || MG.store.alertKeys().length > 0;
+    let fix = false;
+    try { fix = !localStorage.getItem(PRICE_FIX); if (fix) localStorage.setItem(PRICE_FIX, "1"); } catch (e) { /* stockage indisponible */ }
+    return has && (fix || Date.now() - MG.store.lastRefresh > REFRESH_EVERY);
   }
 
   // Au démarrage du site : actualise en arrière-plan si besoin, puis prévient des alertes

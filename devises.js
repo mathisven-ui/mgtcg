@@ -50,6 +50,8 @@ window.MG = window.MG || {};
     return v.toLocaleString("fr-FR", opts);
   }
   money.code = () => cur;
+  // Taux du jour (1 € = n unités de la devise c), utilisé pour convertir les prix TCGplayer en euros
+  money.rate = async (c) => { const r = await loadRates(); return (r && r.rates && r.rates[c]) || null; };
   money.isConverted = () => cur !== "EUR" && !!(rates && rates.rates && rates.rates[cur]);
   money.set = async (c) => {
     if (!CURS[c]) return;

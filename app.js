@@ -22,6 +22,16 @@
   const pct = (a, b) => (a && b ? Math.round((a / b) * 100) : 0);
   const langInfo = (code) => MG.LANGS.find((l) => l.code === code) || MG.LANGS[0];
   const fmtDate = (d) => { try { return new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }); } catch (e) { return d; } };
+  // D'où vient le prix affiché (TCGdex, pokemontcg.io ou TCGplayer converti)
+  function priceSource(cm) {
+    const when = cm.updated ? fmtDate(cm.updated) : "";
+    if (cm.src === "tcgplayer") return "Estimation : prix TCGplayer (États-Unis) converti en euros, car aucun prix Cardmarket n'est disponible pour cette carte.";
+    if (cm.src === "pokemontcg") {
+      const old = cm.updated && Date.now() - new Date(cm.updated).getTime() > 60 * 864e5;
+      return `Source : Cardmarket (via pokemontcg.io)${when ? ", relevé le " + esc(when) : ""}.${old ? " Ce relevé date de plusieurs mois : le prix actuel peut être différent." : ""}`;
+    }
+    return `Source : Cardmarket (via TCGdex)${when ? ", mis à jour le " + esc(when) : ""}.`;
+  }
 
   MG.routes = MG.routes || {};
   const listeners = {};
@@ -579,8 +589,8 @@
               </div>
               ${bars.length ? `<div class="mini-chart" aria-label="Prix moyen sur 30 jours, 7 jours et 24 heures">${bars.map((b) =>
                 `<div class="mc-col"><div class="mc-track"><div class="mc-bar" style="height:${Math.max(6, (b[1] / maxBar) * 100)}%"></div></div><strong>${eur(b[1])}</strong><span>${b[0]}</span></div>`).join("")}</div>` : ""}
-              <p class="disclaimer">Source : Cardmarket (via TCGdex)${cm.updated ? ", mis à jour le " + esc(fmtDate(cm.updated)) : ""}. Données indicatives, pas un conseil d'investissement.</p>`
-            : `<p class="muted">Pas de prix Cardmarket disponible pour cette carte (fréquent pour les cartes asiatiques ou très récentes).</p>`}
+              <p class="disclaimer">${priceSource(cm)} Données indicatives, pas un conseil d'investissement.</p>`
+            : `<p class="muted">Pas de prix disponible pour cette carte, ni sur Cardmarket ni sur TCGplayer (fréquent pour les cartes asiatiques, les promos rares ou les cartes très récentes).</p>`}
 
             ${(() => {
               const key = MG.store.key(lang, card.id);

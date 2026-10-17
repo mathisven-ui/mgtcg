@@ -209,15 +209,83 @@ window.MG = window.MG || {};
       const key = `/${lang}/cards/${id}`;
       if (memory.has(key)) return memory.get(key);
       const cached = readCache(key);
-      if (cached) { const c2 = await fixCardSet(lang, await fillImage(lang, cached, cached.set && cached.set.id)); memory.set(key, c2); return c2; }
+      if (cached && cached.pv === PRICE_V) { const c2 = await fixCardSet(lang, await fillImage(lang, cached, cached.set && cached.set.id)); memory.set(key, c2); return c2; }
       const full = await get(key);
       // On garde en cache une version compacte (le stockage du navigateur est limité)
-      const slim = await fixCardSet(lang, await fillImage(lang, slimCard(full), full.set && full.set.id));
+      let slim = slimCard(full);
+      if (!hasPrice(slim.cardmarket)) slim = await withFallbackPrice(slim, full.set && full.set.id);
+      slim = await fixCardSet(lang, await fillImage(lang, slim, full.set && full.set.id));
       memory.set(key, slim);
       writeCache(key, slim);
       return slim;
     },
   };
+
+  /* ---------- Prix de secours ----------
+     TCGdex n'a pas le lien Cardmarket pour certaines cartes (environ 900,
+     surtout XY, Soleil et Lune, Noir et Blanc et les promos). Dans ce cas :
+     1) prix Cardmarket fournis par pokemontcg.io (gratuit, sans clé),
+        une seule requête par extension, gardée 24 h ;
+     2) sinon, prix TCGplayer (États-Unis) converti en euros.
+     Le prix d'une carte est le même quelle que soit sa langue sur
+     Cardmarket : on lit donc la fiche anglaise de la carte. */
+  const PRICE_V = 2; // à augmenter pour forcer le recalcul des prix déjà en cache
+  const PTCG = "https://api.pokemontcg.io/v2/cards";
+  // Extensions dont l'identifiant diffère entre TCGdex et pokemontcg.io
+  const PTCG_SET = { "bog": "bp", "lc": "base6", "sm7.5": "sm75", "swsh3.5": "swsh35", "swsh4.5": "swsh45", "swsh12.5": "swsh12pt5",
+    "tk-ex-m": "tk2b", "tk-ex-p": "tk2a", "cel25": "cel25", "cel25cc": "cel25c", "swsh4.5sv": "swsh45sv" };
+  const ptcgSetId = (id) => PTCG_SET[id] || id.replace(/^sv0(\d)/, "sv$1").replace(/\.5$/, "pt5");
+  const hasPrice = (cm) => !!(cm && (cm.trend > 0 || cm.avg > 0 || cm["trend-holo"] > 0));
+  const num = (v) => (typeof v === "number" && isFinite(v) && v > 0 ? Math.round(v * 100) / 100 : undefined);
+  const normNo = (n) => String(n ?? "").trim().toUpperCase().replace(/^0+(?=\d)/, "");
+
+  const ptcgSets = new Map();
+  function ptcgPrices(setId) {
+    const pid = ptcgSetId(setId);
+    if (ptcgSets.has(pid)) return ptcgSets.get(pid);
+    const ck = "ptcg:" + pid;
+    const p = (async () => {
+      const cached = readCache(ck);
+      if (cached) return cached;
+      const out = {};
+      for (let page = 1; page <= 3; page++) {
+        const url = `${PTCG}?q=${enc("set.id:" + pid)}&select=number,cardmarket&pageSize=250&page=${page}`;
+        const res = await fetch(url, { headers: { Accept: "application/json" } });
+        if (!res.ok) throw new Error("pokemontcg " + res.status);
+        const d = await res.json();
+        for (const c of (d && d.data) || []) {
+          const pr = c && c.cardmarket && c.cardmarket.prices;
+          if (!pr) continue;
+          out[normNo(c.number)] = [pr.trendPrice, pr.averageSellPrice, pr.lowPrice, pr.avg1, pr.avg7, pr.avg30, pr.reverseHoloTrend, String(c.cardmarket.updatedAt || "").replace(/\//g, "-")];
+        }
+        if (!d || !d.totalCount || page * 250 >= d.totalCount) break;
+      }
+      writeCache(ck, out); // 12 h, comme les fiches de cartes
+      return out;
+    })().catch(() => { ptcgSets.delete(pid); return {}; });
+    ptcgSets.set(pid, p);
+    return p;
+  }
+
+  async function withFallbackPrice(c, setId) {
+    const out = Object.assign({}, c, { pv: PRICE_V });
+    try {
+      const sid = setId || String(c.id || "").split("-").slice(0, -1).join("-");
+      const row = sid ? (await ptcgPrices(sid))[normNo(c.localId)] : null;
+      if (row) {
+        const [trend, avg, low, avg1, avg7, avg30, rh, updated] = row;
+        const cm = { trend: num(trend), avg: num(avg), low: num(low), avg1: num(avg1), avg7: num(avg7), avg30: num(avg30), updated, src: "pokemontcg" };
+        if (c.variants && c.variants.reverse && num(rh)) cm["trend-holo"] = num(rh);
+        if (!cm.trend) cm.trend = cm.avg || cm.avg7 || cm.avg30;
+        if (hasPrice(cm)) { out.cardmarket = cm; return out; }
+      }
+    } catch (e) { /* source indisponible : on essaie la suivante */ }
+    if (c.tcgplayerMarket > 0 && MG.money && MG.money.rate) {
+      const usd = await MG.money.rate("USD").catch(() => null); // 1 € = usd $
+      if (usd > 0) out.cardmarket = { trend: num(c.tcgplayerMarket / usd), src: "tcgplayer" };
+    }
+    return out;
+  }
 
   function slimCard(c) {
     const cm = (c.pricing && c.pricing.cardmarket) || null;
@@ -243,6 +311,7 @@ window.MG = window.MG || {};
       variants: c.variants || {},
       cardmarket: cm,
       tcgplayerMarket: tpMarket,
+      pv: PRICE_V,
     };
   }
 
